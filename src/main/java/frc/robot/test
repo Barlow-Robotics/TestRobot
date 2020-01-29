@@ -1,0 +1,9 @@
+Speed | Consistency | Distance | Angle | Wheel Type | Notes
+______|_____________|__________|_______|____________|______
+0.9   | Good        | Trench   | "Far" |            |
+0.9   | Excellent   | Auto     | "Far" |            |
+1.0   | Good        | Trench   | "Far" | Hi-Grip    | (Angled using 0.25" HDPE) Fell shorter than 0.9 power
+0.95  | Okay        | Trench   | "Far" | Hi-Grip    | Inconsistent
+0.85  | Okay        | Trench   | "Far" | Hi-Grip    | Inconsistent, same power as 0.95 and 1.0, differing feed rate
+0.8   | Okay        | Trench   | "Far" | Hi-Grip    | Hit the bench
+0.75  | Good        | Trench   | "Far" | Hi-Grip    | Hit the bench
