@@ -15,6 +15,7 @@ import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.OI;
 import edu.wpi.first.wpilibj.Encoder;
 import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.ClimbSubsystem;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -36,6 +37,7 @@ public class Robot extends TimedRobot {
   //DriveSubsystem driveSubsystem = new DriveSubsystem();
   ShooterSubsystem shooterSubystem = new ShooterSubsystem();
   ArmSubsystem armSubsystem = new ArmSubsystem();
+  ClimbSubsystem climbSubsystem = new ClimbSubsystem();
 
   /**
    * This function is run when the robot is first started up and should be
@@ -59,6 +61,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
+    //xhcjgvhkblj;kn
   }
 
   /**
@@ -126,6 +129,10 @@ public class Robot extends TimedRobot {
     //armSubsystem.spin(oi.getXButton());
 
     oi.publishData(armSubsystem.getDeploySpeed());
+
+    if(oi.getRTopTrigger()) climbSubsystem.moveUp();
+    else if(oi.getRBottomTrigger()) climbSubsystem.moveDown();
+    else climbSubsystem.stopClimb();
   }
 
   /**
