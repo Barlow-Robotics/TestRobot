@@ -39,14 +39,24 @@ public class DriveSubsystem extends Subsystem {
 
   double leftPower, rightPower;
   double[] encoderValues = new double[2];
-  final double kp = 1.0 ;
-  final double ki = 0.0;
-  final double kd = 0.2;
-  final double period = 1.0/20.0;
-  PIDController targetController = new PIDController(kp, ki, kd, period);
+  final double targetControllerKp = 1.0; 
+  final double targetControllerKi = 0.0;
+  final double targetControllerKd = 0.2;
+  final double targetControllerPeriod = 1.0/20.0;
+  PIDController targetController ;
+  
+  final double powerCellKp = 1.0; 
+  final double powerCellKi = 0.0;
+  final double powerCellKd = 0.2;
+  final double powerCellPeriod = 1.0/20.0;
+  PIDController powerCellController ; 
+
+  final double powerSpeed = 0.5;
+
   enum DriveState {
     Manual,
     AutoTargetAlign,
+    Powercell,
   }
 
   DriveState driveState ;
@@ -72,6 +82,13 @@ public class DriveSubsystem extends Subsystem {
 
     rightSideEncoder = new Encoder(Constants.rightEncoderPorts[0], Constants.rightEncoderPorts[1]);
     rightSideEncoder.reset();
+
+    targetController = new PIDController(targetControllerKp, targetControllerKi, targetControllerKd, targetControllerPeriod);
+    targetController.setSetpoint(0.0);
+
+    powerCellController = new PIDController(powerCellKp, powerCellKi, powerCellKd, powerCellPeriod);
+    powerCellController.setSetpoint(0.0);
+
   }
 
   @Override
@@ -86,33 +103,69 @@ public class DriveSubsystem extends Subsystem {
     switch (driveState) {
       case Manual:
         if (oi.getCircleButton() == true && canSeeTarget() == true) {
-          driveState = DriveState.AutoTargetAlign;
+            targetController.reset();
+            driveState = DriveState.AutoTargetAlign;
+        } else {
+            leftPower = threshold(leftPower);
+            rightPower = threshold(rightPower);
+            //publishEncoderData(leftSideEncoder.get(), rightSideEncoder.get());
+            driveTrain.tankDrive(-leftPower, -rightPower);
         }
         break;
 
       case AutoTargetAlign:
-        if (oi.getCircleButton() == true && canSeeTarget() == true){
-          
+        if (oi.getCircleButton() == false || canSeeTarget() == false){
+            driveState = DriveState.Manual;
+        } else {
+            double angleTarget = angleToTarget() ;
+            double output = targetController.calculate(angleTarget) ;
+            driveTrain.tankDrive(-output, output);            
         }
-        else if (oi.getCircleButton() == false || canSeeTarget() == false){
+        break;
+
+      case Powercell:
+        if (oi.getSquareButton() == false || canSeePowerCell() == false){
           driveState = DriveState.Manual;
+        } else {
+          double anglePowerCell = angleToPowerCell() ;
+          double output = powerCellController.calculate(anglePowerCell) ; 
+          driveTrain.tankDrive(-output + powerSpeed, output + powerSpeed);
         }
         break;
       }
-    leftPower = threshold(leftPower);
-    rightPower = threshold(rightPower);
-    
-    publishEncoderData(leftSideEncoder.get(), rightSideEncoder.get());
-
-    driveTrain.tankDrive(-leftPower, -rightPower);
   
   }
-  
+  private void enable(){
+
+  }
+
   private boolean canSeeTarget(){
     return true ;
     // if (target == true){
     //   return true;
     // }
+  }
+
+  private boolean canSeePowerCell(){
+    return true ; 
+    // if (powerCell == true){
+    //   return true;
+    // }
+    }
+
+  private double angleToTarget() {
+    return findAngle();  //fill in params!
+  }
+
+  private double angleToPowerCell() {
+    return findAngle(); //fill in params!
+  }  
+
+  public double findAngle(double FOV, double screenWidth, int targetX) {
+    double normalizedTargetX = (1/(screenWidth/2))*((double) targetX - ((screenWidth/2)-0.5));
+    double viewPlaneWidth = 2.0*(Math.tan(FOV/2));
+    double x = (viewPlaneWidth/2)*normalizedTargetX;
+    return Math.atan(x);
   }
 
   private void publishEncoderData(double left, double right){
