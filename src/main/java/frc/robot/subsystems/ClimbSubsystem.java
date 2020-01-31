@@ -18,15 +18,11 @@ public class ClimbSubsystem extends Subsystem {
     }
     
     public void moveUp(){
-       if (oi.getRTopTrigger() == true){
         climbController.set(speed);
-       }
     }
     public void moveDown(){
-        if (oi.getRBottomTrigger() == true){
-            speed = -speed;
-            climbController.set(speed);
-           }
+        speed = -speed;
+        climbController.set(speed);
     }
     
     public void stopClimb(){
