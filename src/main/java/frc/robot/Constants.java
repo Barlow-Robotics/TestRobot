@@ -28,4 +28,11 @@ public class Constants{
     public static final double maxShooterSpeed = 0.75;
     public static final double minShooterSpeed = 0.05;
 
+    //Indexing
+    public static final int agitatorPort = 8;
+    public static final int beltPort = 9;
+
+    //Intake
+    public static final int intakeMotor = 10;
+
 }
