@@ -10,6 +10,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.Spark;
+import frc.robot.Constants;
 
 /**
  * Add your docs here.
@@ -17,11 +18,18 @@ import edu.wpi.first.wpilibj.Spark;
 public class IndexingSubsystem extends Subsystem {
   // Put methods for controlling this subsystem
   // here. Call these from Commands.
-  private WPI_TalonSRX beltDriver = new WPI_TalonSRX(6);
+  private WPI_TalonSRX agitator = new WPI_TalonSRX(Constants.agitatorPort);
+  private WPI_TalonSRX beltDrive = new WPI_TalonSRX(Constants.beltPort);
+
+  enum IndexState {
+    Idling,
+    Feeding
+  }
+
+  IndexState indexState;
   
-
   public IndexingSubsystem(){
-
+    indexState = IndexState.Idling;
   } 
 
   @Override
@@ -30,8 +38,15 @@ public class IndexingSubsystem extends Subsystem {
     // setDefaultCommand(new MySpecialCommand());
   }
 
-  public void moveBelts(){
-    
-    beltDriver.set(0.75);
+  public void index(){
+
+    switch(indexState){
+      case Idling:
+      
+      case Feeding: 
+
+      default:
+        
+    }
   }
 }
