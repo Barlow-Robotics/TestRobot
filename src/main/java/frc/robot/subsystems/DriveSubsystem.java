@@ -154,11 +154,11 @@ public class DriveSubsystem extends Subsystem {
     }
 
   private double angleToTarget() {
-    return findAngle();  //fill in params!
+    return 0.0; //findAngle();  //fill in params!
   }
 
   private double angleToPowerCell() {
-    return findAngle(); //fill in params!
+    return 0.0; //findAngle(); //fill in params!
   }  
 
   public double findAngle(double FOV, double screenWidth, int targetX) {
