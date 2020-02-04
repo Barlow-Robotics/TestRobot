@@ -23,12 +23,42 @@ public class ShooterSubsystem extends Subsystem {
   private WPI_TalonSRX shooterController = new WPI_TalonSRX(5);
   private double speed = 0;
 
-  public ShooterSubsystem(){}
+  private enum ShooterState{
+    Idle,
+    SpinningUp,
+    Firing,
+    SpinningDown
+  }
+
+  ShooterState shooterState;
+
+  public ShooterSubsystem(){
+    shooterState = ShooterState.Idle;
+  }
 
   @Override
   public void initDefaultCommand() {
     // Set the default command for a subsystem here.
     // setDefaultCommand(new MySpecialCommand());
+  }
+
+  public void controlShooter(boolean triggerPressed){
+
+    switch(shooterState){
+      case Idle:
+        if(triggerPressed)
+          shooterState = ShooterState.SpinningUp;
+        break;
+
+      case SpinningUp:
+        // Test that trigger is still pressed; if the rotations are at desired speed then
+        // set shooterState to Firing
+      case Firing:
+
+      case SpinningDown:
+
+      default:
+    }
   }
 
   public void moveMotor(){
