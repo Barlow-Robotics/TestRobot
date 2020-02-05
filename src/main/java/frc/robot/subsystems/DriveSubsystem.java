@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.Encoder;
@@ -35,13 +36,9 @@ public class DriveSubsystem extends Subsystem {
   SpeedControllerGroup leftSide;
   SpeedControllerGroup rightSide;  
 
-  Encoder leftSideEncoder;
-  Encoder rightSideEncoder;
-
   public DifferentialDrive driveTrain;
 
   double leftPower, rightPower;
-  double[] encoderValues = new double[2];
   final double targetControllerKp = 4.0; 
   final double targetControllerKi = 0.0;
   final double targetControllerKd = 0.0;
@@ -90,6 +87,9 @@ public class DriveSubsystem extends Subsystem {
     leftFrontSide.follow(leftBackSide);
     rightFrontSide.follow(rightBackSide);
 
+    leftBackSide.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 30); //Encoder as feedback device, main PID loop, 30 ms timeout time
+    rightBackSide.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 30); //Encoder as feedback device, main PID loop, 30 ms timeout time
+
     targetController = new PIDController(targetControllerKp, targetControllerKi, targetControllerKd, targetControllerPeriod);
     targetController.setSetpoint(0.0);
 
@@ -122,7 +122,7 @@ public class DriveSubsystem extends Subsystem {
 
     switch(autoDriveState){
       case Backing:
-      
+        //Motion magic method
       break;
       case SearchingForTarget:
 
@@ -230,7 +230,6 @@ public class DriveSubsystem extends Subsystem {
     SmartDashboard.putBoolean("Outputting", true);
     SmartDashboard.putNumber("Left Data", left);
     SmartDashboard.putNumber("Right Data", right);
-    SmartDashboard.putBoolean("Left Stopped", leftSideEncoder.getStopped());
   }
 
   private double threshold(double power){
