@@ -56,13 +56,22 @@ public class DriveSubsystem extends Subsystem {
 
   final double powerSpeed = 0.5;
 
-  enum DriveState {
+  enum TeleopDriveState {
     Manual,
     AutoTargetAlign,
     Powercell
   }
 
-  DriveState driveState;
+  enum AutoDriveState{
+    Backing,
+    SearchingForTarget,
+    Firing,
+    TargetingMoreCells, //Optimistically
+    ChasingCells
+  }
+
+  TeleopDriveState teleopDriveState;
+  AutoDriveState autoDriveState;
 
   NetworkTableInstance networkTableInst ;
   NetworkTableEntry canSeeTargetEntry ;
@@ -93,7 +102,8 @@ public class DriveSubsystem extends Subsystem {
 
     driveTrain = new DifferentialDrive(leftBackSide, rightBackSide);
   
-    driveState = DriveState.Manual;
+    teleopDriveState = TeleopDriveState.Manual;
+    autoDriveState = AutoDriveState.Backing;
 
     networkTableInst = NetworkTableInstance.getDefault() ;
 
@@ -108,14 +118,39 @@ public class DriveSubsystem extends Subsystem {
     //setDefaultCommand(new DriveCommand());
   }
 
+  public void autonomousDrive(){
+
+    switch(autoDriveState){
+      case Backing:
+      
+      break;
+      case SearchingForTarget:
+
+      break;
+
+      case Firing:
+
+      break;
+
+      case TargetingMoreCells:
+
+      break;
+
+      case ChasingCells:
+
+      break;
+
+      default:
+    }
+  }
 
 
   public void teleopDrive(double leftPower, double rightPower){
-    switch (driveState) {
+    switch (teleopDriveState) {
       case Manual:
         if (oi.getCircleButton() == true && canSeeTarget() == true) {
             targetController.reset();
-            driveState = DriveState.AutoTargetAlign;
+            teleopDriveState = TeleopDriveState.AutoTargetAlign;
             System.out.println("entering auto align") ;
         } 
         else {
@@ -123,13 +158,12 @@ public class DriveSubsystem extends Subsystem {
           rightPower = threshold(rightPower);
           leftBackSide.set(ControlMode.Velocity, -leftPower * 500 * 4096 / 600);
           rightBackSide.set(ControlMode.Velocity, rightPower * 500 * 4096 / 600);
-          SmartDashboard.putNumber("Controller Input", leftPower);
         }
         break;
 
       case AutoTargetAlign:
         if (oi.getCircleButton() == false || canSeeTarget() == false){
-            driveState = DriveState.Manual;
+          teleopDriveState = TeleopDriveState.Manual;
         } else {
            double angleToTarget = angleToTarget() ;
            double output = targetController.calculate(angleToTarget) ;
@@ -143,7 +177,7 @@ public class DriveSubsystem extends Subsystem {
 
       case Powercell:
         if (oi.getSquareButton() == false || canSeePowerCell() == false){
-          driveState = DriveState.Manual;
+          teleopDriveState = TeleopDriveState.Manual;
         } else {
          double anglePowerCell = angleToPowercell() ;
          double output = powerCellController.calculate(anglePowerCell) ; 
