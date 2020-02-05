@@ -14,6 +14,9 @@ public class Constants{
     public static final int[] leftEncoderPorts = {2, 3};
     public static final int[] rightEncoderPorts = {0, 1};
 
+    public static final int PID_id = 0;
+    public static final double DrivetrainKf = 0.1797; //0.1797
+
     //OI //hi :)
     public static final int joystickPort = 0;
 
@@ -25,14 +28,9 @@ public class Constants{
     public static final double maxSpinSpeed = 0.5;
 
     //Shooter
-    public static final double maxShooterSpeed = 0.75;
+    public static final double maxShooterSpeed = 0.9;
     public static final double minShooterSpeed = 0.05;
 
-    //Indexing
-    public static final int agitatorPort = 8;
-    public static final int beltPort = 9;
-
-    //Intake
-    public static final int intakeMotor = 10;
+    public static final int shooterMotor = 1;
 
 }
