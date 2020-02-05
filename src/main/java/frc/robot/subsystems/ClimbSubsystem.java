@@ -29,6 +29,14 @@ public class ClimbSubsystem extends Subsystem {
         speed = 0;
       }
 
+    // public void OperateLift() {
+    //     switch (e){
 
+            
+    //     }
+
+
+
+    // }
 
 }
