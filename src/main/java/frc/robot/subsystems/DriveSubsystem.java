@@ -10,6 +10,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.Encoder;
@@ -18,6 +19,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.OI;
 import edu.wpi.first.wpilibj.controller.PIDController;
+
+import edu.wpi.first.networktables.*;
 
 /**
  * Add your docs here.
@@ -35,32 +38,36 @@ public class DriveSubsystem extends Subsystem {
   Encoder leftSideEncoder;
   Encoder rightSideEncoder;
 
-  public DifferentialDrive driveTrain = new DifferentialDrive(leftSide, rightSide);
+  public DifferentialDrive driveTrain;
 
   double leftPower, rightPower;
   double[] encoderValues = new double[2];
-  final double targetControllerKp = 1.0; 
+  final double targetControllerKp = 4.0; 
   final double targetControllerKi = 0.0;
-  final double targetControllerKd = 0.2;
+  final double targetControllerKd = 0.0;
   final double targetControllerPeriod = 1.0/20.0;
-  PIDController targetController ;
+  PIDController targetController;
   
   final double powerCellKp = 1.0; 
   final double powerCellKi = 0.0;
   final double powerCellKd = 0.2;
   final double powerCellPeriod = 1.0/20.0;
-  PIDController powerCellController ; 
+  PIDController powerCellController; 
 
   final double powerSpeed = 0.5;
 
   enum DriveState {
     Manual,
     AutoTargetAlign,
-    Powercell,
+    Powercell
   }
 
-  DriveState driveState ;
+  DriveState driveState;
 
+  NetworkTableInstance networkTableInst ;
+  NetworkTableEntry canSeeTargetEntry ;
+  NetworkTableEntry targetAngleEntry ;
+  NetworkTableEntry targetDistanceEntry ;
 
   // Put methods for controlling this subsystem
   // here. Call these from Commands.
@@ -71,23 +78,28 @@ public class DriveSubsystem extends Subsystem {
     rightFrontSide = new WPI_TalonSRX(Constants.rightFrontMotor);
     rightBackSide = new WPI_TalonSRX(Constants.rightBackMotor);
 
-    leftBackSide.follow(leftFrontSide);
-    rightBackSide.follow(rightFrontSide);
-    
-    leftSide = new SpeedControllerGroup(leftFrontSide, leftBackSide); 
-    rightSide = new SpeedControllerGroup(rightFrontSide, rightBackSide);
-
-    leftSideEncoder = new Encoder(Constants.leftEncoderPorts[0], Constants.leftEncoderPorts[1]);
-    leftSideEncoder.reset();
-
-    rightSideEncoder = new Encoder(Constants.rightEncoderPorts[0], Constants.rightEncoderPorts[1]);
-    rightSideEncoder.reset();
+    leftFrontSide.follow(leftBackSide);
+    rightFrontSide.follow(rightBackSide);
 
     targetController = new PIDController(targetControllerKp, targetControllerKi, targetControllerKd, targetControllerPeriod);
     targetController.setSetpoint(0.0);
 
     powerCellController = new PIDController(powerCellKp, powerCellKi, powerCellKd, powerCellPeriod);
     powerCellController.setSetpoint(0.0);
+
+    leftBackSide.config_kF(Constants.PID_id, Constants.DrivetrainKf);
+    rightBackSide.config_kF(Constants.PID_id, Constants.DrivetrainKf);
+
+
+    driveTrain = new DifferentialDrive(leftBackSide, rightBackSide);
+  
+    driveState = DriveState.Manual;
+
+    networkTableInst = NetworkTableInstance.getDefault() ;
+
+    canSeeTargetEntry = networkTableInst.getTable("vision").getEntry("canSeeTarget") ;
+    targetAngleEntry = networkTableInst.getTable("vision").getEntry("targetAngle") ;
+    targetDistanceEntry = networkTableInst.getTable("vision").getEntry("targetDistance") ;
 
   }
 
@@ -99,17 +111,19 @@ public class DriveSubsystem extends Subsystem {
 
 
   public void teleopDrive(double leftPower, double rightPower){
-
     switch (driveState) {
       case Manual:
         if (oi.getCircleButton() == true && canSeeTarget() == true) {
             targetController.reset();
             driveState = DriveState.AutoTargetAlign;
-        } else {
-            leftPower = threshold(leftPower);
-            rightPower = threshold(rightPower);
-            //publishEncoderData(leftSideEncoder.get(), rightSideEncoder.get());
-            driveTrain.tankDrive(-leftPower, -rightPower);
+            System.out.println("entering auto align") ;
+        } 
+        else {
+          leftPower = threshold(leftPower);
+          rightPower = threshold(rightPower);
+          leftBackSide.set(ControlMode.Velocity, -leftPower * 500 * 4096 / 600);
+          rightBackSide.set(ControlMode.Velocity, rightPower * 500 * 4096 / 600);
+          SmartDashboard.putNumber("Controller Input", leftPower);
         }
         break;
 
@@ -117,9 +131,13 @@ public class DriveSubsystem extends Subsystem {
         if (oi.getCircleButton() == false || canSeeTarget() == false){
             driveState = DriveState.Manual;
         } else {
-            double angleTarget = angleToTarget() ;
-            double output = targetController.calculate(angleTarget) ;
-            driveTrain.tankDrive(-output, output);            
+           double angleToTarget = angleToTarget() ;
+           double output = targetController.calculate(angleToTarget) ;
+           System.out.println( "angle to target is " + angleToTarget ) ;
+           System.out.println( "output is " + output ) ;
+           leftBackSide.set(ControlMode.Velocity, output * 500 * 4096 / 600);
+           rightBackSide.set(ControlMode.Velocity, output * 500 * 4096 / 600);
+            //driveTrain.tankDrive(-output, output);            
         }
         break;
 
@@ -127,20 +145,20 @@ public class DriveSubsystem extends Subsystem {
         if (oi.getSquareButton() == false || canSeePowerCell() == false){
           driveState = DriveState.Manual;
         } else {
-          double anglePowerCell = angleToPowerCell() ;
-          double output = powerCellController.calculate(anglePowerCell) ; 
+         double anglePowerCell = angleToPowercell() ;
+         double output = powerCellController.calculate(anglePowerCell) ; 
           driveTrain.tankDrive(-output + powerSpeed, output + powerSpeed);
         }
         break;
       }
   
   }
-  private void enable(){
-
-  }
+  
 
   private boolean canSeeTarget(){
-    return true ;
+
+    return canSeeTargetEntry.getBoolean(false) ;
+    //return true ;
     // if (target == true){
     //   return true;
     // }
@@ -154,19 +172,25 @@ public class DriveSubsystem extends Subsystem {
     }
 
   private double angleToTarget() {
-    return 0.0; //findAngle();  //fill in params!
-  }
+    return targetAngleEntry.getDouble(0.0) ;
+    //return 0.0;  //fill in params!
+ }
 
-  private double angleToPowerCell() {
-    return 0.0; //findAngle(); //fill in params!
-  }  
 
-  public double findAngle(double FOV, double screenWidth, int targetX) {
-    double normalizedTargetX = (1/(screenWidth/2))*((double) targetX - ((screenWidth/2)-0.5));
-    double viewPlaneWidth = 2.0*(Math.tan(FOV/2));
-    double x = (viewPlaneWidth/2)*normalizedTargetX;
-    return Math.atan(x);
-  }
+ private double angleToPowercell() {
+  return 0.0;  //fill in params!
+}
+
+  //private double angleToPowerCell() {
+    //return findAngle(); //fill in params!
+  //}  
+
+  // public double findAngle(double FOV, double screenWidth, int targetX) {
+  //   double normalizedTargetX = (1/(screenWidth/2))*((double) targetX - ((screenWidth/2)-0.5));
+  //   double viewPlaneWidth = 2.0*(Math.tan(FOV/2));
+  //   double x = (viewPlaneWidth/2)*normalizedTargetX;
+  //   return Math.atan(x);
+  // }
 
   private void publishEncoderData(double left, double right){
     SmartDashboard.putBoolean("Outputting", true);
