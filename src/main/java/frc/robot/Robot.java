@@ -34,10 +34,10 @@ public class Robot extends TimedRobot {
 
   //Encoder left = new Encoder(Constants.leftEncoderPorts[0], Constants.leftEncoderPorts[1]);
 
-  //DriveSubsystem driveSubsystem = new DriveSubsystem();
-  ShooterSubsystem shooterSubystem = new ShooterSubsystem();
-  ArmSubsystem armSubsystem = new ArmSubsystem();
-  ClimbSubsystem climbSubsystem = new ClimbSubsystem();
+  DriveSubsystem driveSubsystem;
+  ShooterSubsystem shooterSubystem;
+  ArmSubsystem armSubsystem;
+  ClimbSubsystem climbSubsystem;
 
   /**
    * This function is run when the robot is first started up and should be
@@ -49,6 +49,11 @@ public class Robot extends TimedRobot {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
+
+    driveSubsystem = new DriveSubsystem();
+    shooterSubystem = new ShooterSubsystem();
+    armSubsystem = new ArmSubsystem();
+    climbSubsystem = new ClimbSubsystem();
   }
 
   /**
@@ -103,36 +108,39 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    if(oi.getLTopTrigger()) //Press top left trigger to increase speed
-      shooterSubystem.increaseSpeed(true);
-    else
-      shooterSubystem.decreaseSpeed(true);
 
-    if(oi.getXButton())
-      shooterSubystem.stopMotor();
+    // SHOOTER SUBSYSTEM
+    // if(oi.getLTopTrigger()) //Press top left trigger to increase speed
+    //   shooterSubystem.increaseSpeed(true);
+    // else
+    //   shooterSubystem.decreaseSpeed(true);
 
-    shooterSubystem.moveMotor();
+    // if(oi.getXButton())
+    //   shooterSubystem.stopMotor();
 
-    //SmartDashboard.putNumber("Left Speed", left.getDistance());
-    
-    //driveSubsystem.teleopDrive(oi.getLeftStick(), oi.getRightStick());
+    // shooterSubystem.moveMotor();
 
-    if (oi.getCircleButton()) { //Top left trigger
-      armSubsystem.deploy();
-    }
-    else if (oi.getSquareButton()) {  //Bottom left trigger
-      armSubsystem.retract();
-    }
-    else
-      armSubsystem.stopDeploy();
+    //DRIVE SUBSYSTEM   
+    driveSubsystem.teleopDrive(oi.getLeftStick(), oi.getRightStick());
 
-    //armSubsystem.spin(oi.getXButton());
+    // ARM SUBSYSTEM
+    // if (oi.getCircleButton()) { //Top left trigger
+    //   armSubsystem.deploy();
+    // }
+    // else if (oi.getSquareButton()) {  //Bottom left trigger
+    //   armSubsystem.retract();
+    // }
+    // else
+    //   armSubsystem.stopDeploy();
 
-    oi.publishData(armSubsystem.getDeploySpeed());
+    // //armSubsystem.spin(oi.getXButton());
 
-    if(oi.getRTopTrigger()) climbSubsystem.moveUp();
-    else if(oi.getRBottomTrigger()) climbSubsystem.moveDown();
-    else climbSubsystem.stopClimb();
+    // oi.publishData(armSubsystem.getDeploySpeed());
+
+    //CLIMB SUBSYSTEM
+    // if(oi.getRTopTrigger()) climbSubsystem.moveUp();
+    // else if(oi.getRBottomTrigger()) climbSubsystem.moveDown();
+    // else climbSubsystem.stopClimb();
   }
 
   /**
