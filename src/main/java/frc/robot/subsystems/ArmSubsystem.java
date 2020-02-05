@@ -12,8 +12,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Spark;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import frc.robot.Constants;
-import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.DigitalInput;
 
 /**
@@ -25,17 +23,66 @@ public class ArmSubsystem extends Subsystem {
   private Spark rotationControl = new Spark(Constants.wheelRotationSparkPort);
   private Spark deploymentControl = new Spark(Constants.wheelDeploymentSparkPort);
 
-  //DigitalInput limitSwitchDeploy = new DigitalInput(0);
-  //DigitalInput limitSwitchRetract = new DigitalInput(1);
-  
-  //private Encoder deploymentEncoder = new Encoder(1, 2, true, EncodingType.k4X);
+  int minValue= 3;
+
+
+  enum ArmState { Idle, DeployingArm, SpinningWheel, WaitingForTimeout, RetractingArm } ;
+  ArmState armState ;
    
-  public ArmSubsystem(){}
+  public ArmSubsystem() {
+      armState = ArmState.Idle ;
+  }
 
   @Override
   public void initDefaultCommand() {
     // Set the default command for a subsystem here.
     // setDefaultCommand(new MySpecialCommand());
+  }
+
+
+
+  public void OperateControlPanel() {
+    switch (armState) {
+      case Idle:
+         if ( getDeployButton() ) {
+           // start the small block motor
+           armState = ArmState.DeployingArm ;
+         }
+         break ;
+      case DeployingArm:
+         if(limitSwitchDeploy()){
+           //stop the small block motor
+           armState = ArmState.SpinningWheel ;
+         }
+         break ;
+      case SpinningWheel:
+         //turn on wheel motor go spinnoe
+         //change colour change count to 0
+         if(colourChange()>minValue){
+            //stop wheel
+            armState = ArmState.WaitingForTimeout ;
+         }
+         break;
+      case WaitingForTimeout:
+         
+         
+        //
+    }
+    
+  }
+
+  
+  private boolean limitSwitchDeploy() {
+    return false;
+  }
+
+  private int colourChange(){
+    return 3;
+  }
+
+
+  private boolean getDeployButton() {
+      return false;
   }
 
   public void deploy(){
