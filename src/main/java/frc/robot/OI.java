@@ -5,7 +5,9 @@ import frc.robot.Constants;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class OI{
-    private Joystick controller;
+    public static boolean getXButton;
+	public static boolean getSquareButton;
+	private Joystick controller;
     public OI(){
         controller = new Joystick(Constants.joystickPort);
     }
