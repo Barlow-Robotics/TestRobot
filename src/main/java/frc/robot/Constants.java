@@ -27,12 +27,26 @@ public class Constants{
     public static final int wheelDeploymentSparkPort = 1;
 
     public static final double maxDeploySpeed = 0.65;
-    public static final double maxSpinSpeed = 0.5;
+    public static final double maxSpinSpeed = 0.2;
+
+    public static final double deployAngle = 90.0;
+    public static final int minColorChangeCountGoal= 26 ;
+
+    public static final long wheelWaitTime = 5000;
+
 
     //Shooter
     public static final double maxShooterSpeed = 0.9;
     public static final double minShooterSpeed = 0.05;
 
     public static final int shooterMotor = 1;
+
+    //Climb
+    public static final int ClimbMotorPortNumber = 7;
+    public static final int ShooterMotor1 = 6;
+    public static final int LiftEncoderChannelA = 0 ;
+    public static final int LiftEncoderChannelB = 1 ;
+    public static final int MaxEncoderValue = 1000;
+    public static final double LiftMotorSpeed = 0.32 ;
 
 }
