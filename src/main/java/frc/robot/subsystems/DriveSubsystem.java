@@ -51,7 +51,8 @@ public class DriveSubsystem extends Subsystem {
   final double powerCellPeriod = 1.0/20.0;
   PIDController powerCellController; 
 
-  final double powerSpeed = 0.5;
+//  final double powerSpeed = 0.5;
+  final double powerSpeed = 0.0;
 
   enum TeleopDriveState {
     Manual,
@@ -74,6 +75,10 @@ public class DriveSubsystem extends Subsystem {
   NetworkTableEntry canSeeTargetEntry ;
   NetworkTableEntry targetAngleEntry ;
   NetworkTableEntry targetDistanceEntry ;
+
+  NetworkTableEntry canSeePowercellEntry ;
+  NetworkTableEntry powercellAngleEntry ;
+  NetworkTableEntry powercellDistanceEntry ;
 
   // Put methods for controlling this subsystem
   // here. Call these from Commands.
@@ -111,6 +116,10 @@ public class DriveSubsystem extends Subsystem {
     targetAngleEntry = networkTableInst.getTable("vision").getEntry("targetAngle") ;
     targetDistanceEntry = networkTableInst.getTable("vision").getEntry("targetDistance") ;
 
+    canSeePowercellEntry = networkTableInst.getTable("vision").getEntry("canSeePowercell") ;
+    powercellAngleEntry = networkTableInst.getTable("vision").getEntry("pcAngle") ;
+    powercellDistanceEntry = networkTableInst.getTable("vision").getEntry("powercellDistance") ;
+
   }
 
   @Override
@@ -122,7 +131,9 @@ public class DriveSubsystem extends Subsystem {
 
     switch(autoDriveState){
       case Backing:
-        //Motion magic method
+        double targetPos = 4096 * Constants.autoBackingDistance;
+        leftBackSide.set(ControlMode.MotionMagic, targetPos);
+        rightBackSide.set(ControlMode.MotionMagic, targetPos);
       break;
       case SearchingForTarget:
 
@@ -146,14 +157,16 @@ public class DriveSubsystem extends Subsystem {
 
 
   public void teleopDrive(double leftPower, double rightPower){
+
     switch (teleopDriveState) {
       case Manual:
-        if (oi.getCircleButton() == true && canSeeTarget() == true) {
+        if (oi.getLTopTrigger() == true && canSeeTarget() == true) {
             targetController.reset();
             teleopDriveState = TeleopDriveState.AutoTargetAlign;
             System.out.println("entering auto align") ;
-        } 
-        else {
+        } else if ( oi.getRTopTrigger() && canSeePowercell() ) {
+          teleopDriveState = TeleopDriveState.Powercell ;
+        }  else {
           leftPower = threshold(leftPower);
           rightPower = threshold(rightPower);
           leftBackSide.set(ControlMode.Velocity, -leftPower * 500 * 4096 / 600);
@@ -162,7 +175,7 @@ public class DriveSubsystem extends Subsystem {
         break;
 
       case AutoTargetAlign:
-        if (oi.getCircleButton() == false || canSeeTarget() == false){
+        if (oi.getLTopTrigger() == false || canSeeTarget() == false){
           teleopDriveState = TeleopDriveState.Manual;
         } else {
            double angleToTarget = angleToTarget() ;
@@ -176,15 +189,27 @@ public class DriveSubsystem extends Subsystem {
         break;
 
       case Powercell:
-        if (oi.getSquareButton() == false || canSeePowerCell() == false){
+        if (!oi.getRTopTrigger() ||  !canSeePowercell()){
           teleopDriveState = TeleopDriveState.Manual;
         } else {
          double anglePowerCell = angleToPowercell() ;
+         System.out.println("angle to power cell is " + angleToPowercell()) ;
+
          double output = powerCellController.calculate(anglePowerCell) ; 
-          driveTrain.tankDrive(-output + powerSpeed, output + powerSpeed);
+         System.out.println("output is " + output) ;
+          //driveTrain.tankDrive(-output + powerSpeed, output + powerSpeed);
+          leftBackSide.set(ControlMode.Velocity, (output + powerSpeed) * 500 * 4096 / 600);
+          rightBackSide.set(ControlMode.Velocity, (output - powerSpeed) * 500 * 4096 / 600);
+
+          // System.out.println( "angle to target is " + angleToTarget ) ;
+          // System.out.println( "output is " + output ) ;
+          leftBackSide.set(ControlMode.Velocity, output * 500 * 4096 / 600);
+          rightBackSide.set(ControlMode.Velocity, output * 500 * 4096 / 600);
+
         }
         break;
       }
+
   
   }
   
@@ -198,8 +223,8 @@ public class DriveSubsystem extends Subsystem {
     // }
   }
 
-  private boolean canSeePowerCell(){
-    return true ; 
+  private boolean canSeePowercell(){
+    return canSeePowercellEntry.getBoolean(false) ;
     // if (powerCell == true){
     //   return true;
     // }
