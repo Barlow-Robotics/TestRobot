@@ -124,18 +124,8 @@ public class Robot extends TimedRobot {
     driveSubsystem.teleopDrive(oi.getLeftStick(), oi.getRightStick());
 
     // ARM SUBSYSTEM
-    // if (oi.getCircleButton()) { //Top left trigger
-    //   armSubsystem.deploy();
-    // }
-    // else if (oi.getSquareButton()) {  //Bottom left trigger
-    //   armSubsystem.retract();
-    // }
-    // else
-    //   armSubsystem.stopDeploy();
+    armSubsystem.OperateControlPanel();
 
-    // //armSubsystem.spin(oi.getXButton());
-
-    // oi.publishData(armSubsystem.getDeploySpeed());
 
     //CLIMB SUBSYSTEM
     // if(oi.getRTopTrigger()) climbSubsystem.moveUp();
