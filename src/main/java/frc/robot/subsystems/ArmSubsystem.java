@@ -10,110 +10,151 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Spark;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.SendableBase;
+import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.OI;
 
 /**
  * Add your docs here.
  */
 public class ArmSubsystem extends Subsystem {
+  OI oi = new OI();
   // Put methods for controlling this subsystem
   // here. Call these from Commands.
-  private Spark rotationControl = new Spark(Constants.wheelRotationSparkPort);
-  private Spark deploymentControl = new Spark(Constants.wheelDeploymentSparkPort);
-
-  int minValue= 3;
 
 
+  int colourChangeCounter = 0 ;
+
+  String currentColour= " ";
+  String lastColour= " ";
+
+  private Servo armServo = new Servo(0);
+  private Spark spinMotor = new Spark(1);
+
+  long waitStartTime ;
+ 
   enum ArmState { Idle, DeployingArm, SpinningWheel, WaitingForTimeout, RetractingArm } ;
   ArmState armState ;
    
   public ArmSubsystem() {
       armState = ArmState.Idle ;
   }
-
+ 
   @Override
   public void initDefaultCommand() {
+    armServo.set(0.0) ;
     // Set the default command for a subsystem here.
     // setDefaultCommand(new MySpecialCommand());
   }
-
-
-
+ 
+  
   public void OperateControlPanel() {
     switch (armState) {
       case Idle:
-         if ( getDeployButton() ) {
-           // start the small block motor
+          spinMotor.set(0.0) ;
+         armServo.set(0.0) ;
+         if (oi.getSquareButton()) {
+           armServo.setAngle(Constants.deployAngle);
            armState = ArmState.DeployingArm ;
          }
          break ;
       case DeployingArm:
-         if(limitSwitchDeploy()){
-           //stop the small block motor
-           armState = ArmState.SpinningWheel ;
-         }
-         break ;
+          if (!oi.getSquareButton()){
+            armState = ArmState.Idle;
+          } 
+          else if (armServo.getAngle() >= 89) {
+            armState = ArmState.SpinningWheel;
+            colourChangeCounter = 0 ;
+            lastColour = getColour() ;
+            spinMotor.set(Constants.maxSpinSpeed ) ;
+          }
+          break ;
       case SpinningWheel:
-         //turn on wheel motor go spinnoe
-         //change colour change count to 0
-         if(colourChange()>minValue){
-            //stop wheel
-            armState = ArmState.WaitingForTimeout ;
-         }
+         if (!oi.getSquareButton()){
+            armState = ArmState.Idle;
+          } 
+         else{
+            currentColour = getColour() ;
+            if(currentColour!=lastColour){
+             colourChangeCounter++;
+            }
+            if(colourChangeCounter > Constants.minColorChangeCountGoal ){
+              waitStartTime = System.currentTimeMillis();
+              armState = ArmState.WaitingForTimeout ;
+              spinMotor.set(0.0) ;
+            } 
+          }
          break;
       case WaitingForTimeout:
+         if (!oi.getSquareButton()){
+            armState = ArmState.Idle;
+          } 
+         else if ( System.currentTimeMillis() - waitStartTime > Constants.wheelWaitTime ) {
+           armServo.set(0.0) ;
+           armState = ArmState.RetractingArm ;
+         }
+         break;
+      case RetractingArm:
+         if ( armServo.getAngle() < 5){
+          armState= ArmState.Idle;
+         }
+         break;
+
          
-         
-        //
     }
-    
+   
   }
 
-  
-  private boolean limitSwitchDeploy() {
-    return false;
+
+  public char getFMSColour() {
+    String gameData;
+    gameData = DriverStation.getInstance().getGameSpecificMessage();
+    if (gameData.length() > 0) {
+      return gameData.charAt(0);
+    } else {
+      return ' ';
+    }
+    //   switch (gameData.charAt(0))
+  //   {
+  //     case 'B' :
+  //       //Blue case code
+  //       break;
+  //     case 'G' :
+  //       //Green case code
+  //       break;
+  //     case 'R' :
+  //       //Red case code
+  //       break;
+  //     case 'Y' :
+  //       //Yellow case code
+  //       break;
+  //     default :
+  //       //This is corrupt data
+  //       break;
+  //   }
+  // } else {
+  //   //Code for no data received yet
+  // }
+
   }
 
-  private int colourChange(){
+  public String getColour(){
+    return "a";
+  }
+
+  public int colourChange(){
     return 3;
   }
 
 
-  private boolean getDeployButton() {
-      return false;
-  }
-
-  public void deploy(){
-    //if(/*encoder.distance*/false)
-      deploymentControl.set(Constants.maxDeploySpeed);
-    //else if (/*encoder.distance*/true)
-      //deploymentControl.set(0.0);
-    SmartDashboard.putNumber("Speed", deploymentControl.getSpeed());
-      
-  }
-
-  public void retract(){
-    //if(/*encoder.distance < setdistance*/false)
-      deploymentControl.set(-Constants.maxDeploySpeed);
-    //else if (/*encoder.distance*/true)
-      //deploymentControl.set(0.0);
-  }
-
-  public void spin(boolean shouldSpin) {
-    if (shouldSpin)
-      rotationControl.set(Constants.maxSpinSpeed);
-    else if (!shouldSpin)
-      rotationControl.set(0.0);
-  }
-
-  public void stopDeploy(){
-    deploymentControl.set(0);
-  }
-
-  public double getDeploySpeed() {return deploymentControl.getSpeed();}
-
-
+ 
+  
+ 
+ 
 }
+ 
+ 
 
