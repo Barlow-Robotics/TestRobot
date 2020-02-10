@@ -178,13 +178,17 @@ public class DriveSubsystem extends Subsystem {
         if (oi.getLTopTrigger() == false || canSeeTarget() == false){
           teleopDriveState = TeleopDriveState.Manual;
         } else {
-           double angleToTarget = angleToTarget() ;
-           double output = targetController.calculate(angleToTarget) ;
-           System.out.println( "angle to target is " + angleToTarget ) ;
-           System.out.println( "output is " + output ) ;
-           leftBackSide.set(ControlMode.Velocity, output * 500 * 4096 / 600);
-           rightBackSide.set(ControlMode.Velocity, output * 500 * 4096 / 600);
-            //driveTrain.tankDrive(-output, output);            
+            double angleToTarget
+            //if(true/*certain amount of time passed*/)
+              angleToTarget = angleToTargetFromTables();
+            else
+              angleToTarget = angleToTargetFromEncoders();
+            double output = targetController.calculate(angleToTarget) ;
+            System.out.println( "angle to target is " + angleToTarget ) ;
+            System.out.println( "output is " + output ) ;
+            leftBackSide.set(ControlMode.Velocity, output * 500 * 4096 / 600);
+            rightBackSide.set(ControlMode.Velocity, output * 500 * 4096 / 600);
+              //driveTrain.tankDrive(-output, output);            
         }
         break;
 
@@ -230,10 +234,13 @@ public class DriveSubsystem extends Subsystem {
     // }
     }
 
-  private double angleToTarget() {
+  private double angleToTargetFromTables() {
     return targetAngleEntry.getDouble(0.0) ;
-    //return 0.0;  //fill in params!
- }
+  }
+
+  private double angleToTargetFromEncoders(){
+    return 0.0;
+  }
 
 
  private double angleToPowercell() {
