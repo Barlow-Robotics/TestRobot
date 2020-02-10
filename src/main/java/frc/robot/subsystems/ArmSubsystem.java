@@ -73,9 +73,9 @@ public class ArmSubsystem extends Subsystem {
           }
           break ;
       case SpinningWheel:
-         if (!oi.getSquareButton()){
-            armState = ArmState.Idle;
-          } 
+        if (!oi.getSquareButton()){
+          armState = ArmState.Idle;
+        } 
          else{
             currentColour = getColour() ;
             if(currentColour!=lastColour){
