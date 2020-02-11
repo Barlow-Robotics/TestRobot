@@ -14,8 +14,14 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import com.kauailabs.navx.AHRSProtocol;
+import com.kauailabs.navx.frc.AHRS;
 
 import frc.robot.Constants;
 import frc.robot.OI;
@@ -34,12 +40,14 @@ public class DriveSubsystem extends Subsystem {
   WPI_TalonSRX rightBackSide;
 
   SpeedControllerGroup leftSide;
-  SpeedControllerGroup rightSide;  
+  SpeedControllerGroup rightSide; 
+  
+  AHRS navX;
 
-  public DifferentialDrive driveTrain;
+  //public DifferentialDrive driveTrain;
 
   double leftPower, rightPower;
-  final double targetControllerKp = 4.0; 
+  final double targetControllerKp = 2.1; 
   final double targetControllerKi = 0.0;
   final double targetControllerKd = 0.0;
   final double targetControllerPeriod = 1.0/20.0;
@@ -53,6 +61,8 @@ public class DriveSubsystem extends Subsystem {
 
 //  final double powerSpeed = 0.5;
   final double powerSpeed = 0.0;
+  
+  private double originalAngleToTarget;
 
   enum TeleopDriveState {
     Manual,
@@ -89,6 +99,8 @@ public class DriveSubsystem extends Subsystem {
     rightFrontSide = new WPI_TalonSRX(Constants.rightFrontMotor);
     rightBackSide = new WPI_TalonSRX(Constants.rightBackMotor);
 
+    navX = new AHRS(SerialPort.Port.kUSB);
+
     leftFrontSide.follow(leftBackSide);
     rightFrontSide.follow(rightBackSide);
 
@@ -96,6 +108,7 @@ public class DriveSubsystem extends Subsystem {
     rightBackSide.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 30); //Encoder as feedback device, main PID loop, 30 ms timeout time
 
     targetController = new PIDController(targetControllerKp, targetControllerKi, targetControllerKd, targetControllerPeriod);
+    targetController.setTolerance(Constants.angleThreshold);
     targetController.setSetpoint(0.0);
 
     powerCellController = new PIDController(powerCellKp, powerCellKi, powerCellKd, powerCellPeriod);
@@ -104,8 +117,7 @@ public class DriveSubsystem extends Subsystem {
     leftBackSide.config_kF(Constants.PID_id, Constants.DrivetrainKf);
     rightBackSide.config_kF(Constants.PID_id, Constants.DrivetrainKf);
 
-
-    driveTrain = new DifferentialDrive(leftBackSide, rightBackSide);
+    //driveTrain = new DifferentialDrive(leftBackSide, rightBackSide);
   
     teleopDriveState = TeleopDriveState.Manual;
     autoDriveState = AutoDriveState.Backing;
@@ -160,10 +172,13 @@ public class DriveSubsystem extends Subsystem {
 
     switch (teleopDriveState) {
       case Manual:
+        SmartDashboard.putBoolean("Can See Target", canSeeTarget());
         if (oi.getLTopTrigger() == true && canSeeTarget() == true) {
-            targetController.reset();
-            teleopDriveState = TeleopDriveState.AutoTargetAlign;
             System.out.println("entering auto align") ;
+            targetController.reset();
+            navX.reset();
+            originalAngleToTarget = angleToTargetFromTables();
+            teleopDriveState = TeleopDriveState.AutoTargetAlign;
         } else if ( oi.getRTopTrigger() && canSeePowercell() ) {
           teleopDriveState = TeleopDriveState.Powercell ;
         }  else {
@@ -175,15 +190,16 @@ public class DriveSubsystem extends Subsystem {
         break;
 
       case AutoTargetAlign:
-        if (oi.getLTopTrigger() == false || canSeeTarget() == false){
+        if (oi.getLTopTrigger() == false /*|| canSeeTarget() == false*/){
+          System.out.println("Exiting auto-align\n" + targetController.getPositionError()
+                              + "\nAngle error from vision: " + angleToTargetFromTables());
           teleopDriveState = TeleopDriveState.Manual;
         } else {
-            double angleToTarget
-            //if(true/*certain amount of time passed*/)
-              angleToTarget = angleToTargetFromTables();
-            else
-              angleToTarget = angleToTargetFromEncoders();
-            double output = targetController.calculate(angleToTarget) ;
+            double angleToTarget = originalAngleToTarget - (navX.getAngle()*3.14159/180);
+            SmartDashboard.putNumber("NavX Value", navX.getAngle());
+            //if(angleToTarget < Constants.angleThreshold && abs(angleToTarget - angleToTargetFromTables) > Constants.angleThreshold) 
+              //angleToTarget = angleToTargetFromTables();
+            double output = targetController.calculate(angleToTarget);
             System.out.println( "angle to target is " + angleToTarget ) ;
             System.out.println( "output is " + output ) ;
             leftBackSide.set(ControlMode.Velocity, output * 500 * 4096 / 600);
@@ -258,11 +274,11 @@ public class DriveSubsystem extends Subsystem {
   //   return Math.atan(x);
   // }
 
-  private void publishEncoderData(double left, double right){
-    SmartDashboard.putBoolean("Outputting", true);
-    SmartDashboard.putNumber("Left Data", left);
-    SmartDashboard.putNumber("Right Data", right);
-  }
+  // private void publishEncoderData(double left, double right){
+  //   SmartDashboard.putBoolean("Outputting", true);
+  //   SmartDashboard.putNumber("Left Data", left);
+  //   SmartDashboard.putNumber("Right Data", right);
+  // }
 
   private double threshold(double power){
     if(power < -Constants.drivetrainMaxPower)
