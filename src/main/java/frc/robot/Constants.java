@@ -41,6 +41,8 @@ public class Constants{
 
     public static final int shooterMotor = 1;
 
+    public static final double angleThreshold = 0.01;
+
     //Climb
     public static final int ClimbMotorPortNumber = 7;
     public static final int ShooterMotor1 = 6;
