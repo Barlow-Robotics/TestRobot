@@ -49,7 +49,7 @@ public class DriveSubsystem extends Subsystem {
   double leftPower, rightPower;
   final double targetControllerKp = 2.1; 
   final double targetControllerKi = 0.0;
-  final double targetControllerKd = 0.0;
+  final double targetControllerKd = 0.4;
   final double targetControllerPeriod = 1.0/20.0;
   PIDController targetController;
   
@@ -129,7 +129,7 @@ public class DriveSubsystem extends Subsystem {
     targetDistanceEntry = networkTableInst.getTable("vision").getEntry("targetDistance") ;
 
     canSeePowercellEntry = networkTableInst.getTable("vision").getEntry("canSeePowercell") ;
-    powercellAngleEntry = networkTableInst.getTable("vision").getEntry("pcAngle") ;
+    powercellAngleEntry = networkTableInst.getTable("vision").getEntry("powercellAngle") ;
     powercellDistanceEntry = networkTableInst.getTable("vision").getEntry("powercellDistance") ;
 
   }
@@ -169,7 +169,7 @@ public class DriveSubsystem extends Subsystem {
 
 
   public void teleopDrive(double leftPower, double rightPower){
-
+    SmartDashboard.putBoolean("Sees cell", canSeePowercell());
     switch (teleopDriveState) {
       case Manual:
         SmartDashboard.putBoolean("Can See Target", canSeeTarget());
@@ -218,13 +218,13 @@ public class DriveSubsystem extends Subsystem {
          double output = powerCellController.calculate(anglePowerCell) ; 
          System.out.println("output is " + output) ;
           //driveTrain.tankDrive(-output + powerSpeed, output + powerSpeed);
-          leftBackSide.set(ControlMode.Velocity, (output + powerSpeed) * 500 * 4096 / 600);
-          rightBackSide.set(ControlMode.Velocity, (output - powerSpeed) * 500 * 4096 / 600);
+          leftBackSide.set(ControlMode.Velocity, (output - Constants.speedConstantForBallChase) * 500 * 4096 / 600);
+          rightBackSide.set(ControlMode.Velocity, (output + Constants.speedConstantForBallChase) * 500 * 4096 / 600);
 
           // System.out.println( "angle to target is " + angleToTarget ) ;
           // System.out.println( "output is " + output ) ;
-          leftBackSide.set(ControlMode.Velocity, output * 500 * 4096 / 600);
-          rightBackSide.set(ControlMode.Velocity, output * 500 * 4096 / 600);
+          // leftBackSide.set(ControlMode.Velocity, output * 500 * 4096 / 600);
+          // rightBackSide.set(ControlMode.Velocity, output * 500 * 4096 / 600);
 
         }
         break;
@@ -232,6 +232,8 @@ public class DriveSubsystem extends Subsystem {
 
   
   }
+
+  public double getAngleToTarget(){ return angleToTargetFromTables();}
   
 
   private boolean canSeeTarget(){
@@ -260,7 +262,7 @@ public class DriveSubsystem extends Subsystem {
 
 
  private double angleToPowercell() {
-  return 0.0;  //fill in params!
+  return powercellAngleEntry.getDouble(0.0);
 }
 
   //private double angleToPowerCell() {
