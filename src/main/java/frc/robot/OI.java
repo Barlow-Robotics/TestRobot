@@ -17,7 +17,7 @@ public class OI{
     }
 
     public double getRightStick(){
-        return controller.getRawAxis(5);
+        return controller.getRawAxis(3);
     }
 
     public boolean getSquareButton(){
