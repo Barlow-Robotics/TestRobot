@@ -19,6 +19,8 @@ public class Constants{
 
     public static final double autoBackingDistance = 3.5; //3.5 rotations of the wheel ~ 65"
 
+    public static final double speedConstantForBallChase = 0.2;
+
     //OI //hi :)
     public static final int joystickPort = 0;
 
