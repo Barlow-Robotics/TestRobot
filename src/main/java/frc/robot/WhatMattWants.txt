@@ -1,4 +1,4 @@
-arcade drive (Left drive, right turn)
+arcade drive (Left drive, right turn) 100% full
 full speed when joysticks on full
     constant acceleration, not instantaneous
 auto target top left trigger
