@@ -26,16 +26,22 @@ public class Constants{
     public static final int joystickPort = 0;
     public static final int boxControlPort = 1;
 
+    //Index
+    public static final int indexingWheelMotor = 7;
+
+    public static final double feedingSpeed = 0.5;
+    public static final double agitatingSpeed = 0.5;
+
     //Wheel
     public static final int wheelRotationSparkPort = 0;
     public static final int wheelDeploymentSparkPort = 1;
-
+ 
     public static final double maxDeploySpeed = 0.65;
     public static final double maxSpinSpeed = 0.2;
-
-    public static final double deployAngle = 90.0;
+ 
+    public static final int colourFilterLength = 3;
     public static final int minColorChangeCountGoal= 26 ;
-
+ 
     public static final long wheelWaitTime = 5000;
 
 
