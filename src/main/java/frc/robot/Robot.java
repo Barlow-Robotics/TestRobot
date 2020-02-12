@@ -10,12 +10,13 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.OI;
-import edu.wpi.first.wpilibj.Encoder;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ClimbSubsystem;
+import frc.robot.subsystems.IndexingSubsystem;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -31,7 +32,7 @@ public class Robot extends TimedRobot {
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
   private long startTime, endTime, duration, totalDuration;
-  private int cycleIndex;
+  private int cycleIndex, cellCount;
 
   
   OI oi = new OI();
@@ -42,6 +43,7 @@ public class Robot extends TimedRobot {
   ShooterSubsystem shooterSubystem;
   ArmSubsystem armSubsystem;
   ClimbSubsystem climbSubsystem;
+  IndexingSubsystem indexingSubsystem;
 
   /**
    * This function is run when the robot is first started up and should be
@@ -54,10 +56,15 @@ public class Robot extends TimedRobot {
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
 
+    //======================
+    cellCount = 0;
+    //======================
+
     driveSubsystem = new DriveSubsystem();
     shooterSubystem = new ShooterSubsystem();
     armSubsystem = new ArmSubsystem();
     climbSubsystem = new ClimbSubsystem();
+    indexingSubsystem = new IndexingSubsystem();
   }
 
   /**
@@ -114,28 +121,24 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     startTime = System.currentTimeMillis();
-    // SHOOTER SUBSYSTEM
-    // if(oi.getLTopTrigger()) //Press top left trigger to increase speed
-    //   shooterSubystem.increaseSpeed(true);
-    // else
-    //   shooterSubystem.decreaseSpeed(true);
 
-    // if(oi.getXButton())
-    //   shooterSubystem.stopMotor();
-
-    // shooterSubystem.moveMotor();
+    //SHOOTER SUBSYSTEM
+    shooterSubystem.operateShooterOP();
 
     //DRIVE SUBSYSTEM   
-    driveSubsystem.teleopDrive(oi.getLeftStick(), oi.getRightStick());
+    driveSubsystem.teleopDrive(oi.getLeftY(), oi.getRightX());
 
     // ARM SUBSYSTEM
     armSubsystem.OperateControlPanel();
-
 
     //CLIMB SUBSYSTEM
     // if(oi.getRTopTrigger()) climbSubsystem.moveUp();
     // else if(oi.getRBottomTrigger()) climbSubsystem.moveDown();
     // else climbSubsystem.stopClimb();
+
+    //INDEXING SUBSYSTEM
+    indexingSubsystem.operateIndex();
+
     endTime = System.currentTimeMillis();
     duration = endTime - startTime;
     totalDuration += duration;
@@ -155,4 +158,6 @@ public class Robot extends TimedRobot {
   public void testPeriodic() {
 
   }
+
+  public void incrementBallCount(){cellCount++;}
 }
