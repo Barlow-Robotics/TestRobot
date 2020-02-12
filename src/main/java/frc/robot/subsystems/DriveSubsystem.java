@@ -44,18 +44,24 @@ public class DriveSubsystem extends Subsystem {
   
   AHRS navX;
 
-  //public DifferentialDrive driveTrain;
+  public DifferentialDrive driveTrain;
 
   double leftPower, rightPower;
-  final double targetControllerKp = 2.1; 
+  final double driveControllerKp = 0.1;
+  final double driveControllerKi = 0.0;
+  final double driveControllerKd = 0.0;
+  final double driveControllerPeriod = 1.0/20.0;
+  PIDController driveController;
+
+  final double targetControllerKp = 1.05; 
   final double targetControllerKi = 0.0;
-  final double targetControllerKd = 0.4;
+  final double targetControllerKd = 0.2;
   final double targetControllerPeriod = 1.0/20.0;
   PIDController targetController;
   
-  final double powerCellKp = 1.0; 
+  final double powerCellKp = 0.375; 
   final double powerCellKi = 0.0;
-  final double powerCellKd = 0.2;
+  final double powerCellKd = 0.0;
   final double powerCellPeriod = 1.0/20.0;
   PIDController powerCellController; 
 
@@ -106,6 +112,8 @@ public class DriveSubsystem extends Subsystem {
 
     leftBackSide.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 30); //Encoder as feedback device, main PID loop, 30 ms timeout time
     rightBackSide.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 30); //Encoder as feedback device, main PID loop, 30 ms timeout time
+
+    driveController = new PIDController(driveControllerKp, driveControllerKi, driveControllerKd);
 
     targetController = new PIDController(targetControllerKp, targetControllerKi, targetControllerKd, targetControllerPeriod);
     targetController.setTolerance(Constants.angleThreshold);
@@ -174,7 +182,6 @@ public class DriveSubsystem extends Subsystem {
       case Manual:
         SmartDashboard.putBoolean("Can See Target", canSeeTarget());
         if (oi.getLTopTrigger() == true && canSeeTarget() == true) {
-            System.out.println("entering auto align") ;
             targetController.reset();
             navX.reset();
             originalAngleToTarget = angleToTargetFromTables();
@@ -184,15 +191,19 @@ public class DriveSubsystem extends Subsystem {
         }  else {
           leftPower = threshold(leftPower);
           rightPower = threshold(rightPower);
-          leftBackSide.set(ControlMode.Velocity, -leftPower * 500 * 4096 / 600);
-          rightBackSide.set(ControlMode.Velocity, rightPower * 500 * 4096 / 600);
+          // leftPower = driveController.calculate(leftBackSide.get() - leftPower);
+          // rightPower = driveController.calculate(rightBackSide.get() - rightPower);
+          // leftBackSide.set(ControlMode.Velocity, -leftPower * 500 * 4096 / 600);
+          // rightBackSide.set(ControlMode.Velocity, rightPower * 500 * 4096 / 600);
+          leftBackSide.set(ControlMode.Velocity, -leftPower * 500 * 8192 / 600);
+          rightBackSide.set(ControlMode.PercentOutput, rightPower);
         }
         break;
 
       case AutoTargetAlign:
         if (oi.getLTopTrigger() == false /*|| canSeeTarget() == false*/){
-          System.out.println("Exiting auto-align\n" + targetController.getPositionError()
-                              + "\nAngle error from vision: " + angleToTargetFromTables());
+          // System.out.println("Exiting auto-align\n" + targetController.getPositionError()
+          //                     + "\nAngle error from vision: " + angleToTargetFromTables());
           teleopDriveState = TeleopDriveState.Manual;
         } else {
             double angleToTarget = originalAngleToTarget - (navX.getAngle()*3.14159/180);
@@ -200,10 +211,10 @@ public class DriveSubsystem extends Subsystem {
             //if(angleToTarget < Constants.angleThreshold && abs(angleToTarget - angleToTargetFromTables) > Constants.angleThreshold) 
               //angleToTarget = angleToTargetFromTables();
             double output = targetController.calculate(angleToTarget);
-            System.out.println( "angle to target is " + angleToTarget ) ;
-            System.out.println( "output is " + output ) ;
-            leftBackSide.set(ControlMode.Velocity, output * 500 * 4096 / 600);
-            rightBackSide.set(ControlMode.Velocity, output * 500 * 4096 / 600);
+            // System.out.println( "angle to target is " + angleToTarget ) ;
+            // System.out.println( "output is " + output ) ;
+            leftBackSide.set(ControlMode.Velocity, output * 500 * 8192 / 600);
+            rightBackSide.set(ControlMode.Velocity, output * 500 * 8192 / 600);
               //driveTrain.tankDrive(-output, output);            
         }
         break;
@@ -213,13 +224,13 @@ public class DriveSubsystem extends Subsystem {
           teleopDriveState = TeleopDriveState.Manual;
         } else {
          double anglePowerCell = angleToPowercell() ;
-         System.out.println("angle to power cell is " + angleToPowercell()) ;
+         // System.out.println("angle to power cell is " + angleToPowercell()) ;
 
          double output = powerCellController.calculate(anglePowerCell) ; 
-         System.out.println("output is " + output) ;
+         // System.out.println("output is " + output) ;
           //driveTrain.tankDrive(-output + powerSpeed, output + powerSpeed);
-          leftBackSide.set(ControlMode.Velocity, (output - Constants.speedConstantForBallChase) * 500 * 4096 / 600);
-          rightBackSide.set(ControlMode.Velocity, (output + Constants.speedConstantForBallChase) * 500 * 4096 / 600);
+          leftBackSide.set(ControlMode.Velocity, (output - Constants.speedConstantForBallChase) * 500 * 8192 / 600);
+          rightBackSide.set(ControlMode.Velocity, (output + Constants.speedConstantForBallChase) * 500 * 8192 / 600);
 
           // System.out.println( "angle to target is " + angleToTarget ) ;
           // System.out.println( "output is " + output ) ;
@@ -287,11 +298,15 @@ public class DriveSubsystem extends Subsystem {
       power = -Constants.drivetrainMaxPower;
     else if(power > Constants.drivetrainMaxPower)
       power = Constants.drivetrainMaxPower;
-    else if(power < Constants.drivetrainMinPower)
+    else if(power < Constants.drivetrainMinPower && power > 0)
       power = 0;
-    else if(power > -Constants.drivetrainMinPower)
+    else if(power > -Constants.drivetrainMinPower && power < 0)
       power = 0;
     
     return power;
+  }
+
+  private void arcadeDrive(double speed, double angle){
+
   }
 }
