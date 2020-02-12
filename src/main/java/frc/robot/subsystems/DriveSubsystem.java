@@ -304,5 +304,38 @@ public class DriveSubsystem extends Subsystem {
 
   private void arcadeDrive(double speed, double angle){
 
+    double leftPower, rightPower;
+
+    //Figure out which input is stronger, adjust sign accordingly
+    double defaultInput = Math.copySign(Math.max(Math.abs(xSpeed), Math.abs(zRotation)), xSpeed);
+
+    if(speed >= Constants.drivetrainMinPower){
+      //Right-forward, else left-forward
+      if(angle >= Constants.drivetrainMinPower){
+        leftPower = defaultInput;
+        rightPower = speed - angle;
+      }
+      else if(angle <= Constants.drivetrainMinPower){
+        leftPower = speed - angle;
+        rightPower = defaultInput;
+      }
+    }
+    else if(speed <= -Constants.drivetrainMinPower){
+      if(angle >= Constants.drivetrainMinPower){
+        leftPower = speed + angle;
+        rightPower = defaultInput;
+      }
+      else if(angle <= Constants.drivetrainMinPower){
+        leftPower = defaultInput;
+        rightPower = speed - angle;
+      }
+    }
+    else{
+      leftPower = 0;
+      rightPower = 0;
+    }
+    //Set motor output
+    leftBackSide.set(leftPower);
+    rightBackSide.set(rightPower);
   }
 }
