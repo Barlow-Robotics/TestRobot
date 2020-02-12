@@ -323,6 +323,7 @@ public class DriveSubsystem extends Subsystem {
       }
     }
     else if(speed <= -Constants.drivetrainMinPower){
+      //Left-backward, else right-backward
       if(angle >= Constants.drivetrainMinPower){
         leftPower = speed + angle;
         rightPower = defaultInput;
