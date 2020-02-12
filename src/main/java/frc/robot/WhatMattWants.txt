@@ -1,0 +1,10 @@
+arcade drive (Left drive, right turn)
+full speed when joysticks on full
+    constant acceleration, not instantaneous
+auto target top left trigger
+auto ball bottom left trigger
+shoot top right trigger (click and hold)
+manual intake bottom right trigger
+
+
+Climb, wheel are operator
