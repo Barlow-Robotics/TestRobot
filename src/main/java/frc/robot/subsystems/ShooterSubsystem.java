@@ -47,7 +47,7 @@ public class ShooterSubsystem extends Subsystem {
     // setDefaultCommand(new MySpecialCommand());
   }
 
-  public void operateShooter(){
+  public void operateShooterOP(){
     // Gonna leave trigger commands in here for the moment for testing purposes
     switch(shooterState){
       case IdleSpin:
