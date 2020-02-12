@@ -2,6 +2,9 @@ package frc.robot;
 
 
 public class Constants{
+    //General
+
+
     //Drivetrain
     public static final int leftFrontMotor = 2;
     public static final int leftBackMotor = 1;
@@ -15,6 +18,7 @@ public class Constants{
     public static final int[] rightEncoderPorts = {0, 1};
 
     public static final int PID_id = 0;
+    public static final double PID_Period = 1.0/20.0;
     public static final double DrivetrainKf = 0.1797; //0.1797
     public static final int unitsPerRotation = 8096;
 
@@ -34,8 +38,9 @@ public class Constants{
 
     //Wheel
     public static final int wheelRotationSparkPort = 0;
-    public static final int wheelDeploymentSparkPort = 1;
- 
+    public static final int openSolenoidDeployPort = 0;
+    public static final int closeSolenoidDeployPort = 1;
+    
     public static final double maxDeploySpeed = 0.65;
     public static final double maxSpinSpeed = 0.2;
  
