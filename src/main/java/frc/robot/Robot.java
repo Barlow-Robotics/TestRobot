@@ -29,6 +29,10 @@ public class Robot extends TimedRobot {
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
+
+  private long startTime, endTime, duration, totalDuration;
+  private int cycleIndex;
+
   
   OI oi = new OI();
 
@@ -109,7 +113,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-
+    startTime = System.currentTimeMillis();
     // SHOOTER SUBSYSTEM
     // if(oi.getLTopTrigger()) //Press top left trigger to increase speed
     //   shooterSubystem.increaseSpeed(true);
@@ -132,6 +136,16 @@ public class Robot extends TimedRobot {
     // if(oi.getRTopTrigger()) climbSubsystem.moveUp();
     // else if(oi.getRBottomTrigger()) climbSubsystem.moveDown();
     // else climbSubsystem.stopClimb();
+    endTime = System.currentTimeMillis();
+    duration = endTime - startTime;
+    totalDuration += duration;
+    cycleIndex++;
+
+    if(cycleIndex >= 100) {
+      cycleIndex = 0;
+      System.out.println("Average duration: " + totalDuration/100.0);
+      totalDuration = 0;
+    }
   }
 
   /**
