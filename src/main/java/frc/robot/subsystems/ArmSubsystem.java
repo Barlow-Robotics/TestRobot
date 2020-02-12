@@ -38,6 +38,8 @@ public class ArmSubsystem extends Subsystem {
  
   char currentColour = 'a';
   char lastColour = 'b';
+
+  private boolean previousInput;
  
   private final static I2C.Port i2cPort = I2C.Port.kOnboard;
   final static ColorSensorV3 m_colorSensor = new ColorSensorV3(i2cPort);
@@ -51,7 +53,9 @@ public class ArmSubsystem extends Subsystem {
  
   //put calibrated colours here
  
-  private Solenoid armPiston = new Solenoid(0);
+  private Solenoid openSolenoidDeploy = new Solenoid(Constants.openSolenoidDeployPort);
+  private Solenoid closeSolenoidDeploy = new Solenoid(Constants.closeSolenoidDeployPort);
+  private boolean wheelDeployed;
   private Spark spinMotor = new Spark(1);
  
   ColourFilter colourFilter;
@@ -74,12 +78,15 @@ public class ArmSubsystem extends Subsystem {
   public ArmSubsystem() {
     armState = ArmState.Idle;
     colourFilter = new ColourFilter(Constants.colourFilterLength, 'n');
+    previousInput = false;
+    wheelDeployed = false;
   }
  
   @Override
   public void initDefaultCommand() {
     spinMotor.set(0.0);
-    armPiston.set(false);
+    wheelDeployed = false;
+    updatePistons();
   }
  
   public void OperateControlPanel() {
@@ -87,16 +94,20 @@ public class ArmSubsystem extends Subsystem {
     switch (armState) {
     case Idle:
       spinMotor.set(0.0);
-      armPiston.set(false);
-      if (oi.getSquareButton()) { //what button is used ?? MUST CHANGE
-        armPiston.set(true);
+      wheelDeployed = false;
+      updatePistons();
+      if (oi.getSquareButton() && !previousInput) { //what button is used ?? MUST CHANGE
+        wheelDeployed = true;
+        updatePistons();
         armState = ArmState.DeployingArm;
+        previousInput = true;
       }
       break;
     case DeployingArm:
-      if (!oi.getSquareButton()) {
+      if (oi.getSquareButton() && !previousInput) {
         armState = ArmState.Idle;
       } else  {
+        previousInput = oi.getSquareButton();
         armState = ArmState.SpinningWheel;
         colourChangeCounter = 0;
         lastColour = colourFilter.getColour();
@@ -165,7 +176,8 @@ public class ArmSubsystem extends Subsystem {
       if (!oi.getSquareButton()) {
         armState = ArmState.Idle;
       } else if (System.currentTimeMillis() - waitStartTime > Constants.wheelWaitTime) {
-        armPiston.set(false);
+        wheelDeployed = false;
+        updatePistons();
         armState = ArmState.RetractingArm;
       }
       break;
@@ -177,7 +189,7 @@ public class ArmSubsystem extends Subsystem {
  
     }
     System.out.println("arm state is " + armState);
-    System.out.println("angle of servo is " + armPiston.get());
+    System.out.println("wheel is deployed: " + wheelDeployed);
  
   }
  
@@ -218,7 +230,10 @@ public class ArmSubsystem extends Subsystem {
     return result;
   }
  
- 
+  private void updatePistons(){
+    openSolenoidDeploy.set(wheelDeployed);
+    closeSolenoidDeploy.set(!wheelDeployed);
+  }
  
  
 }
