@@ -1,17 +1,22 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
+
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class OI{
     public static boolean getXButton;
 	public static boolean getSquareButton;
-	private Joystick controller;
+    private Joystick controller;
+    private Joystick box;
+    
     public OI(){
         controller = new Joystick(Constants.joystickPort);
+        box = new Joystick(Constants.boxControlPort);
     }
 
+    //Joystick buttons and axes
     public double getLeftY(){return controller.getRawAxis(1);}
     public double getRightX(){return controller.getRawAxis(2);}
 
@@ -29,6 +34,14 @@ public class OI{
     public boolean getPOVDown(){return controller.getPOV() == 5;}
     public boolean getPOVLeft(){return controller.getPOV() == 3;}
     public boolean getPOVRight(){return controller.getPOV() == 7;}
+
+    //Box buttons and axes
+    public boolean getPinkButton(){return box.getRawButton(3);}
+    public boolean getTealButton(){return box.getRawButton(4);}
+    public boolean getRedButton(){return box.getRawButton(2);}
+    public boolean getPurpleButton(){return box.getRawButton(1);}
+
+    
 
     public void publishData(double data){
         SmartDashboard.putNumber("Deploy Speed", data);
