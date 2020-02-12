@@ -9,7 +9,7 @@ public class Constants{
     public static final int rightBackMotor = 4;
 
     public static final double drivetrainMinPower = 0.05;
-    public static final double drivetrainMaxPower = 0.8;
+    public static final double drivetrainMaxPower = 1.0;
 
     public static final int[] leftEncoderPorts = {2, 3};
     public static final int[] rightEncoderPorts = {0, 1};
@@ -19,7 +19,7 @@ public class Constants{
 
     public static final double autoBackingDistance = 3.5; //3.5 rotations of the wheel ~ 65"
 
-    public static final double speedConstantForBallChase = 0.2;
+    public static final double speedConstantForBallChase = 0.5;
 
     //OI //hi :)
     public static final int joystickPort = 0;
