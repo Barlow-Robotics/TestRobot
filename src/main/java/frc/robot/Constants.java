@@ -16,6 +16,7 @@ public class Constants{
 
     public static final int PID_id = 0;
     public static final double DrivetrainKf = 0.1797; //0.1797
+    public static final int unitsPerRotation = 8096;
 
     public static final double autoBackingDistance = 3.5; //3.5 rotations of the wheel ~ 65"
 
