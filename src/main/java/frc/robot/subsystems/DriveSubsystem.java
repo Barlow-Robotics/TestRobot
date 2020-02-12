@@ -195,8 +195,9 @@ public class DriveSubsystem extends Subsystem {
           // rightPower = driveController.calculate(rightBackSide.get() - rightPower);
           // leftBackSide.set(ControlMode.Velocity, -leftPower * 500 * 4096 / 600);
           // rightBackSide.set(ControlMode.Velocity, rightPower * 500 * 4096 / 600);
-          leftBackSide.set(ControlMode.Velocity, -leftPower * 500 * 8192 / 600);
-          rightBackSide.set(ControlMode.PercentOutput, rightPower);
+          leftBackSide.set(ControlMode.Velocity,
+                           -leftPower * 500 * Constants.unitsPerRotation / 600);
+          rightBackSide.set(ControlMode.Velocity, rightPower);
         }
         break;
 
@@ -304,10 +305,11 @@ public class DriveSubsystem extends Subsystem {
 
   private void arcadeDrive(double speed, double angle){
 
-    double leftPower, rightPower;
+    double leftPower = 0;
+    double rightPower = 0;
 
     //Figure out which input is stronger, adjust sign accordingly
-    double defaultInput = Math.copySign(Math.max(Math.abs(xSpeed), Math.abs(zRotation)), xSpeed);
+    double defaultInput = Math.copySign(Math.max(Math.abs(speed), Math.abs(angle)), speed);
 
     if(speed >= Constants.drivetrainMinPower){
       //Right-forward, else left-forward
@@ -335,7 +337,7 @@ public class DriveSubsystem extends Subsystem {
       rightPower = 0;
     }
     //Set motor output
-    leftBackSide.set(leftPower);
-    rightBackSide.set(rightPower);
+    leftBackSide.set(ControlMode.Velocity, leftPower * 500 * Constants.unitsPerRotation / 600);
+    rightBackSide.set(ControlMode.Velocity, rightPower * 500 * Constants.unitsPerRotation / 600);
   }
 }
