@@ -11,17 +11,33 @@ import edu.wpi.first.wpilibj.command.Subsystem;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.Spark;
 
+import frc.robot.Constants;
+import frc.robot.OI;
+
+
+
 /**
  * Add your docs here.
  */
 public class IndexingSubsystem extends Subsystem {
   // Put methods for controlling this subsystem
   // here. Call these from Commands.
-  private WPI_TalonSRX beltDriver = new WPI_TalonSRX(6);
+  private WPI_TalonSRX wheelDriver;
+  private Spark agitatorMotor;
+  private OI oi;
+  private int cellCount;
+  enum IndexingState{
+    Idle,
+    Feeding
+  }
+  
+  IndexingState indexingState;
   
 
   public IndexingSubsystem(){
-
+    wheelDriver = new WPI_TalonSRX(Constants.indexingWheelMotor);
+    oi = new OI();
+    cellCount = 0;
   } 
 
   @Override
@@ -30,8 +46,30 @@ public class IndexingSubsystem extends Subsystem {
     // setDefaultCommand(new MySpecialCommand());
   }
 
-  public void moveBelts(){
+  public void operateIndex(){
     
-    beltDriver.set(0.75);
+    switch(indexingState){
+      case Idle:
+        if(isShooting())
+          indexingState = IndexingState.Feeding;
+        break;
+      case Feeding:
+        if(!isShooting()){
+          wheelDriver.set(0);
+          agitatorMotor.set(0);
+          indexingState = IndexingState.Idle;
+        }
+        else{
+          wheelDriver.set(Constants.feedingSpeed);
+          agitatorMotor.set(Constants.agitatingSpeed);
+          if(false/*Sensor detects ball exit*/)
+            cellCount--;
+        }
+    }
+  }
+
+
+  private boolean isShooting(){
+    return oi.getRTopTrigger();
   }
 }
