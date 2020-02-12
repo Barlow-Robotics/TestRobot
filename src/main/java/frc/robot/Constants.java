@@ -24,6 +24,7 @@ public class Constants{
 
     //OI //hi :)
     public static final int joystickPort = 0;
+    public static final int boxControlPort = 1;
 
     //Wheel
     public static final int wheelRotationSparkPort = 0;
