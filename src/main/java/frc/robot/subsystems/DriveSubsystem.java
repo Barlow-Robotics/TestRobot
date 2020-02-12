@@ -267,10 +267,6 @@ public class DriveSubsystem extends Subsystem {
     return targetAngleEntry.getDouble(0.0) ;
   }
 
-  private double angleToTargetFromEncoders(){
-    return 0.0;
-  }
-
 
  private double angleToPowercell() {
   return powercellAngleEntry.getDouble(0.0);
