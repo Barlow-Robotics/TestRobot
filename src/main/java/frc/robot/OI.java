@@ -50,6 +50,18 @@ public class OI{
         //climb - move down
     }
 
+    public boolean getPOVUp(){
+        return controller.getPOV() == 1;
+    }
+
+    public boolean getPOVDown(){
+        return controller.getPOV() == 5;
+    }
+
+    public boolean getPOVLeft(){
+        return controller.getPOV() == 3;
+    }
+
     public void publishData(double data){
         SmartDashboard.putNumber("Deploy Speed", data);
     }
