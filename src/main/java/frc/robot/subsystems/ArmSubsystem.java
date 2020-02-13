@@ -182,9 +182,9 @@ public class ArmSubsystem extends Subsystem {
       }
       break;
     case RetractingArm:
-      //if (armPiston.get() == false) {
-        armState = ArmState.Idle;
-      //}
+      wheelDeployed = false;
+      updatePistons();
+      armState = ArmState.Idle;
       break;
  
     }
