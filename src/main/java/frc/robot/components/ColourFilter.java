@@ -19,7 +19,7 @@ public class ColourFilter {
  
     ArmSubsystem armSubsystem = new ArmSubsystem();
  
-public void addMeasurement (char c){
+public void addMeasurement(char c){
     listOfColours.add(c);
     if (listOfColours.size()>filterLength){
         listOfColours.remove(0);
@@ -31,8 +31,8 @@ public void addMeasurement (char c){
     }  // for
     currentColour = c;
 }
- 
- 
+
+
  
 public char getColour(){
     return currentColour;
