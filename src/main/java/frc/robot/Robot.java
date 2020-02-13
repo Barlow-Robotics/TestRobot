@@ -115,6 +115,12 @@ public class Robot extends TimedRobot {
     }
   }
 
+  @Override
+  public void teleopInit() {
+    super.teleopInit();
+    System.out.println("Period: " + this.m_period);
+  }
+
   /**
    * This function is called periodically during operator control.
    */
