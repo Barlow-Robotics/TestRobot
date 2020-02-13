@@ -7,6 +7,10 @@
 
 package frc.robot;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTableEntry;
+
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -17,6 +21,7 @@ import frc.robot.OI;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.IndexingSubsystem;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -31,7 +36,7 @@ public class Robot extends TimedRobot {
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
-  private long startTime, endTime, duration, totalDuration;
+  private long startTime, endTime, duration, totalDuration, previousStartTime;
   private int cycleIndex, cellCount;
 
   
@@ -44,6 +49,11 @@ public class Robot extends TimedRobot {
   ArmSubsystem armSubsystem;
   ClimbSubsystem climbSubsystem;
   IndexingSubsystem indexingSubsystem;
+  NetworkTableInstance networkTable;
+  NetworkTableEntry frameTime;
+  NetworkTableEntry loopTime;
+
+  
 
   /**
    * This function is run when the robot is first started up and should be
@@ -65,6 +75,11 @@ public class Robot extends TimedRobot {
     armSubsystem = new ArmSubsystem();
     climbSubsystem = new ClimbSubsystem();
     indexingSubsystem = new IndexingSubsystem();
+
+    networkTable = NetworkTableInstance.getDefault(); 
+    frameTime = networkTable.getTable("performance").getEntry("frameTime");
+    loopTime = networkTable.getTable("performance").getEntry("loopTime");
+
   }
 
   /**
@@ -119,7 +134,7 @@ public class Robot extends TimedRobot {
   public void teleopInit() {
     super.teleopInit();
     System.out.println("Period: " + this.m_period);
-    //Add a variable to store the millis() here (LastStart)
+    previousStartTime = System.currentTimeMillis();
   }
 
   /**
@@ -129,8 +144,10 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     startTime = System.currentTimeMillis();
 
+    loopTime.forceSetNumber(System.currentTimeMillis() - previousStartTime);
     //Write to NetworkTables millis() - LastStart
     //LastStart = millis()
+    previousStartTime = System.currentTimeMillis();
 
     //SHOOTER SUBSYSTEM
     shooterSubystem.operateShooterOP();
@@ -151,17 +168,11 @@ public class Robot extends TimedRobot {
 
     endTime = System.currentTimeMillis();
     duration = endTime - startTime;
-    totalDuration += duration;
-    cycleIndex++;
 
-    if(cycleIndex >= 100) {
-      cycleIndex = 0;
-      System.out.println("Average duration: " + totalDuration/100.0);
-      totalDuration = 0;
-    }
+    frameTime.forceSetNumber(duration);
     //Send data to NetworkTable "performance" with entry "frameTime" for every cycle
     //Send lastTime difference to entry "loopTime"
-
+    
   }
 
   /**
