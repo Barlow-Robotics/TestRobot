@@ -9,6 +9,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.command.Subsystem;
 
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.Encoder;
 import frc.robot.Constants;
@@ -38,6 +39,9 @@ public class ShooterSubsystem extends Subsystem {
 
   public ShooterSubsystem(){
     shooterState = ShooterState.IdleSpin;
+
+    shooterController.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 30);
+    
     oi = new OI();
   }
 
@@ -45,6 +49,11 @@ public class ShooterSubsystem extends Subsystem {
   public void initDefaultCommand() {
     // Set the default command for a subsystem here.
     // setDefaultCommand(new MySpecialCommand());
+  }
+
+  public void operateShooter(boolean doSpin){
+    if(doSpin)
+      shooterController.set(ControlMode.Velocity, Constants.maxShooterSpeed);
   }
 
   public void operateShooterOP(){
