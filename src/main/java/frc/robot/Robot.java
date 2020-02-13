@@ -119,6 +119,7 @@ public class Robot extends TimedRobot {
   public void teleopInit() {
     super.teleopInit();
     System.out.println("Period: " + this.m_period);
+    //Add a variable to store the millis() here (LastStart)
   }
 
   /**
@@ -127,6 +128,9 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     startTime = System.currentTimeMillis();
+
+    //Write to NetworkTables millis() - LastStart
+    //LastStart = millis()
 
     //SHOOTER SUBSYSTEM
     shooterSubystem.operateShooterOP();
@@ -155,6 +159,9 @@ public class Robot extends TimedRobot {
       System.out.println("Average duration: " + totalDuration/100.0);
       totalDuration = 0;
     }
+    //Send data to NetworkTable "performance" with entry "frameTime" for every cycle
+    //Send lastTime difference to entry "loopTime"
+
   }
 
   /**
