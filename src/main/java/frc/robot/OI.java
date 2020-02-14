@@ -17,18 +17,18 @@ public class OI{
     }
 
     //Joystick buttons and axes
-    public double getLeftY(){return controller.getRawAxis(1);}
-    public double getRightX(){return controller.getRawAxis(2);}
+    public double getForwardSpeed(){return controller.getRawAxis(1);} //Left-side Y axis
+    public double getTurnAngle(){return controller.getRawAxis(2);}   //Right-side X axis
 
     public boolean getSquareButton(){return controller.getRawButton(1);}
     public boolean getCircleButton(){return controller.getRawButton(3);}
     public boolean getXButton(){return controller.getRawButton(2);}
 
-    public boolean getLTopTrigger() {return controller.getRawButton(5);}
-    public boolean getLBottomTrigger() {return controller.getRawButton(7);}
+    public boolean isAutoTargeting() {return controller.getRawButton(5);} //Top left trigger
+    public boolean isBallChasing() {return controller.getRawButton(7);} //Bottom left trigger
 
-    public boolean getRTopTrigger() {return controller.getRawButton(6);}
-    public boolean getRBottomTrigger() {return controller.getRawButton(8);}
+    public boolean getIsShooting() {return controller.getRawButton(6);}     // Top right trigger
+    public boolean getDeployIntakeManual() {return controller.getRawButton(8);} //Bottom right trigger
 
     public boolean getPOVUp(){return controller.getPOV() == 1;}
     public boolean getPOVDown(){return controller.getPOV() == 5;}
