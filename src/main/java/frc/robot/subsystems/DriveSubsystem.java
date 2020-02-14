@@ -108,10 +108,14 @@ public class DriveSubsystem extends Subsystem {
     navX = new AHRS(SerialPort.Port.kUSB);
 
     leftFrontSide.follow(leftBackSide);
-    rightFrontSide.follow(rightBackSide);
-
     leftBackSide.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 30); //Encoder as feedback device, main PID loop, 30 ms timeout time
+    leftBackSide.configClosedloopRamp(0.3);
+    leftBackSide.config_kF(Constants.PID_id, Constants.DrivetrainKf);
+
+    rightFrontSide.follow(rightBackSide);
     rightBackSide.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 30); //Encoder as feedback device, main PID loop, 30 ms timeout time
+    rightBackSide.configClosedloopRamp(0.3);
+    rightBackSide.config_kF(Constants.PID_id, Constants.DrivetrainKf);
 
     driveController = new PIDController(driveControllerKp, driveControllerKi, driveControllerKd);
 
@@ -121,11 +125,6 @@ public class DriveSubsystem extends Subsystem {
 
     powerCellController = new PIDController(powerCellKp, powerCellKi, powerCellKd, powerCellPeriod);
     powerCellController.setSetpoint(0.0);
-
-    leftBackSide.config_kF(Constants.PID_id, Constants.DrivetrainKf);
-    rightBackSide.config_kF(Constants.PID_id, Constants.DrivetrainKf);
-
-    //driveTrain = new DifferentialDrive(leftBackSide, rightBackSide);
   
     teleopDriveState = TeleopDriveState.Manual;
     autoDriveState = AutoDriveState.Backing;
@@ -181,12 +180,12 @@ public class DriveSubsystem extends Subsystem {
     switch (teleopDriveState) {
       case Manual:
         SmartDashboard.putBoolean("Can See Target", canSeeTarget());
-        if (oi.getLTopTrigger() == true && canSeeTarget() == true) {
+        if (oi.isAutoTargeting() == true && canSeeTarget() == true) {
             targetController.reset();
             navX.reset();
             originalAngleToTarget = angleToTargetFromTables();
             teleopDriveState = TeleopDriveState.AutoTargetAlign;
-        } else if ( oi.getRTopTrigger() && canSeePowercell() ) {
+        } else if ( oi.isBallChasing() && canSeePowercell() ) {
           teleopDriveState = TeleopDriveState.Powercell ;
         }  else {
           leftPower = threshold(leftPower);
@@ -202,7 +201,7 @@ public class DriveSubsystem extends Subsystem {
         break;
 
       case AutoTargetAlign:
-        if (oi.getLTopTrigger() == false /*|| canSeeTarget() == false*/){
+        if (oi.isAutoTargeting() == false /*|| canSeeTarget() == false*/){
           // System.out.println("Exiting auto-align\n" + targetController.getPositionError()
           //                     + "\nAngle error from vision: " + angleToTargetFromTables());
           teleopDriveState = TeleopDriveState.Manual;
@@ -221,7 +220,7 @@ public class DriveSubsystem extends Subsystem {
         break;
 
       case Powercell:
-        if (!oi.getRTopTrigger() ||  !canSeePowercell()){
+        if (!oi.isBallChasing() ||  !canSeePowercell()){
           teleopDriveState = TeleopDriveState.Manual;
         } else {
          double anglePowerCell = angleToPowercell() ;
