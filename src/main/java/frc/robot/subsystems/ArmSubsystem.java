@@ -56,7 +56,7 @@ public class ArmSubsystem extends Subsystem {
  
   private Solenoid openSolenoidDeploy = new Solenoid(Constants.openSolenoidDeployPort);
   private Solenoid closeSolenoidDeploy = new Solenoid(Constants.closeSolenoidDeployPort);
-  private Compressor compressor = new Compressor();
+  private Compressor compressor = new Compressor(0);
   private boolean wheelDeployed, colorMatched;
   private WPI_TalonSRX wheelSpinner = new WPI_TalonSRX(Constants.wheelRotationTalonID);
  
@@ -83,6 +83,7 @@ public class ArmSubsystem extends Subsystem {
     previousInput = false;
     wheelDeployed = false;
     spinningMode = SpinningMode.Which;
+    compressor.setClosedLoopControl(true);
   }
  
   @Override
