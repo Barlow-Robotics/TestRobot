@@ -70,11 +70,11 @@ public class Robot extends TimedRobot {
     cellCount = 0;
     //======================
 
-    driveSubsystem = new DriveSubsystem();
+    // driveSubsystem = new DriveSubsystem();
     shooterSubystem = new ShooterSubsystem();
     armSubsystem = new ArmSubsystem();
-    climbSubsystem = new ClimbSubsystem();
-    indexingSubsystem = new IndexingSubsystem();
+    // climbSubsystem = new ClimbSubsystem();
+    // indexingSubsystem = new IndexingSubsystem();
 
     networkTable = NetworkTableInstance.getDefault(); 
     frameTime = networkTable.getTable("performance").getEntry("frameTime");
@@ -93,7 +93,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     //xhcjgvhkblj;kn
-    SmartDashboard.putNumber("Angle To Target", driveSubsystem.getAngleToTarget());
+    // SmartDashboard.putNumber("Angle To Target", driveSubsystem.getAngleToTarget());
   }
 
   /**
@@ -150,13 +150,13 @@ public class Robot extends TimedRobot {
     previousStartTime = System.currentTimeMillis();
 
     //SHOOTER SUBSYSTEM
-    shooterSubystem.operateShooterOP();
+    shooterSubystem.operateShooter(true);
 
     //DRIVE SUBSYSTEM   
-    driveSubsystem.teleopDrive(oi.getLeftY(), oi.getRightX());
+    //  driveSubsystem.teleopDrive(oi.getForwardSpeed(), oi.getTurnAngle());
 
-    // ARM SUBSYSTEM
-    armSubsystem.OperateControlPanel();
+    //ARM SUBSYSTEM
+     armSubsystem.OperateControlPanel();
 
     //CLIMB SUBSYSTEM
     // if(oi.getRTopTrigger()) climbSubsystem.moveUp();
@@ -164,7 +164,7 @@ public class Robot extends TimedRobot {
     // else climbSubsystem.stopClimb();
 
     //INDEXING SUBSYSTEM
-    indexingSubsystem.operateIndex();
+    // indexingSubsystem.operateIndex();
 
     endTime = System.currentTimeMillis();
     duration = endTime - startTime;
