@@ -28,7 +28,7 @@ public class DriveCommand extends Command {
   // Called repeatedly when this Command is scheduled to run
   @Override
   protected void execute() {
-    driveSubsystem.teleopDrive(oi.getLeftY(), oi.getRightX()); //Joystick input
+    driveSubsystem.teleopDrive(oi.getForwardSpeed(), oi.getTurnAngle()); //Joystick input
   }
 
   // Make this return true when this Command no longer needs to run execute()
