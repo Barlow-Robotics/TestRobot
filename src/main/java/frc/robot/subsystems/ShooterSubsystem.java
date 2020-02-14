@@ -16,6 +16,7 @@ import frc.robot.Constants;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Servo;
 import frc.robot.OI;
+import com.ctre.phoenix.motorcontrol.ControlMode;
 
 
 /**
@@ -24,7 +25,7 @@ import frc.robot.OI;
 public class ShooterSubsystem extends Subsystem {
   // Put methods for controlling this subsystem
   // here. Call these from Commands.
-  private WPI_TalonSRX shooterController = new WPI_TalonSRX(Constants.shooterMotor);
+  private WPI_TalonSRX shooterController = new WPI_TalonSRX(Constants.shooterMotorTalonID);
   private Servo angleServo = new Servo(0);
   private double speed = 0;
   private double angle = 0;
@@ -32,7 +33,7 @@ public class ShooterSubsystem extends Subsystem {
 
   private enum ShooterState{
     IdleSpin,
-    AngleChange
+    Targeting
   }
 
   private ShooterState shooterState;
@@ -52,8 +53,23 @@ public class ShooterSubsystem extends Subsystem {
   }
 
   public void operateShooter(boolean doSpin){
-    if(doSpin)
-      shooterController.set(ControlMode.Velocity, Constants.maxShooterSpeed);
+    switch(shooterState){
+      case IdleSpin:
+        if(doSpin)
+          shooterController.set(ControlMode.Velocity, Constants.maxShooterSpeed);
+        else 
+          shooterController.set(0.0);
+          
+        if(oi.isAutoTargeting())
+          shooterState = ShooterState.Targeting;
+      case Targeting:
+        if(!oi.isAutoTargeting())
+          shooterState = ShooterState.IdleSpin;
+        else{
+          shooterController.set(ControlMode.Velocity, Constants.maxShooterSpeed);
+          // INSERT ANGLE ADJUSTMENT CODE HERE
+        }
+    }
   }
 
   public void operateShooterOP(){
@@ -62,9 +78,9 @@ public class ShooterSubsystem extends Subsystem {
       case IdleSpin:
         checkAndMoveMotor();
         if(oi.getPOVDown() || oi.getPOVUp())
-          shooterState = ShooterState.AngleChange;
+          shooterState = ShooterState.Targeting;
         break;
-      case AngleChange:
+      case Targeting:
         if(oi.getPOVUp())
           angle += 0.005;
         else if(oi.getPOVDown())
@@ -79,7 +95,7 @@ public class ShooterSubsystem extends Subsystem {
   }
 
   private void checkAndMoveMotor(){
-    if(oi.getRTopTrigger())
+    if(oi.getIsShooting())
       speed += 0.05;
     else
       speed -= 0.05;
