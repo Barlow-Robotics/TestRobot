@@ -36,15 +36,19 @@ public class Constants{
     public static final double feedingSpeed = 0.5;
     public static final double agitatingSpeed = 0.5;
 
+    //Intake
+    public static final int intakeDeployPort = 2;
+    public static final int intakeRetractPort = 3;
+
     //Wheel
-    public static final int wheelRotationSparkPort = 0;
+    public static final int wheelRotationTalonID = 7;
     public static final int openSolenoidDeployPort = 0;
     public static final int closeSolenoidDeployPort = 1;
     
-    public static final double maxSpinSpeed = 0.2;
+    public static final double maxSpinSpeed = 0.25;
  
     public static final int colourFilterLength = 3;
-    public static final int minColorChangeCountGoal= 26 ;
+    public static final int minColorChangeCountGoal= 26;
  
     public static final long wheelWaitTime = 5000;
 
@@ -53,7 +57,7 @@ public class Constants{
     public static final double maxShooterSpeed = 0.9 * 500 * 8096 / 600;
     public static final double minShooterSpeed = 0.05;
 
-    public static final int shooterMotor = 1;
+    public static final int shooterMotorTalonID = 6;
 
     public static final double angleThreshold = 0.01;
     
