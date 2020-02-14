@@ -22,7 +22,8 @@ import frc.robot.OI;
 public class IndexingSubsystem extends Subsystem {
   // Put methods for controlling this subsystem
   // here. Call these from Commands.
-  private WPI_TalonSRX wheelDriver;
+  //private WPI_TalonSRX wheelDriver;
+  private Spark indexingWheelDriver;
   private Spark agitatorMotor;
   private OI oi;
   private int cellCount;
@@ -35,9 +36,11 @@ public class IndexingSubsystem extends Subsystem {
   
 
   public IndexingSubsystem(){
-    wheelDriver = new WPI_TalonSRX(Constants.indexingWheelMotor);
+//    wheelDriver = new WPI_TalonSRX(Constants.indexingWheelMotor);
+    indexingWheelDriver = new Spark(Constants.indexingWheelMotor);
     oi = new OI();
     cellCount = 0;
+    indexingState = IndexingState.Idle;
   } 
 
   @Override
@@ -52,16 +55,18 @@ public class IndexingSubsystem extends Subsystem {
       case Idle:
         if(isShooting())
           indexingState = IndexingState.Feeding;
+        else
+          indexingWheelDriver.set(0.0);
         break;
       case Feeding:
         if(!isShooting()){
-          wheelDriver.set(0);
-          agitatorMotor.set(0);
+          indexingWheelDriver.set(0);
+          // agitatorMotor.set(0);
           indexingState = IndexingState.Idle;
         }
         else{
-          wheelDriver.set(Constants.feedingSpeed);
-          agitatorMotor.set(Constants.agitatingSpeed);
+          indexingWheelDriver.set(Constants.feedingSpeed);
+          // agitatorMotor.set(Constants.agitatingSpeed);
           if(false/*Sensor detects ball exit*/)
             cellCount--;
         }
@@ -70,6 +75,6 @@ public class IndexingSubsystem extends Subsystem {
 
 
   private boolean isShooting(){
-    return oi.getRTopTrigger();
+    return oi.getIsShooting();
   }
 }
