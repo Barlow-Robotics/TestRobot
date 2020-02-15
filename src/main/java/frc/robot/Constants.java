@@ -52,12 +52,18 @@ public class Constants{
  
     public static final long wheelWaitTime = 5000;
 
+    public static final char Blue = 'B';
+    public static final char Red = 'R';
+    public static final char Green = 'G';
+    public static final char Yellow = 'Y';
+    public static final char NullColorConstant = 'N';
+
 
     //Shooter
     public static final double maxShooterSpeed = 0.9 * 500 * 8096 / 600;
     public static final double minShooterSpeed = 0.05;
 
-    public static final int shooterMotorTalonID = 5;
+    public static final int shooterMotorTalonID = 6;
 
     public static final int leftServoPort = 0;
     public static final int rightServoPort = 1;
