@@ -71,7 +71,7 @@ public class ArmSubsystem extends Subsystem {
   ArmState armState;
  
   enum SpinningMode{
-    Which, TurnTimes, TurnColour
+    InitSpin, TurnTimes, TurnColour
   };
  
   SpinningMode spinningMode;
@@ -82,7 +82,7 @@ public class ArmSubsystem extends Subsystem {
     colourFilter = new ColourFilter(Constants.colourFilterLength, 'n');
     previousInput = false;
     wheelDeployed = false;
-    spinningMode = SpinningMode.Which;
+    spinningMode = SpinningMode.InitSpin;
     compressor.setClosedLoopControl(true);
   }
  
@@ -127,7 +127,7 @@ public class ArmSubsystem extends Subsystem {
         armState = ArmState.Idle;
           } else {
         switch (spinningMode){
-          case Which:
+          case InitSpin:
             if (getFMSColour == 'n'){
               spinningMode = SpinningMode.TurnTimes;
               System.out.println("State: " + spinningMode);
