@@ -35,7 +35,7 @@ public class Constants{
     public static final int indexingWheelMotor = 7;
     // public static final int agitatingWheelMotor = 7;
 
-    public static final double feedingSpeed = 0.9;
+    public static final double feedingSpeed = 0.75;
     public static final double agitatingSpeed = 0.5;
 
     //Intake
