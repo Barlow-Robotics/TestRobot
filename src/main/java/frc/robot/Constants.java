@@ -33,7 +33,7 @@ public class Constants{
     //Index
     public static final int indexingWheelMotor = 7;
 
-    public static final double feedingSpeed = 0.5;
+    public static final double feedingSpeed = 0.9;
     public static final double agitatingSpeed = 0.5;
 
     //Intake
@@ -59,15 +59,16 @@ public class Constants{
 
     public static final int shooterMotorTalonID = 6;
 
+    public static final int leftServoPort = 0;
+    public static final int rightServoPort = 1;
+
     public static final double angleThreshold = 0.01;
     
-    public static final double setAngleOfServo = 0.0;
+    public static final double setAngleOfServo = 0.05;
 
     //Climb
     public static final int ClimbMotorPortNumber = 7;
     public static final int ShooterMotor1 = 6;
-    public static final int LiftEncoderChannelA = 0 ;
-    public static final int LiftEncoderChannelB = 1 ;
     public static final int MaxEncoderValue = 1000;
     public static final double LiftMotorSpeed = 0.32 ;
 
