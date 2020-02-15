@@ -14,13 +14,9 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.interfaces.Gyro;
-import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import com.kauailabs.navx.AHRSProtocol;
 import com.kauailabs.navx.frc.AHRS;
 
 import frc.robot.Constants;
@@ -138,16 +134,18 @@ public class DriveSubsystem extends Subsystem {
     canSeePowercellEntry = networkTableInst.getTable("vision").getEntry("canSeePowercell") ;
     powercellAngleEntry = networkTableInst.getTable("vision").getEntry("powercellAngle") ;
     powercellDistanceEntry = networkTableInst.getTable("vision").getEntry("powercellDistance") ;
-
   }
+
+
 
   @Override
   public void initDefaultCommand() {
     //setDefaultCommand(new DriveCommand());
   }
 
-  public void autonomousDrive(){
 
+
+  public void autonomousDrive(){
     switch(autoDriveState){
       case Backing:
         double targetPos = 4096 * Constants.autoBackingDistance;
@@ -175,7 +173,8 @@ public class DriveSubsystem extends Subsystem {
   }
 
 
-  public void teleopDrive(double leftPower, double rightPower){
+
+  public void teleopDrive(double robotSpeed, double robotAngle){
     SmartDashboard.putBoolean("Sees cell", canSeePowercell());
     switch (teleopDriveState) {
       case Manual:
@@ -185,122 +184,71 @@ public class DriveSubsystem extends Subsystem {
             navX.reset();
             originalAngleToTarget = angleToTargetFromTables();
             teleopDriveState = TeleopDriveState.AutoTargetAlign;
-        } else if ( oi.isBallChasing() && canSeePowercell() ) {
+        } 
+        else if ( oi.isBallChasing() && canSeePowercell() ) {
           teleopDriveState = TeleopDriveState.Powercell ;
-        }  else {
-          leftPower = threshold(leftPower);
-          rightPower = threshold(rightPower);
-          // leftPower = driveController.calculate(leftBackSide.get() - leftPower);
-          // rightPower = driveController.calculate(rightBackSide.get() - rightPower);
-          // leftBackSide.set(ControlMode.Velocity, -leftPower * 500 * 4096 / 600);
-          // rightBackSide.set(ControlMode.Velocity, rightPower * 500 * 4096 / 600);
-          leftBackSide.set(ControlMode.Velocity,
-                           -leftPower * 500 * Constants.unitsPerRotation / 600);
-          rightBackSide.set(ControlMode.Velocity, rightPower);
+        }  
+        else {
+          arcadeDrive(robotSpeed, robotAngle);
         }
         break;
 
       case AutoTargetAlign:
         if (oi.isAutoTargeting() == false /*|| canSeeTarget() == false*/){
-          // System.out.println("Exiting auto-align\n" + targetController.getPositionError()
-          //                     + "\nAngle error from vision: " + angleToTargetFromTables());
           teleopDriveState = TeleopDriveState.Manual;
         } else {
             double angleToTarget = originalAngleToTarget - (navX.getAngle()*3.14159/180);
             SmartDashboard.putNumber("NavX Value", navX.getAngle());
-            //if(angleToTarget < Constants.angleThreshold && abs(angleToTarget - angleToTargetFromTables) > Constants.angleThreshold) 
-              //angleToTarget = angleToTargetFromTables();
             double output = targetController.calculate(angleToTarget);
-            // System.out.println( "angle to target is " + angleToTarget ) ;
-            // System.out.println( "output is " + output ) ;
             leftBackSide.set(ControlMode.Velocity, output * 500 * 8192 / 600);
             rightBackSide.set(ControlMode.Velocity, output * 500 * 8192 / 600);
-              //driveTrain.tankDrive(-output, output);            
         }
         break;
 
       case Powercell:
         if (!oi.isBallChasing() ||  !canSeePowercell()){
           teleopDriveState = TeleopDriveState.Manual;
-        } else {
-         double anglePowerCell = angleToPowercell() ;
-         // System.out.println("angle to power cell is " + angleToPowercell()) ;
-
-         double output = powerCellController.calculate(anglePowerCell) ; 
-         // System.out.println("output is " + output) ;
-          //driveTrain.tankDrive(-output + powerSpeed, output + powerSpeed);
+        } 
+        else {
+          double anglePowerCell = angleToPowercell() ;
+          double output = powerCellController.calculate(anglePowerCell) ; 
           leftBackSide.set(ControlMode.Velocity, (output - Constants.speedConstantForBallChase) * 500 * 8192 / 600);
           rightBackSide.set(ControlMode.Velocity, (output + Constants.speedConstantForBallChase) * 500 * 8192 / 600);
-
-          // System.out.println( "angle to target is " + angleToTarget ) ;
-          // System.out.println( "output is " + output ) ;
-          // leftBackSide.set(ControlMode.Velocity, output * 500 * 4096 / 600);
-          // rightBackSide.set(ControlMode.Velocity, output * 500 * 4096 / 600);
-
         }
         break;
       }
-
-  
   }
 
+
+
   public double getAngleToTarget(){ return angleToTargetFromTables();}
+
+
   
 
   private boolean canSeeTarget(){
-
     return canSeeTargetEntry.getBoolean(false) ;
-    //return true ;
-    // if (target == true){
-    //   return true;
-    // }
   }
 
+
+
   private boolean canSeePowercell(){
-    return canSeePowercellEntry.getBoolean(false) ;
-    // if (powerCell == true){
-    //   return true;
-    // }
-    }
+    return canSeePowercellEntry.getBoolean(false);
+  }
+
+
 
   private double angleToTargetFromTables() {
     return targetAngleEntry.getDouble(0.0) ;
   }
 
 
- private double angleToPowercell() {
-  return powercellAngleEntry.getDouble(0.0);
-}
 
-  //private double angleToPowerCell() {
-    //return findAngle(); //fill in params!
-  //}  
-
-  // public double findAngle(double FOV, double screenWidth, int targetX) {
-  //   double normalizedTargetX = (1/(screenWidth/2))*((double) targetX - ((screenWidth/2)-0.5));
-  //   double viewPlaneWidth = 2.0*(Math.tan(FOV/2));
-  //   double x = (viewPlaneWidth/2)*normalizedTargetX;
-  //   return Math.atan(x);
-  // }
-
-  // private void publishEncoderData(double left, double right){
-  //   SmartDashboard.putBoolean("Outputting", true);
-  //   SmartDashboard.putNumber("Left Data", left);
-  //   SmartDashboard.putNumber("Right Data", right);
-  // }
-
-  private double threshold(double power){
-    if(power < -Constants.drivetrainMaxPower)
-      power = -Constants.drivetrainMaxPower;
-    else if(power > Constants.drivetrainMaxPower)
-      power = Constants.drivetrainMaxPower;
-    else if(power < Constants.drivetrainMinPower && power > 0)
-      power = 0;
-    else if(power > -Constants.drivetrainMinPower && power < 0)
-      power = 0;
-    
-    return power;
+  private double angleToPowercell() {
+    return powercellAngleEntry.getDouble(0.0);
   }
+
+
 
   private void arcadeDrive(double speed, double angle){
 
@@ -332,7 +280,7 @@ public class DriveSubsystem extends Subsystem {
         rightPower = speed - angle;
       }
     }
-    else{
+    else {
       leftPower = 0;
       rightPower = 0;
     }
