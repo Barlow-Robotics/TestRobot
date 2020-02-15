@@ -34,7 +34,6 @@ public class ArmSubsystem extends Subsystem {
   // here. Call these from Commands.
  
   int colourChangeCounter = 0;
-  private int desiredNumberOfColourChanges;
  
   char currentColour = Constants.NullColorConstant;
   char lastColour = Constants.NullColorConstant;
@@ -117,9 +116,12 @@ public class ArmSubsystem extends Subsystem {
         armState = ArmState.SpinningWheel;
         colourChangeCounter = 0;
         lastColour = colourFilter.getColour();
-        if (FMSColour == Constants.NullColorConstant){
+        if (FMSColour == Constants.NullColorConstant)
           desiredNumberOfColorChanges = Constants.minColorChangeCountGoal;
-        } 
+        else{
+          desiredNumberOfColorChanges = -1;
+          colourFilter.resetMemory();
+        }
       }
       break;
     case SpinningWheel:
@@ -130,21 +132,23 @@ public class ArmSubsystem extends Subsystem {
       else {
         previousInput = oi.isOperatingWheel();
         currentColour = colourFilter.getColour();
-        if(currentColour == FMSColour)
+        if(currentColour == FMSColour && desiredNumberOfColorChanges == -1)
           desiredNumberOfColorChanges = 2;
         else
           desiredNumberOfColorChanges = -1;
       }
 
-      if(desiredNumberOfColourChanges > 0){
+      currentColour = colourFilter.getColour();
+
+      if(desiredNumberOfColorChanges > 0){
         lastColour = currentColour;
-        currentColour = colourFilter.getColour();
         wheelSpinner.set(Constants.maxSpinSpeed);
         if(lastColour != currentColour)
-          desiredNumberOfColourChanges--;
+          desiredNumberOfColorChanges--;
       }
-      else if(desiredNumberOfColourChanges == -1){
-
+      else if(desiredNumberOfColorChanges == -1){
+        if(currentColour == FMSColour)
+          desiredNumberOfColorChanges = 2;
       }
       else{
         wheelSpinner.set(0.0);
@@ -187,7 +191,7 @@ public class ArmSubsystem extends Subsystem {
       colourGoal = gameData.charAt(0);
       return colourGoal;
     } else {
-      return 'n';
+      return Constants.NullColorConstant;
     }
   }
 
