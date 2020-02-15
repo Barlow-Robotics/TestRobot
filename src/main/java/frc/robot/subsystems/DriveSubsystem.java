@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -39,15 +38,6 @@ public class DriveSubsystem extends Subsystem {
   SpeedControllerGroup rightSide; 
   
   AHRS navX;
-
-  public DifferentialDrive driveTrain;
-
-  double leftPower, rightPower;
-  final double driveControllerKp = 0.1;
-  final double driveControllerKi = 0.0;
-  final double driveControllerKd = 0.0;
-  final double driveControllerPeriod = 1.0/20.0;
-  PIDController driveController;
 
   final double targetControllerKp = 1.05; 
   final double targetControllerKi = 0.0;
@@ -105,15 +95,13 @@ public class DriveSubsystem extends Subsystem {
 
     leftFrontSide.follow(leftBackSide);
     leftBackSide.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 30); //Encoder as feedback device, main PID loop, 30 ms timeout time
-    leftBackSide.configClosedloopRamp(0.3);
+    leftBackSide.configClosedloopRamp(Constants.voltageRampingConstant);
     leftBackSide.config_kF(Constants.PID_id, Constants.DrivetrainKf);
 
     rightFrontSide.follow(rightBackSide);
     rightBackSide.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 30); //Encoder as feedback device, main PID loop, 30 ms timeout time
-    rightBackSide.configClosedloopRamp(0.3);
+    rightBackSide.configClosedloopRamp(Constants.voltageRampingConstant);
     rightBackSide.config_kF(Constants.PID_id, Constants.DrivetrainKf);
-
-    driveController = new PIDController(driveControllerKp, driveControllerKi, driveControllerKd);
 
     targetController = new PIDController(targetControllerKp, targetControllerKi, targetControllerKd, targetControllerPeriod);
     targetController.setTolerance(Constants.angleThreshold);
