@@ -14,7 +14,7 @@ public class ClimbSubsystem extends Subsystem {
     Encoder liftMotorEncoder ;
 
     public ClimbSubsystem(){
-       liftMotorEncoder = new Encoder(Constants.LiftEncoderChannelA, Constants.LiftEncoderChannelB);
+      // liftMotorEncoder = new Encoder(Constants.LiftEncoderChannelA, Constants.LiftEncoderChannelB);
 
     }
 
