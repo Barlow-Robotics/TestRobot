@@ -56,7 +56,7 @@ public class ShooterSubsystem extends Subsystem {
     switch(shooterState){
       case IdleSpin:
         if(doSpin)
-          shooterController.set(ControlMode.Velocity, Constants.maxShooterSpeed);
+          shooterController.set(-0.85); //CHANGE
         else 
           shooterController.set(0.0);
           
