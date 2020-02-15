@@ -31,7 +31,7 @@ public class ShooterSubsystem extends Subsystem {
   private double angle = 0;
   private OI oi;
 
-  private enum ShooterState{
+  public enum ShooterState{
     IdleSpin,
     Targeting
   }
@@ -124,5 +124,9 @@ public class ShooterSubsystem extends Subsystem {
       //speed = 0;
 
     return speed;
+  }
+
+  public ShooterState getShooterState(){
+    return shooterState;
   }
 }
