@@ -35,7 +35,7 @@ public class ClimbSubsystem extends Subsystem {
     void OperateClimb() {
         switch (climbState){
             case Idle:
-                if(oi.getSquareButton()){
+                if(oi.isClimbing()){
                     moveMotor(Constants.LiftMotorSpeed);
                     liftMotorEncoder.reset();
                     climbState = ClimbState.LiftHook ; 
