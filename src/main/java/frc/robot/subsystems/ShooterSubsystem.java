@@ -55,8 +55,10 @@ public class ShooterSubsystem extends Subsystem {
   public void operateShooter(boolean doSpin){
     switch(shooterState){
       case IdleSpin:
-        if(doSpin)
-          shooterController.set(-0.85); //CHANGE
+        if(doSpin){
+          shooterController.set(-Constants.maxShooterPercent); //CHANGE
+          SmartDashboard.putNumber("Shooter Flywheel Speed", shooterController.get());
+        }
         else 
           shooterController.set(0.0);
           
