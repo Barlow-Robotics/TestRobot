@@ -10,7 +10,7 @@ package frc.robot;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableEntry;
-
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -52,6 +52,7 @@ public class Robot extends TimedRobot {
   NetworkTableInstance networkTable;
   NetworkTableEntry frameTime;
   NetworkTableEntry loopTime;
+  // Compressor compressor;
 
   
 
@@ -72,13 +73,16 @@ public class Robot extends TimedRobot {
 
     // driveSubsystem = new DriveSubsystem();
     shooterSubystem = new ShooterSubsystem();
-    armSubsystem = new ArmSubsystem();
+    // armSubsystem = new ArmSubsystem();
     // climbSubsystem = new ClimbSubsystem();
-    // indexingSubsystem = new IndexingSubsystem();
+    indexingSubsystem = new IndexingSubsystem();
 
     networkTable = NetworkTableInstance.getDefault(); 
     frameTime = networkTable.getTable("performance").getEntry("frameTime");
     loopTime = networkTable.getTable("performance").getEntry("loopTime");
+
+    // compressor = new Compressor(0);
+    // compressor.clearAllPCMStickyFaults();
 
   }
 
@@ -94,6 +98,7 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     //xhcjgvhkblj;kn
     // SmartDashboard.putNumber("Angle To Target", driveSubsystem.getAngleToTarget());
+    
   }
 
   /**
@@ -150,13 +155,13 @@ public class Robot extends TimedRobot {
     previousStartTime = System.currentTimeMillis();
 
     //SHOOTER SUBSYSTEM
-    shooterSubystem.operateShooter(true);
+    shooterSubystem.operateShooterOP();
 
     //DRIVE SUBSYSTEM   
-    //  driveSubsystem.teleopDrive(oi.getForwardSpeed(), oi.getTurnAngle());
+    // driveSubsystem.teleopDrive(oi.getForwardSpeed(), oi.getTurnAngle());
 
     //ARM SUBSYSTEM
-     armSubsystem.OperateControlPanel();
+    // armSubsystem.OperateControlPanel();
 
     //CLIMB SUBSYSTEM
     // if(oi.getRTopTrigger()) climbSubsystem.moveUp();
@@ -164,7 +169,7 @@ public class Robot extends TimedRobot {
     // else climbSubsystem.stopClimb();
 
     //INDEXING SUBSYSTEM
-    // indexingSubsystem.operateIndex();
+    indexingSubsystem.operateIndex();
 
     endTime = System.currentTimeMillis();
     duration = endTime - startTime;
