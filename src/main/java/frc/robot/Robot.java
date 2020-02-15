@@ -49,10 +49,12 @@ public class Robot extends TimedRobot {
   ArmSubsystem armSubsystem;
   ClimbSubsystem climbSubsystem;
   IndexingSubsystem indexingSubsystem;
+
   NetworkTableInstance networkTable;
   NetworkTableEntry frameTime;
   NetworkTableEntry loopTime;
-  // Compressor compressor;
+
+  Compressor compressor;
 
   
 
@@ -81,9 +83,8 @@ public class Robot extends TimedRobot {
     frameTime = networkTable.getTable("performance").getEntry("frameTime");
     loopTime = networkTable.getTable("performance").getEntry("loopTime");
 
-    // compressor = new Compressor(0);
-    // compressor.clearAllPCMStickyFaults();
-
+    compressor = new Compressor(0);
+    compressor.clearAllPCMStickyFaults();
   }
 
   /**
@@ -96,8 +97,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    //xhcjgvhkblj;kn
-    // SmartDashboard.putNumber("Angle To Target", driveSubsystem.getAngleToTarget());
     
   }
 
@@ -150,8 +149,6 @@ public class Robot extends TimedRobot {
     startTime = System.currentTimeMillis();
 
     loopTime.forceSetNumber(System.currentTimeMillis() - previousStartTime);
-    //Write to NetworkTables millis() - LastStart
-    //LastStart = millis()
     previousStartTime = System.currentTimeMillis();
 
     //SHOOTER SUBSYSTEM
@@ -169,7 +166,7 @@ public class Robot extends TimedRobot {
     // else climbSubsystem.stopClimb();
 
     //INDEXING SUBSYSTEM
-    indexingSubsystem.operateIndex();
+    indexingSubsystem.operateIndex(shooterSubystem.getShooterState(),);
 
     endTime = System.currentTimeMillis();
     duration = endTime - startTime;
