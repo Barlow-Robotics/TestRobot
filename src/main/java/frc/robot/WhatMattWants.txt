@@ -8,3 +8,8 @@ manual intake bottom right trigger
 
 
 Climb, wheel are operator
+
+one-button climb control
+
+wheel: R1/RB
+climb: L1/LB
