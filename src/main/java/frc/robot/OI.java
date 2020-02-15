@@ -23,6 +23,7 @@ public class OI{
     public boolean getSquareButton(){return controller.getRawButton(1);}
     public boolean getCircleButton(){return controller.getRawButton(3);}
     public boolean getXButton(){return controller.getRawButton(2);}
+    public boolean getTriangleButton(){return controller.getRawButton(4);}
 
     public boolean isAutoTargeting() {return controller.getRawButton(5);} //Top left trigger
     public boolean isBallChasing() {return controller.getRawButton(7);} //Bottom left trigger
@@ -40,11 +41,5 @@ public class OI{
     public boolean getTealButton(){return box.getRawButton(4);}
     public boolean getRedButton(){return box.getRawButton(2);}
     public boolean getPurpleButton(){return box.getRawButton(1);}
-
-    
-
-    public void publishData(double data){
-        SmartDashboard.putNumber("Deploy Speed", data);
-    }
 
 }
