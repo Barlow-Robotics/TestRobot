@@ -31,15 +31,17 @@ public class ColourFilter {
 
 
  
-public char getColour(){
-    return currentColour;
-}
+    public char getColour(){
+        return currentColour;
+    }
  
-public ColourFilter(int length, char startingColour){
-    listOfColours = new ArrayList<Character>();
-    currentColour = startingColour;
-    filterLength = length;
-}
+
+    
+    public ColourFilter(int length, char startingColour){
+        listOfColours = new ArrayList<Character>();
+        currentColour = startingColour;
+        filterLength = length;
+    }
  
 }
 
