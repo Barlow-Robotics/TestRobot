@@ -23,7 +23,7 @@ public class IntakeSubsystem extends Subsystem {
   private Solenoid intakeDeploy, intakeRetract;
   private OI oi;
 
-  private enum IntakeState{
+  public enum IntakeState{
     RetractedIdle,
     Deploying,
     Intaking,
@@ -34,7 +34,6 @@ public class IntakeSubsystem extends Subsystem {
 
   public IntakeSubsystem(){
     oi = new OI();
-//    u
   }
 
   @Override
@@ -48,5 +47,9 @@ public class IntakeSubsystem extends Subsystem {
     switch(intakeState){
 
     }
+  }
+
+  public IntakeState getIntakeState(){
+    return intakeState;
   }
 }
