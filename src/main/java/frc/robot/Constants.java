@@ -35,7 +35,7 @@ public class Constants{
     public static final int indexingWheelMotor = 7;
     // public static final int agitatingWheelMotor = 7;
 
-    public static final double feedingSpeed = 0.75;
+    public static final double feedingSpeed = 0.4;
     public static final double agitatingSpeed = 0.5;
 
     //Intake
@@ -63,7 +63,8 @@ public class Constants{
 
 
     //Shooter
-    public static final double maxShooterSpeed = 0.9 * 500 * 8096 / 600;
+    public static final double maxShooterSpeed = 0.5 * 500 * 8096 / 600;
+    public static final double maxShooterPercent = 0.7;
     public static final double minShooterSpeed = 0.05;
 
     public static final int shooterMotorTalonID = 6;
