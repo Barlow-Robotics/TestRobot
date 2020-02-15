@@ -13,6 +13,7 @@ public class Constants{
 
     public static final double drivetrainMinPower = 0.05;
     public static final double drivetrainMaxPower = 1.0;
+    public static final double voltageRampingConstant = 0.3;
 
     public static final int[] leftEncoderPorts = {2, 3};
     public static final int[] rightEncoderPorts = {0, 1};
@@ -32,6 +33,7 @@ public class Constants{
 
     //Index
     public static final int indexingWheelMotor = 7;
+    // public static final int agitatingWheelMotor = 7;
 
     public static final double feedingSpeed = 0.9;
     public static final double agitatingSpeed = 0.5;
@@ -51,6 +53,7 @@ public class Constants{
     public static final int minColorChangeCountGoal= 26;
  
     public static final long wheelWaitTime = 5000;
+    public static final double wheelDecrementFactor = 0.02;
 
     public static final char Blue = 'B';
     public static final char Red = 'R';
