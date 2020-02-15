@@ -21,6 +21,7 @@ import frc.robot.OI;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.IndexingSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 
 
 /**
@@ -45,10 +46,11 @@ public class Robot extends TimedRobot {
   //Encoder left = new Encoder(Constants.leftEncoderPorts[0], Constants.leftEncoderPorts[1]);
 
   DriveSubsystem driveSubsystem;
-  ShooterSubsystem shooterSubystem;
+  ShooterSubsystem shooterSubsystem;
   ArmSubsystem armSubsystem;
   ClimbSubsystem climbSubsystem;
   IndexingSubsystem indexingSubsystem;
+  IntakeSubsystem intakeSubsystem;
 
   NetworkTableInstance networkTable;
   NetworkTableEntry frameTime;
@@ -74,17 +76,18 @@ public class Robot extends TimedRobot {
     //======================
 
     // driveSubsystem = new DriveSubsystem();
-    shooterSubystem = new ShooterSubsystem();
+    shooterSubsystem = new ShooterSubsystem();
     // armSubsystem = new ArmSubsystem();
     // climbSubsystem = new ClimbSubsystem();
     indexingSubsystem = new IndexingSubsystem();
+    // intakeSubsystem = new IntakeSubsystem();
 
     networkTable = NetworkTableInstance.getDefault(); 
     frameTime = networkTable.getTable("performance").getEntry("frameTime");
     loopTime = networkTable.getTable("performance").getEntry("loopTime");
 
-    compressor = new Compressor(0);
-    compressor.clearAllPCMStickyFaults();
+    // compressor = new Compressor(0);
+    // compressor.clearAllPCMStickyFaults();
   }
 
   /**
@@ -152,7 +155,7 @@ public class Robot extends TimedRobot {
     previousStartTime = System.currentTimeMillis();
 
     //SHOOTER SUBSYSTEM
-    shooterSubystem.operateShooterOP();
+    shooterSubsystem.operateShooter(true);
 
     //DRIVE SUBSYSTEM   
     // driveSubsystem.teleopDrive(oi.getForwardSpeed(), oi.getTurnAngle());
@@ -166,7 +169,7 @@ public class Robot extends TimedRobot {
     // else climbSubsystem.stopClimb();
 
     //INDEXING SUBSYSTEM
-    indexingSubsystem.operateIndex(shooterSubystem.getShooterState(),);
+    indexingSubsystem.operateIndex();
 
     endTime = System.currentTimeMillis();
     duration = endTime - startTime;
@@ -182,7 +185,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
-
+    shooterSubsystem.operateShooter(true);
+    indexingSubsystem.operateIndex();
   }
 
   public void incrementBallCount(){cellCount++;}
