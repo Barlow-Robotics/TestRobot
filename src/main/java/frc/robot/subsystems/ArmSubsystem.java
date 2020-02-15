@@ -11,11 +11,9 @@ package frc.robot.subsystems;
 //sure we'll say the motor is port 1
  
 import edu.wpi.first.wpilibj.command.Subsystem;
-import edu.wpi.first.wpilibj.Spark;
 import com.revrobotics.ColorSensorV3;
 import edu.wpi.first.wpilibj.Solenoid;
 import frc.robot.Constants;
-import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.OI;
 import edu.wpi.first.wpilibj.util.Color;
@@ -36,9 +34,11 @@ public class ArmSubsystem extends Subsystem {
   // here. Call these from Commands.
  
   int colourChangeCounter = 0;
+  private int desiredNumberOfColourChanges;
  
-  char currentColour = 'a';
-  char lastColour = 'b';
+  char currentColour = Constants.NullColorConstant;
+  char lastColour = Constants.NullColorConstant;
+  char FMSColour = Constants.NullColorConstant;
 
   private boolean previousInput;
  
@@ -51,12 +51,10 @@ public class ArmSubsystem extends Subsystem {
   private final Color kRedTarget = ColorMatch.makeColor(0.561, 0.232, 0.114);
   private final Color kYellowTarget = ColorMatch.makeColor(0.361, 0.524, 0.113);
  
- 
   //put calibrated colours here
  
   private Solenoid openSolenoidDeploy = new Solenoid(Constants.openSolenoidDeployPort);
   private Solenoid closeSolenoidDeploy = new Solenoid(Constants.closeSolenoidDeployPort);
-  private Compressor compressor = new Compressor(0);
   private boolean wheelDeployed, colorMatched;
   private WPI_TalonSRX wheelSpinner = new WPI_TalonSRX(1);
  
@@ -75,142 +73,113 @@ public class ArmSubsystem extends Subsystem {
   };
  
   SpinningMode spinningMode;
+  int desiredNumberOfColorChanges;
  
  
   public ArmSubsystem() {
     armState = ArmState.Idle;
+    spinningMode = SpinningMode.Which;
     colourFilter = new ColourFilter(Constants.colourFilterLength, 'n');
     previousInput = false;
     wheelDeployed = false;
-    spinningMode = SpinningMode.Which;
+    desiredNumberOfColorChanges = 0;
+
+    m_colorMatcher.addColorMatch(kBlueTarget);
+    m_colorMatcher.addColorMatch(kGreenTarget);
+    m_colorMatcher.addColorMatch(kRedTarget);
+    m_colorMatcher.addColorMatch(kYellowTarget); 
   }
  
   @Override
   public void initDefaultCommand() {
     wheelSpinner.set(0.0);
-    wheelDeployed = false;
-    updatePistons();
+    deployWheel(false);
   }
  
   public void OperateControlPanel() {
     switch (armState) {
     case Idle:
       wheelSpinner.set(0.0);
-      wheelDeployed = false;
-      updatePistons();
-      if (oi.getSquareButton()) { //what button is used ?? MUST CHANGE
-        wheelDeployed = true;
-        updatePistons();
+      deployWheel(false);
+      if (oi.isOperatingWheel()) {
+        deployWheel(true);
         armState = ArmState.DeployingArm;
-        System.out.println("arm state is " + armState);
-        System.out.println("wheel is deployed: " + wheelDeployed);
-    
         previousInput = true;
       }
       break;
     case DeployingArm:
-      if (!oi.getSquareButton() || colorMatched) {
+      if (previousInput != oi.isOperatingWheel() || colorMatched) {
         armState = ArmState.Idle;
-        System.out.println("arm state is " + armState);
-        System.out.println("wheel is deployed: " + wheelDeployed);
-          } else  {
-        previousInput = oi.getSquareButton();
+      } 
+      else {
+        FMSColour = getFMSColour();
+        previousInput = oi.isOperatingWheel();
         armState = ArmState.SpinningWheel;
         colourChangeCounter = 0;
         lastColour = colourFilter.getColour();
-        wheelSpinner.set(Constants.maxSpinSpeed);
+        if (FMSColour == Constants.NullColorConstant){
+          desiredNumberOfColorChanges = Constants.minColorChangeCountGoal;
+        } 
       }
       break;
     case SpinningWheel:
-      if (!oi.getSquareButton()) {
+      FMSColour = getFMSColour();
+      if (previousInput != oi.isOperatingWheel()) {
         armState = ArmState.Idle;
-          } else {
-        switch (spinningMode){
-          case Which:
-            if (getFMSColour == 'n'){
-              spinningMode = SpinningMode.TurnTimes;
-              System.out.println("State: " + spinningMode);
-            } 
-            else{
-              spinningMode = SpinningMode.TurnColour;
-              System.out.println("State: " + spinningMode);
+      } 
+      else {
+        previousInput = oi.isOperatingWheel();
+        currentColour = colourFilter.getColour();
+        if(currentColour == FMSColour)
+          desiredNumberOfColorChanges = 2;
+        else
+          desiredNumberOfColorChanges = -1;
+      }
 
-            }
-            break;
-          case TurnTimes:
+      if(desiredNumberOfColourChanges > 0){
+        lastColour = currentColour;
+        currentColour = colourFilter.getColour();
+        wheelSpinner.set(Constants.maxSpinSpeed);
+        if(lastColour != currentColour)
+          desiredNumberOfColourChanges--;
+      }
+      else if(desiredNumberOfColourChanges == -1){
 
-            colourFilter.addMeasurement(getColourFromSensor());
-            currentColour = colourFilter.getColour();
-            if (currentColour != lastColour) {
-              System.out.println("Change:"+colourChangeCounter);
-              colourChangeCounter++;
-              lastColour = currentColour;
-              System.out.println("Color changed ("+colourChangeCounter+")");
-            }
-            if (colourChangeCounter > Constants.minColorChangeCountGoal) {
-              waitStartTime = System.currentTimeMillis();
-              wheelSpinner.set(0.0);
-              armState = ArmState.WaitingForTimeout;
-              System.out.println("arm state is " + armState);
-              System.out.println("wheel is deployed: " + wheelDeployed);
-            }
-            break;
-          case TurnColour:
-            currentColour = getColourFromSensor();
-            if (currentColour == getFMSColour()){
-                colorMatched = true;
-            }
-            else if(colorMatched){
-              System.out.println("Matched");
-              System.out.println("Number of Changes:" + colourChangeCounter);
-              if (colourChangeCounter < 2){
-                if (currentColour != lastColour) {
-                  lastColour = currentColour;
-                  colourChangeCounter++;
-                }  
-              }
-              else{
-                wheelSpinner.set(0.0);
-                armState = ArmState.WaitingForTimeout;
-                System.out.println("arm state is " + armState);
-                System.out.println("wheel is deployed: " + wheelDeployed);
-              }  
-            }
-            else{
-               wheelSpinner.set(Constants.maxSpinSpeed);
-            }
-           
-            break;
-        }
+      }
+      else{
+        wheelSpinner.set(0.0);
+        armState = armState.WaitingForTimeout;
       }
       break;
     case WaitingForTimeout:
-      if (!oi.getSquareButton() || colorMatched) {
+      if (!oi.isOperatingWheel() || colorMatched) {
         armState = ArmState.Idle;
-        System.out.println("arm state is " + armState);
-        System.out.println("wheel is deployed: " + wheelDeployed);
-          } else if (System.currentTimeMillis() - waitStartTime > Constants.wheelWaitTime) {
+      } 
+      else if (System.currentTimeMillis() - waitStartTime > Constants.wheelWaitTime) {
         wheelDeployed = false;
-        // updatePistons();
         armState = ArmState.RetractingArm;
       }
       break;
     case RetractingArm:
-      wheelDeployed = false;
-      updatePistons();
+      deployWheel(false);
       armState = ArmState.Idle;
-      System.out.println("arm state is " + armState);
-      System.out.println("wheel is deployed: " + wheelDeployed);
-        break;
- 
+      break;
     }
     // System.out.println("arm state is " + armState);
     // System.out.println("wheel is deployed: " + wheelDeployed);
- 
   }
  
-  char getFMSColour = getFMSColour();
- 
+  
+
+  private int calculateChangesToCorrectColor(char currentColour, char FMSColour){
+    int changes = 0;
+    if(currentColour == FMSColour)
+       changes = 2;
+    return changes;
+  }
+
+
+
   public char getFMSColour() {
     String gameData;
     gameData = DriverStation.getInstance().getGameSpecificMessage();
@@ -221,34 +190,32 @@ public class ArmSubsystem extends Subsystem {
       return 'n';
     }
   }
- 
-  char getColourFromSensor;
- 
-  private char getColourFromSensor() {
-    m_colorMatcher.addColorMatch(kBlueTarget);
-    m_colorMatcher.addColorMatch(kGreenTarget);
-    m_colorMatcher.addColorMatch(kRedTarget);
-    m_colorMatcher.addColorMatch(kYellowTarget);  
+
+
+  
+  private char getColourFromSensor() { 
     char result;
     Color detectedColor = m_colorSensor.getColor();
     ColorMatchResult match = m_colorMatcher.matchClosestColor(detectedColor);
     if (match.color == kBlueTarget) {
-      result = 'B';
+      result = Constants.Blue;
     } else if (match.color == kRedTarget) {
-      result = 'R';
+      result = Constants.Red;
     } else if (match.color == kGreenTarget) {
-      result = 'g';
+      result = Constants.Green;
     } else if (match.color == kYellowTarget) {
-      result = 'Y';
+      result = Constants.Yellow;
     } else {
       result = 'N';
     }
     return result;
   }
+
+
  
-  private void updatePistons(){
-    openSolenoidDeploy.set(wheelDeployed);
-    closeSolenoidDeploy.set(!wheelDeployed);
+  private void deployWheel(boolean deploy){
+    openSolenoidDeploy.set(deploy);
+    closeSolenoidDeploy.set(!deploy);
   }
  
  
