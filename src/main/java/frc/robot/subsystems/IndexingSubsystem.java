@@ -13,6 +13,9 @@ import edu.wpi.first.wpilibj.Spark;
 
 import frc.robot.Constants;
 import frc.robot.OI;
+import frc.robot.Robot;
+import frc.robot.subsystems.IntakeSubsystem.IntakeState;
+import frc.robot.subsystems.ShooterSubsystem.ShooterState;
 
 
 
@@ -29,7 +32,8 @@ public class IndexingSubsystem extends Subsystem {
   private int cellCount;
   enum IndexingState{
     Idle,
-    Feeding
+    Feeding,
+    Agitating
   }
   
   IndexingState indexingState;
@@ -49,19 +53,21 @@ public class IndexingSubsystem extends Subsystem {
     // setDefaultCommand(new MySpecialCommand());
   }
 
-  public void operateIndex(){
+  public void operateIndex(ShooterState shooterState, IntakeState intakeState){
     
     switch(indexingState){
       case Idle:
-        if(isShooting())
+        if(shooterState == ShooterState.Targeting)
           indexingState = IndexingState.Feeding;
+        else if(intakeState == IntakeState.Intaking)
+          indexingState = IndexingState.Agitating;
         else
           indexingWheelDriver.set(0.0);
         break;
       case Feeding:
-        if(!isShooting()){
+        if(shooterState == ShooterState.IdleSpin){
           indexingWheelDriver.set(0);
-          // agitatorMotor.set(0);
+          agitatorMotor.set(0);
           indexingState = IndexingState.Idle;
         }
         else{
@@ -70,11 +76,15 @@ public class IndexingSubsystem extends Subsystem {
           if(false/*Sensor detects ball exit*/)
             cellCount--;
         }
-    }
-  }
-
-
-  private boolean isShooting(){
-    return oi.getIsShooting();
+        break;
+      case Agitating:
+        if(intakeState == IntakeState.RetractedIdle){
+          agitatorMotor.set(0);
+          indexingState = IndexingState.Idle;
+        }
+        else{
+          agitatorMotor.set(Constants.agitatingSpeed);
+        }
+    } 
   }
 }
