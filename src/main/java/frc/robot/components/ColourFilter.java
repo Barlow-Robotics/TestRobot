@@ -34,6 +34,11 @@ public class ColourFilter {
     public char getColour(){
         return currentColour;
     }
+
+
+    public void resetMemory(){
+        listOfColours = new ArrayList<Character>();
+    }
  
 
     
