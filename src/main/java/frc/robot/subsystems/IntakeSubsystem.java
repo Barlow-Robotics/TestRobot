@@ -8,9 +8,9 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.Solenoid;
-
+import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.command.Subsystem;
-
+import frc.robot.Constants;
 import frc.robot.OI;
 
 /**
@@ -18,10 +18,11 @@ import frc.robot.OI;
  */
 
 
-
 public class IntakeSubsystem extends Subsystem {
   private Solenoid intakeDeploy, intakeRetract;
+  private Spark intakeMotor;
   private OI oi;
+  private boolean priorOperatorInput = false;
 
   public enum IntakeState{
     RetractedIdle,
@@ -34,7 +35,12 @@ public class IntakeSubsystem extends Subsystem {
 
   public IntakeSubsystem(){
     oi = new OI();
+    intakeDeploy = new Solenoid(Constants.intakeDeployPort);
+    intakeRetract = new Solenoid(Constants.intakeRetractPort);
+    intakeMotor = new Spark(Constants.intakeMotorPort);
   }
+
+
 
   @Override
   public void initDefaultCommand() {
@@ -42,14 +48,48 @@ public class IntakeSubsystem extends Subsystem {
     // setDefaultCommand(new MySpecialCommand());
   }
 
+
+
   public void operateIntake(){
 
     switch(intakeState){
-
+      case RetractedIdle:
+        if(oi.getDeployIntakeManual()){
+          setIntakeDeploy(true);
+          priorOperatorInput = oi.getDeployIntakeManual();
+        }
+        break;
+      case Deploying:
+          intakeMotor.set(Constants.intakeSpeed);
+          intakeState = IntakeState.Intaking;
+        break;
+      case Intaking:
+        if(oi.getDeployIntakeManual() && !priorOperatorInput){
+          intakeState = IntakeState.Retracting;
+        }
+        else{
+          intakeMotor.set(Constants.intakeSpeed);
+          priorOperatorInput = oi.getDeployIntakeManual();
+        }
+        break;
+      case Retracting:
+        intakeMotor.set(0);
+        setIntakeDeploy(false);
+        intakeState = IntakeState.RetractedIdle;
+        break;
     }
   }
 
+
+
   public IntakeState getIntakeState(){
     return intakeState;
+  }
+
+
+  private void setIntakeDeploy(boolean deploy){
+    intakeDeploy.set(deploy);
+    intakeRetract.set(!deploy);
+
   }
 }
