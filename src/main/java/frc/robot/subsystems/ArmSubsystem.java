@@ -82,12 +82,16 @@ public class ArmSubsystem extends Subsystem {
     m_colorMatcher.addColorMatch(kRedTarget);
     m_colorMatcher.addColorMatch(kYellowTarget); 
   }
+
+
  
   @Override
   public void initDefaultCommand() {
     wheelSpinner.set(0.0);
     deployWheel(false);
   }
+
+  
  
   public void OperateControlPanel() {
     switch (armState) {
