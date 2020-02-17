@@ -35,6 +35,7 @@ public class ColourFilter {
         return currentColour;
     }
 
+    
 
     public void resetMemory(){
         listOfColours = new ArrayList<Character>();
