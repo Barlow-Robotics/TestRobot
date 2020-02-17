@@ -51,7 +51,6 @@ public class DriveSubsystem extends Subsystem {
   final double powerCellPeriod = 1.0/20.0;
   PIDController powerCellController; 
 
-//  final double powerSpeed = 0.5;
   final double powerSpeed = 0.0;
   
   private double originalAngleToTarget;
@@ -94,12 +93,12 @@ public class DriveSubsystem extends Subsystem {
     navX = new AHRS(SerialPort.Port.kUSB);
 
     leftFrontSide.follow(leftBackSide);
-    leftBackSide.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 30); //Encoder as feedback device, main PID loop, 30 ms timeout time
+    leftBackSide.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, Constants.mainFeedbackLoop, Constants.timeoutTime); //Encoder as feedback device, main PID loop, 30 ms timeout time
     leftBackSide.configClosedloopRamp(Constants.voltageRampingConstant);
     leftBackSide.config_kF(Constants.PID_id, Constants.DrivetrainKf);
 
     rightFrontSide.follow(rightBackSide);
-    rightBackSide.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 30); //Encoder as feedback device, main PID loop, 30 ms timeout time
+    rightBackSide.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, Constants.mainFeedbackLoop, Constants.timeoutTime); //Encoder as feedback device, main PID loop, 30 ms timeout time
     rightBackSide.configClosedloopRamp(Constants.voltageRampingConstant);
     rightBackSide.config_kF(Constants.PID_id, Constants.DrivetrainKf);
 
@@ -170,7 +169,7 @@ public class DriveSubsystem extends Subsystem {
         if (oi.isAutoTargeting() == true && canSeeTarget() == true) {
             targetController.reset();
             navX.reset();
-            originalAngleToTarget = angleToTargetFromTables();
+            originalAngleToTarget = angleToTargetFromVision();
             teleopDriveState = TeleopDriveState.AutoTargetAlign;
         } 
         else if ( oi.isBallChasing() && canSeePowercell() ) {
@@ -188,8 +187,8 @@ public class DriveSubsystem extends Subsystem {
             double angleToTarget = originalAngleToTarget - (navX.getAngle()*3.14159/180);
             SmartDashboard.putNumber("NavX Value", navX.getAngle());
             double output = targetController.calculate(angleToTarget);
-            leftBackSide.set(ControlMode.Velocity, output * 500 * 8192 / 600);
-            rightBackSide.set(ControlMode.Velocity, output * 500 * 8192 / 600);
+            leftBackSide.set(ControlMode.Velocity, output * Constants.VelocityInputConversionFactor);
+            rightBackSide.set(ControlMode.Velocity, output * Constants.VelocityInputConversionFactor);
         }
         break;
 
@@ -207,11 +206,6 @@ public class DriveSubsystem extends Subsystem {
       }
   }
 
-
-
-  public double getAngleToTarget(){ return angleToTargetFromTables();}
-
-
   
 
   private boolean canSeeTarget(){
@@ -226,7 +220,7 @@ public class DriveSubsystem extends Subsystem {
 
 
 
-  private double angleToTargetFromTables() {
+  private double angleToTargetFromVision() {
     return targetAngleEntry.getDouble(0.0) ;
   }
 
