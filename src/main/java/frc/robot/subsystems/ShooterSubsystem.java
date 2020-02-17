@@ -27,8 +27,8 @@ public class ShooterSubsystem extends Subsystem {
   // here. Call these from Commands.
   private WPI_TalonSRX shooterController = new WPI_TalonSRX(Constants.shooterMotorTalonID);
   private Servo angleServo = new Servo(0);
-  private double speed = 0;
-  private double angle = 0;
+  private double flywheelSpeedPercent = 0;
+  private double servoAngle = 0;
   private OI oi;
 
   public enum ShooterState{
@@ -74,7 +74,7 @@ public class ShooterSubsystem extends Subsystem {
     }
   }
 
-  public void operateShooterOP(){
+  public void operateShooterWithButtonAdjustments(){
     // Gonna leave trigger commands in here for the moment for testing purposes
     switch(shooterState){
       case IdleSpin:
@@ -84,35 +84,35 @@ public class ShooterSubsystem extends Subsystem {
         break;
       case Targeting:
         if(oi.getPOVUp())
-          angle += 0.005;
+          servoAngle += 0.005;
         else if(oi.getPOVDown())
-          angle -= 0.005;
+          servoAngle -= 0.005;
         else if(oi.getPOVLeft())
-          angle = Constants.setAngleOfServo;
+          servoAngle = Constants.setAngleOfServo;
         else
           shooterState = ShooterState.IdleSpin;
         checkAndMoveMotor();
-        angleServo.set(angle);
+        angleServo.set(servoAngle);
     }
   }
 
   private void checkAndMoveMotor(){
     if(oi.getIsShooting())
-      speed += 0.05;
+      flywheelSpeedPercent += 0.05;
     else
-      speed -= 0.05;
+      flywheelSpeedPercent -= 0.05;
         
     if(oi.getXButton())
-      speed = 0;
+      flywheelSpeedPercent = 0;
 
-    speed = threshold(speed);
-    shooterController.set(speed);
+      flywheelSpeedPercent = threshold(flywheelSpeedPercent);
+    shooterController.set(flywheelSpeedPercent);
     log();
   }
 
   private void log(){
-    SmartDashboard.putNumber("Current Speed", speed);
-    SmartDashboard.putNumber("Current Angle", angle * 90);
+    SmartDashboard.putNumber("Current Speed", flywheelSpeedPercent);
+    SmartDashboard.putNumber("Current Angle", servoAngle * 90);
   }
 
   private double threshold(double speed){
