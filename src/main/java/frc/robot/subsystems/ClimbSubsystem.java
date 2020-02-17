@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.command.Subsystem;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj.Encoder;
@@ -14,8 +15,6 @@ public class ClimbSubsystem extends Subsystem {
     Encoder liftMotorEncoder ;
 
     public ClimbSubsystem(){
-      // liftMotorEncoder = new Encoder(Constants.LiftEncoderChannelA, Constants.LiftEncoderChannelB);
-
     }
 
     @Override
@@ -36,26 +35,30 @@ public class ClimbSubsystem extends Subsystem {
         switch (climbState){
             case Idle:
                 if(oi.isClimbing()){
-                    moveMotor(Constants.LiftMotorSpeed);
+                    climbController.set(ControlMode.Position, Constants.unitsPerRotation * Constants.desiredClimberRotationsUp);
                     liftMotorEncoder.reset();
-                    climbState = ClimbState.LiftHook ; 
+                    climbState = ClimbState.LiftHook; 
                 }
                 break ;
             case LiftHook:
-                if(liftMotorEncoder.get() >= Constants.MaxEncoderValue){
-                    stopMotor();
+                if(climbController.getClosedLoopError() < Constants.tolerableUnitsFromMaxClimberValue){
                     climbState = ClimbState.HookAtTop ;
+                }
+                else if(!oi.isClimbing()){
+                    stopMotor();
+                }
+                else{
+                    climbController.set(ControlMode.Position, Constants.unitsPerRotation * Constants.desiredClimberRotationsUp);
                 }
                 break ;
             case HookAtTop:
-                if(oi.getXButton()){
-                    moveMotor(-Constants.LiftMotorSpeed);
-                    liftMotorEncoder.reset();
+                if(oi.isClimbing()){
+                    climbController.set(ControlMode.Position, Constants.unitsPerRotation * -Constants.desiredClimberRotationsDown);
                     climbState = ClimbState.LiftingBot ;
                 }
                 break ;
             case LiftingBot:
-                if(liftMotorEncoder.get() <= 0){
+                if(climbController.getClosedLoopError() < Constants.tolerableUnitsFromMaxClimberValue){
                     stopMotor();
                     climbState = ClimbState.Stopped ;
                 }
@@ -66,9 +69,13 @@ public class ClimbSubsystem extends Subsystem {
         }
     }
 
+
+
     public void moveMotor(double speed){
         climbController.set(speed);
     }
+
+    
 
     public void stopMotor(){
         climbController.set(0);
