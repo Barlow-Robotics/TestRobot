@@ -15,13 +15,17 @@ public class Constants{
     public static final double drivetrainMaxPower = 1.0;
     public static final double voltageRampingConstant = 0.3;
 
-    public static final int[] leftEncoderPorts = {2, 3};
-    public static final int[] rightEncoderPorts = {0, 1};
-
     public static final int PID_id = 0;
     public static final double PID_Period = 1.0/20.0;
     public static final double DrivetrainKf = 0.1797; //0.1797
-    public static final int unitsPerRotation = 8096;
+
+    public static final int unitsPerRotation = 8192;
+    public static final int desiredRPMs = 500;
+    public static final double RPMsToUnitsPerHundredMilliseconds = 1.0/600.0;
+    public static final double VelocityInputConversionFactor = desiredRPMs * unitsPerRotation * RPMsToUnitsPerHundredMilliseconds;
+
+    public static final int timeoutTime = 30;
+    public static final int mainFeedbackLoop = 0;
 
     public static final double autoBackingDistance = 3.5; //3.5 rotations of the wheel ~ 65"
 
@@ -39,8 +43,10 @@ public class Constants{
     public static final double agitatingSpeed = 0.5;
 
     //Intake
+    public static final int intakeMotorPort = 2;
     public static final int intakeDeployPort = 2;
     public static final int intakeRetractPort = 3;
+    public static final double intakeSpeed = 0.4;
 
     //Wheel
     public static final int wheelRotationTalonID = 7;
@@ -79,7 +85,9 @@ public class Constants{
     //Climb
     public static final int ClimbMotorPortNumber = 7;
     public static final int ShooterMotor1 = 6;
-    public static final int MaxEncoderValue = 1000;
+    public static final int desiredClimberRotationsUp = 5;
+    public static final int desiredClimberRotationsDown = 3;
     public static final double LiftMotorSpeed = 0.32 ;
+    public static final int tolerableUnitsFromMaxClimberValue = 50;
 
 }
