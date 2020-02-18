@@ -75,8 +75,8 @@ public class Robot extends TimedRobot {
     //======================
 
     // driveSubsystem = new DriveSubsystem();
-    shooterSubsystem = new ShooterSubsystem();
-    // armSubsystem = new ArmSubsystem();
+    // shooterSubsystem = new ShooterSubsystem();
+    armSubsystem = new ArmSubsystem();
     // climbSubsystem = new ClimbSubsystem();
     // indexingSubsystem = new IndexingSubsystem();
     // intakeSubsystem = new IntakeSubsystem();
@@ -154,13 +154,14 @@ public class Robot extends TimedRobot {
     previousStartTime = System.currentTimeMillis();
 
     //SHOOTER SUBSYSTEM
-    shooterSubsystem.operateShooter(true);
+    // shooterSubsystem.operateShooter(true);
 
     //DRIVE SUBSYSTEM   
     // driveSubsystem.teleopDrive(oi.getForwardSpeed(), oi.getTurnAngle());
 
     //ARM SUBSYSTEM
     // armSubsystem.OperateControlPanel();
+    armSubsystem.sendState();
 
     //CLIMB SUBSYSTEM
     // if(oi.getRTopTrigger()) climbSubsystem.moveUp();
@@ -168,7 +169,7 @@ public class Robot extends TimedRobot {
     // else climbSubsystem.stopClimb();
 
     //INDEXING SUBSYSTEM
-    indexingSubsystem.operateIndex();
+    // indexingSubsystem.operateIndex();
 
     endTime = System.currentTimeMillis();
     duration = endTime - startTime;
