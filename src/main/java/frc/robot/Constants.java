@@ -53,7 +53,7 @@ public class Constants{
     public static final int openSolenoidDeployPort = 0;
     public static final int closeSolenoidDeployPort = 1;
     
-    public static final double maxSpinSpeed = 0.25;
+    public static final double maxSpinSpeed = -0.25;
  
     public static final int colourFilterLength = 3;
     public static final int minColorChangeCountGoal= 26;
@@ -70,7 +70,7 @@ public class Constants{
 
     //Shooter
     public static final double maxShooterSpeed = 0.5 * 500 * 8096 / 600;
-    public static final double maxShooterPercent = 0.7;
+    public static final double maxShooterPercent = 0.85;
     public static final double minShooterSpeed = 0.05;
 
     public static final int shooterMotorTalonID = 6;
