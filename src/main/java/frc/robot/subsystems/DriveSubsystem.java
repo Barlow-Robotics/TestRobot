@@ -21,13 +21,14 @@ import com.kauailabs.navx.frc.AHRS;
 import frc.robot.Constants;
 import frc.robot.OI;
 import edu.wpi.first.wpilibj.controller.PIDController;
-
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.networktables.*;
 
 /**
  * Add your docs here.
  */
 public class DriveSubsystem extends Subsystem {
+
   OI oi = new OI();
   WPI_TalonSRX leftBackSide;
   WPI_TalonSRX leftFrontSide;
@@ -135,10 +136,10 @@ public class DriveSubsystem extends Subsystem {
   public void autonomousDrive(){
     switch(autoDriveState){
       case Backing:
-        double targetPos = 4096 * Constants.autoBackingDistance;
+        double targetPos = Constants.unitsPerRotation * Constants.autoBackingDistance;
         leftBackSide.set(ControlMode.MotionMagic, targetPos);
         rightBackSide.set(ControlMode.MotionMagic, targetPos);
-      break;
+        break;
       case SearchingForTarget:
 
       break;
@@ -184,7 +185,7 @@ public class DriveSubsystem extends Subsystem {
         if (oi.isAutoTargeting() == false /*|| canSeeTarget() == false*/){
           teleopDriveState = TeleopDriveState.Manual;
         } else {
-            double angleToTarget = originalAngleToTarget - (navX.getAngle()*3.14159/180);
+            double angleToTarget = originalAngleToTarget - (navX.getAngle()*Constants.degreesToRadiansFactor);
             SmartDashboard.putNumber("NavX Value", navX.getAngle());
             double output = targetController.calculate(angleToTarget);
             leftBackSide.set(ControlMode.Velocity, output * Constants.VelocityInputConversionFactor);
@@ -199,8 +200,8 @@ public class DriveSubsystem extends Subsystem {
         else {
           double anglePowerCell = angleToPowercell() ;
           double output = powerCellController.calculate(anglePowerCell) ; 
-          leftBackSide.set(ControlMode.Velocity, (output - Constants.speedConstantForBallChase) * 500 * 8192 / 600);
-          rightBackSide.set(ControlMode.Velocity, (output + Constants.speedConstantForBallChase) * 500 * 8192 / 600);
+          leftBackSide.set(ControlMode.Velocity, (output - Constants.speedConstantForBallChase) * Constants.VelocityInputConversionFactor);
+          rightBackSide.set(ControlMode.Velocity, (output + Constants.speedConstantForBallChase) * Constants.VelocityInputConversionFactor);
         }
         break;
       }
