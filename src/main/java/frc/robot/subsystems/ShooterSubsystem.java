@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.command.Subsystem;
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-import edu.wpi.first.wpilibj.Encoder;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Servo;
@@ -26,6 +26,7 @@ public class ShooterSubsystem extends Subsystem {
   // Put methods for controlling this subsystem
   // here. Call these from Commands.
   private WPI_TalonSRX shooterController = new WPI_TalonSRX(Constants.shooterMotorTalonID);
+  // private WPI_TalonFX falconController = new WPI_TalonFX(Constants.shooterMotorTalonID);
   private Servo angleServo = new Servo(0);
   private double flywheelSpeedPercent = 0;
   private double servoAngle = 0;
@@ -41,7 +42,8 @@ public class ShooterSubsystem extends Subsystem {
   public ShooterSubsystem(){
     shooterState = ShooterState.IdleSpin;
 
-    shooterController.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 30);
+    shooterController.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, Constants.mainFeedbackLoop, Constants.timeoutTime);
+    // falconController.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, Constants.mainFeedbackLoop, Constants.timeoutTime);
     
     oi = new OI();
   }
@@ -57,6 +59,7 @@ public class ShooterSubsystem extends Subsystem {
       case IdleSpin:
         if(doSpin){
           shooterController.set(-Constants.maxShooterPercent); //CHANGE
+          //falconController.set(ControlMode.Velocity, -Constants.maxShooterPercent);
           SmartDashboard.putNumber("Shooter Flywheel Speed", shooterController.get());
         }
         else 
