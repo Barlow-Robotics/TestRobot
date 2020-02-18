@@ -76,6 +76,7 @@ public class ArmSubsystem extends Subsystem {
   ArmState armState;
  
   int desiredNumberOfColorChanges;
+  char desiredColor;
  
  
   public ArmSubsystem() {
@@ -84,6 +85,7 @@ public class ArmSubsystem extends Subsystem {
     previousInput = false;
     wheelDeployed = false;
     desiredNumberOfColorChanges = 0;
+    desiredColor = 'N';
 
     //Map colors under the wheel sensor to colors under *our* sensor
     FMSColourToDesiredColour = new HashMap<Character, Character>();
@@ -136,40 +138,24 @@ public class ArmSubsystem extends Subsystem {
         if (FMSColour == Constants.NullColorConstant)
           desiredNumberOfColorChanges = Constants.minColorChangeCountGoal;
         else{
-          desiredNumberOfColorChanges = -1;
-          colourFilter.resetMemory();
+          //set the desiredColor variable to one that matches up to our own
+          //sensor using the FMSToDesiredColor HashMap.
         }
       }
       break;
     case SpinningWheel:
-      FMSColour = getFMSColour();
-      if (previousInput != oi.isOperatingWheel()) {
-        armState = ArmState.Idle;
-      } 
-      else {
-        previousInput = oi.isOperatingWheel();
-        currentColour = colourFilter.getColour();
-        if(currentColour == FMSColour && desiredNumberOfColorChanges == -1)
-          desiredNumberOfColorChanges = 2;
-        else
-          desiredNumberOfColorChanges = -1;
+      if(previousInput != oi.isOperatingWheel() && oi.isOperatingWheel()){
+        armState = ArmState.RetractingArm;
       }
-
-      currentColour = colourFilter.getColour();
-
-      if(desiredNumberOfColorChanges > 0){
-        lastColour = currentColour;
-        wheelSpinner.set(Constants.maxSpinSpeed);
-        if(lastColour != currentColour)
-          desiredNumberOfColorChanges--;
+      else if(false/*We see the color we want*/){
+        //Stop motors and set the state to Retracting
       }
-      else if(desiredNumberOfColorChanges == -1){
-        if(currentColour == FMSColour)
-          desiredNumberOfColorChanges = 2;
+      else if(false/*ColorChangeCount = 0 and we don't need to spin anymore*/){
+        //Stop motors and set the state to Retracting
       }
       else{
-        wheelSpinner.set(0.0);
-        armState = armState.WaitingForTimeout;
+        //Keep spinning the motor
+        //If we see a color change and we're going for 3-5 rotations, decrement colorChangeCount
       }
       break;
     case WaitingForTimeout:
@@ -233,3 +219,32 @@ public class ArmSubsystem extends Subsystem {
 }
  
 
+/*FMSColour = getFMSColour();
+      if (previousInput != oi.isOperatingWheel()) {
+        armState = ArmState.Idle;
+      } 
+      else {
+        previousInput = oi.isOperatingWheel();
+        currentColour = colourFilter.getColour();
+        if(currentColour == FMSColour && desiredNumberOfColorChanges == -1)
+          desiredNumberOfColorChanges = 2;
+        else
+          desiredNumberOfColorChanges = -1;
+      }
+
+      currentColour = colourFilter.getColour();
+
+      if(desiredNumberOfColorChanges > 0){
+        lastColour = currentColour;
+        wheelSpinner.set(Constants.maxSpinSpeed);
+        if(lastColour != currentColour)
+          desiredNumberOfColorChanges--;
+      }
+      else if(desiredNumberOfColorChanges == -1){
+        if(currentColour == FMSColour)
+          desiredNumberOfColorChanges = 2;
+      }
+      else{
+        wheelSpinner.set(0.0);
+        armState = armState.WaitingForTimeout;
+      }*/
