@@ -85,7 +85,10 @@ public class ArmSubsystem extends Subsystem {
     wheelDeployed = false;
     desiredNumberOfColorChanges = 0;
 
-    FMSColourToDesiredColour.add()
+    FMSColourToDesiredColour = new HashMap<Character, Character>();
+    FMSColourToDesiredColour.put('R', 'B');
+
+    FMSColourToDesiredColour.get('R');
 
     m_colorMatcher.addColorMatch(kBlueTarget);
     m_colorMatcher.addColorMatch(kGreenTarget);
