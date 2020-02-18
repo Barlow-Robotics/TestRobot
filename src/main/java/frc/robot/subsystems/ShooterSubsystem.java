@@ -59,11 +59,13 @@ public class ShooterSubsystem extends Subsystem {
       case IdleSpin:
         if(doSpin){
           shooterController.set(-Constants.maxShooterPercent); //CHANGE
-          //falconController.set(ControlMode.Velocity, -Constants.maxShooterPercent);
+          // falconController.set(ControlMode.Velocity, -Constants.maxShooterPercent);
           SmartDashboard.putNumber("Shooter Flywheel Speed", shooterController.get());
         }
-        else 
+        else {
           shooterController.set(0.0);
+          // falconController.set(ControlMode.Velocity, 0);
+        }
           
         if(oi.isAutoTargeting())
           shooterState = ShooterState.Targeting;
@@ -71,7 +73,8 @@ public class ShooterSubsystem extends Subsystem {
         if(!oi.isAutoTargeting())
           shooterState = ShooterState.IdleSpin;
         else{
-          shooterController.set(ControlMode.Velocity, Constants.maxShooterSpeed);
+          shooterController.set(ControlMode.Velocity, Constants.maxShooterPercent);
+          // falconController.set(ControlMode.Velocity, Constants.maxShooterSpeed);
           // INSERT ANGLE ADJUSTMENT CODE HERE
         }
     }
