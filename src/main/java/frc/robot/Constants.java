@@ -69,7 +69,7 @@ public class Constants{
 
 
     //Shooter
-    public static final double maxShooterSpeed = 0.5 * 500 * 8096 / 600;
+    public static final double maxShooterSpeed = 0.85 * VelocityInputConversionFactor;
     public static final double maxShooterPercent = 0.85;
     public static final double minShooterSpeed = 0.05;
 
