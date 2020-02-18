@@ -11,6 +11,7 @@ package frc.robot.subsystems;
 //sure we'll say the motor is port 1
  
 import edu.wpi.first.wpilibj.command.Subsystem;
+import java.util.HashMap;
 import com.revrobotics.ColorSensorV3;
 import edu.wpi.first.wpilibj.Solenoid;
 import frc.robot.Constants;
@@ -22,6 +23,8 @@ import com.revrobotics.ColorMatchResult;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.revrobotics.ColorMatch;
 import frc.robot.components.ColourFilter;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 /**
  * Add your docs here.
  */
@@ -34,10 +37,12 @@ public class ArmSubsystem extends Subsystem {
   // here. Call these from Commands.
  
   int colourChangeCounter = 0;
- 
+
   char currentColour = Constants.NullColorConstant;
   char lastColour = Constants.NullColorConstant;
   char FMSColour = Constants.NullColorConstant;
+
+  HashMap<Character, Character> FMSColourToDesiredColour;
 
   private boolean previousInput;
  
@@ -56,6 +61,9 @@ public class ArmSubsystem extends Subsystem {
   private Solenoid closeSolenoidDeploy = new Solenoid(Constants.closeSolenoidDeployPort);
   private boolean wheelDeployed, colorMatched;
   private WPI_TalonSRX wheelSpinner = new WPI_TalonSRX(1);
+  
+  NetworkTableInstance networkTableInst;
+  NetworkTableEntry wheelState;
  
   ColourFilter colourFilter;
  
@@ -77,10 +85,15 @@ public class ArmSubsystem extends Subsystem {
     wheelDeployed = false;
     desiredNumberOfColorChanges = 0;
 
+    FMSColourToDesiredColour.add()
+
     m_colorMatcher.addColorMatch(kBlueTarget);
     m_colorMatcher.addColorMatch(kGreenTarget);
     m_colorMatcher.addColorMatch(kRedTarget);
     m_colorMatcher.addColorMatch(kYellowTarget); 
+
+    networkTableInst = NetworkTableInstance.getDefault();
+    wheelState = networkTableInst.getTable("WheelOfFortune").getEntry("wheelState");
   }
 
 
@@ -94,6 +107,7 @@ public class ArmSubsystem extends Subsystem {
   
  
   public void OperateControlPanel() {
+    wheelState.forceSetString(armState.toString());
     switch (armState) {
     case Idle:
       wheelSpinner.set(0.0);
