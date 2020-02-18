@@ -54,6 +54,7 @@ public class Robot extends TimedRobot {
   NetworkTableInstance networkTable;
   NetworkTableEntry frameTime;
   NetworkTableEntry loopTime;
+  NetworkTableEntry wheelState;
 
   Compressor compressor;
 
@@ -76,7 +77,7 @@ public class Robot extends TimedRobot {
 
     // driveSubsystem = new DriveSubsystem();
     // shooterSubsystem = new ShooterSubsystem();
-    armSubsystem = new ArmSubsystem();
+    // armSubsystem = new ArmSubsystem();
     // climbSubsystem = new ClimbSubsystem();
     // indexingSubsystem = new IndexingSubsystem();
     // intakeSubsystem = new IntakeSubsystem();
@@ -84,6 +85,7 @@ public class Robot extends TimedRobot {
     networkTable = NetworkTableInstance.getDefault(); 
     frameTime = networkTable.getTable("performance").getEntry("frameTime");
     loopTime = networkTable.getTable("performance").getEntry("loopTime");
+    wheelState = networkTable.getTable("WheelOfFortune").getEntry("wheelState");
 
     // compressor = new Compressor(0);
     // compressor.clearAllPCMStickyFaults();
@@ -185,8 +187,9 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
-    shooterSubsystem.operateShooter(true);
+    // shooterSubsystem.operateShooter(true);
     // indexingSubsystem.operateIndex();
+    wheelState.forceSetBoolean(oi.isAutoTargeting());
   }
 
   public void incrementBallCount(){cellCount++;}
