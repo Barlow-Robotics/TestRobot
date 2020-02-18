@@ -78,7 +78,7 @@ public class Robot extends TimedRobot {
     shooterSubsystem = new ShooterSubsystem();
     // armSubsystem = new ArmSubsystem();
     // climbSubsystem = new ClimbSubsystem();
-    indexingSubsystem = new IndexingSubsystem();
+    // indexingSubsystem = new IndexingSubsystem();
     // intakeSubsystem = new IntakeSubsystem();
 
     networkTable = NetworkTableInstance.getDefault(); 
@@ -185,7 +185,7 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {
     shooterSubsystem.operateShooter(true);
-    indexingSubsystem.operateIndex();
+    // indexingSubsystem.operateIndex();
   }
 
   public void incrementBallCount(){cellCount++;}
