@@ -176,6 +176,11 @@ public class ArmSubsystem extends Subsystem {
   }
 
 
+  public void sendState(){
+    wheelState.forceSetString(armState.toString());
+  }
+
+
 
   public char getFMSColour() {
     String gameData;
