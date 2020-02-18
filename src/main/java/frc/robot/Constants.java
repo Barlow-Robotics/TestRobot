@@ -3,7 +3,7 @@ package frc.robot;
 
 public class Constants{
     //General
-
+    public static final double degreesToRadiansFactor = Math.PI/180;
 
     //Drivetrain
     public static final int leftFrontMotor = 2;
