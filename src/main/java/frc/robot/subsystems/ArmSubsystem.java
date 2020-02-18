@@ -85,10 +85,12 @@ public class ArmSubsystem extends Subsystem {
     wheelDeployed = false;
     desiredNumberOfColorChanges = 0;
 
+    //Map colors under the wheel sensor to colors under *our* sensor
     FMSColourToDesiredColour = new HashMap<Character, Character>();
     FMSColourToDesiredColour.put('R', 'B');
-
-    FMSColourToDesiredColour.get('R');
+    FMSColourToDesiredColour.put('B', 'R');
+    FMSColourToDesiredColour.put('G', 'Y');
+    FMSColourToDesiredColour.put('Y', 'G');
 
     m_colorMatcher.addColorMatch(kBlueTarget);
     m_colorMatcher.addColorMatch(kGreenTarget);
