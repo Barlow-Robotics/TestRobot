@@ -21,7 +21,6 @@ import com.kauailabs.navx.frc.AHRS;
 import frc.robot.Constants;
 import frc.robot.OI;
 import edu.wpi.first.wpilibj.controller.PIDController;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.networktables.*;
 
 /**
@@ -136,31 +135,10 @@ public class DriveSubsystem extends Subsystem {
 
 
 
-  public void autonomousDrive(){
-    switch(autoDriveState){
-      case Backing:
-        double targetPos = Constants.unitsPerRotation * Constants.autoBackingDistance;
-        leftBackSide.set(ControlMode.MotionMagic, targetPos);
-        rightBackSide.set(ControlMode.MotionMagic, targetPos);
-        break;
-      case SearchingForTarget:
-
-      break;
-
-      case Firing:
-
-      break;
-
-      case TargetingMoreCells:
-
-      break;
-
-      case ChasingCells:
-
-      break;
-
-      default:
-    }
+  public void driveStraightDistance(double distanceInFeet, boolean foward){
+    double targetPos = Constants.unitsPerRotation * Constants.autoBackingDistance;
+    leftBackSide.set(ControlMode.MotionMagic, targetPos);
+    rightBackSide.set(ControlMode.MotionMagic, targetPos);
   }
 
 
