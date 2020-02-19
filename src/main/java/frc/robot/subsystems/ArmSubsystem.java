@@ -110,6 +110,7 @@ public class ArmSubsystem extends Subsystem {
   }
 
   
+  
  
   public void OperateControlPanel() {
     wheelState.forceSetString(armState.toString());
