@@ -75,7 +75,6 @@ public class IndexingSubsystem extends Subsystem {
           indexingWheelDriver.set(-Constants.feedingSpeed);
           // agitatorMotor.set(Constants.agitatingSpeed);
           if(false/*Sensor detects ball exit*/)
-            cellCount--;
         }
         break;
       case Agitating:
