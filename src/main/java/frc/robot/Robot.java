@@ -58,7 +58,12 @@ public class Robot extends TimedRobot {
 
   Compressor compressor;
 
-  
+  public enum AutoState{
+    Idle, Backing, Searching, Aligning, Firing, SearchingForCells, ChasingCells
+  };
+
+  AutoState autoState;
+
 
   /**
    * This function is run when the robot is first started up and should be
