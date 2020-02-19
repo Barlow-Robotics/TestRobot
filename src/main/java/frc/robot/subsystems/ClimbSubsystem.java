@@ -39,7 +39,7 @@ public class ClimbSubsystem extends Subsystem {
                     liftMotorEncoder.reset();
                     climbState = ClimbState.LiftHook; 
                 }
-                break ;
+                break;
             case LiftHook:
                 if(climbController.getClosedLoopError() < Constants.tolerableUnitsFromMaxClimberValue){
                     climbState = ClimbState.HookAtTop ;
