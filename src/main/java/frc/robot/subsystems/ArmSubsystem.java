@@ -68,7 +68,7 @@ public class ArmSubsystem extends Subsystem {
   long waitStartTime;
  
   enum ArmState {
-    Idle, DeployingArm, SpinningWheel, WaitingForTimeout, RetractingArm
+    Idle, DeployingArm, SpinningWheel, SpinningDown, WaitingForTimeout, RetractingArm
   };
  
   ArmState armState;
@@ -160,13 +160,18 @@ public class ArmSubsystem extends Subsystem {
       }
       lastColour = currentColour;
       break;
+    case SpinningDown:
+    wheelSpinner.set(wheelSpinner.get() - Constants.wheelDecrementFactor);
+      if(wheelSpinner.get()>=0){
+        wheelSpinner.set(0);
+        armState = ArmState.WaitingForTimeout;
+      }
+    break;
     case WaitingForTimeout:
-      wheelSpinner.set(wheelSpinner.get() - Constants.wheelDecrementFactor);
-      if (!oi.isOperatingWheel() || colorMatched) {
+      if (!oi.isOperatingWheel()) {
         armState = ArmState.Idle;
       } 
       else if (System.currentTimeMillis() - waitStartTime > Constants.wheelWaitTime) {
-        wheelDeployed = false;
         armState = ArmState.RetractingArm;
       }
       break;
