@@ -33,8 +33,6 @@ public class ArmSubsystem extends Subsystem {
   char colourGoal;
  
   OI oi = new OI();
-  // Put methods for controlling this subsystem
-  // here. Call these from Commands.
  
   int colourChangeCounter = 0;
 
@@ -138,8 +136,7 @@ public class ArmSubsystem extends Subsystem {
         if (FMSColour == Constants.NullColorConstant)
           desiredNumberOfColorChanges = Constants.minColorChangeCountGoal;
         else{
-          //set the desiredColor variable to one that matches up to our own
-          //sensor using the FMSToDesiredColor HashMap.
+          desiredColor = FMSColourToDesiredColour.get(FMSColour);
         }
       }
       break;
@@ -147,16 +144,21 @@ public class ArmSubsystem extends Subsystem {
       if(previousInput != oi.isOperatingWheel() && oi.isOperatingWheel()){
         armState = ArmState.RetractingArm;
       }
-      else if(false/*We see the color we want*/){
-        //Stop motors and set the state to Retracting
+      else if(currentColour == desiredColor){
+        wheelSpinner.set(0.0);
+        armState= ArmState.RetractingArm;
       }
-      else if(false/*ColorChangeCount = 0 and we don't need to spin anymore*/){
-        //Stop motors and set the state to Retracting
+      else if(colourChangeCounter==0){
+        wheelSpinner.set(0.0);
+        armState= ArmState.RetractingArm;
       }
       else{
-        //Keep spinning the motor
-        //If we see a color change and we're going for 3-5 rotations, decrement colorChangeCount
+        
+        if(currentColour!=lastColour && getFMSColour()==Constants.NullColorConstant){
+          colourChangeCounter--;
+        }
       }
+      lastColour = currentColour;
       break;
     case WaitingForTimeout:
       wheelSpinner.set(wheelSpinner.get() - Constants.wheelDecrementFactor);
