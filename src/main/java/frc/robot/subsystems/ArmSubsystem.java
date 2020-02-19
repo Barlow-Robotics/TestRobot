@@ -34,8 +34,6 @@ public class ArmSubsystem extends Subsystem {
  
   OI oi = new OI();
  
-  int colourChangeCounter = 0;
-
   char currentColour = Constants.NullColorConstant;
   char lastColour = Constants.NullColorConstant;
   char FMSColour = Constants.NullColorConstant;
@@ -132,8 +130,8 @@ public class ArmSubsystem extends Subsystem {
         FMSColour = getFMSColour();
         previousInput = oi.isOperatingWheel();
         armState = ArmState.SpinningWheel;
-        colourChangeCounter = 0;
-        lastColour = colourFilter.getColour();
+        desiredNumberOfColorChanges = 0;
+        lastColour = getColourFromSensor();
         if (FMSColour == Constants.NullColorConstant)
           desiredNumberOfColorChanges = Constants.minColorChangeCountGoal;
         else{
@@ -142,6 +140,7 @@ public class ArmSubsystem extends Subsystem {
       }
       break;
     case SpinningWheel:
+      currentColour = getColourFromSensor();
       if(previousInput != oi.isOperatingWheel() && oi.isOperatingWheel()){
         armState = ArmState.RetractingArm;
       }
@@ -149,14 +148,14 @@ public class ArmSubsystem extends Subsystem {
         wheelSpinner.set(0.0);
         armState= ArmState.RetractingArm;
       }
-      else if(colourChangeCounter==0){
+      else if(desiredNumberOfColorChanges == 0 && FMSColour==Constants.NullColorConstant){
         wheelSpinner.set(0.0);
         armState= ArmState.RetractingArm;
       }
       else{
-        
-        if(currentColour!=lastColour && getFMSColour()==Constants.NullColorConstant){
-          colourChangeCounter--;
+        wheelSpinner.set(Constants.maxSpinSpeed);
+        if(currentColour!=lastColour && FMSColour==Constants.NullColorConstant){
+          desiredNumberOfColorChanges--;
         }
       }
       lastColour = currentColour;
@@ -216,7 +215,7 @@ public class ArmSubsystem extends Subsystem {
     } else if (match.color == kYellowTarget) {
       result = Constants.Yellow;
     } else {
-      result = 'N';
+      result = Constants.NullColorConstant;
     }
     return result;
   }

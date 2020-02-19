@@ -87,6 +87,8 @@ public class Robot extends TimedRobot {
     // indexingSubsystem = new IndexingSubsystem();
     // intakeSubsystem = new IntakeSubsystem();
 
+    autoState = AutoState.Idle;
+
     networkTable = NetworkTableInstance.getDefault(); 
     frameTime = networkTable.getTable("performance").getEntry("frameTime");
     loopTime = networkTable.getTable("performance").getEntry("loopTime");
