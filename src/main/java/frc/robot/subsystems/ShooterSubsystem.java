@@ -58,8 +58,8 @@ public class ShooterSubsystem extends Subsystem {
     switch(shooterState){
       case IdleSpin:
         if(doSpin){
-          shooterController.set(-Constants.maxShooterPercent); //CHANGE
-          // falconController.set(ControlMode.Velocity, -Constants.maxShooterPercent);
+          shooterController.set(ControlMode.Velocity, -Constants.maxShooterSpeed); //CHANGE
+          // falconController.set(ControlMode.Velocity, -Constants.maxShooterSpeed);
           SmartDashboard.putNumber("Shooter Flywheel Speed", shooterController.get());
         }
         else {
