@@ -32,8 +32,8 @@ public class Constants{
     public static final double speedConstantForBallChase = 0.5;
 
     //OI //hi :)
-    public static final int joystickPort = 0;
-    public static final int boxControlPort = 1;
+    public static final int joystickPort = 1;
+    public static final int boxControlPort = 0;
 
     //Index
     public static final int indexingWheelMotor = 7;
