@@ -55,6 +55,7 @@ public class DriveSubsystem extends Subsystem {
   final double powerSpeed = 0.0;
   
   private double originalAngleToTarget;
+  private double currentAngleToTarget;
 
   enum TeleopDriveState {
     Manual,
@@ -122,6 +123,8 @@ public class DriveSubsystem extends Subsystem {
     canSeePowercellEntry = networkTableInst.getTable("vision").getEntry("canSeePowercell") ;
     powercellAngleEntry = networkTableInst.getTable("vision").getEntry("powercellAngle") ;
     powercellDistanceEntry = networkTableInst.getTable("vision").getEntry("powercellDistance") ;
+
+    currentAngleToTarget = 0;
   }
 
 
@@ -162,12 +165,12 @@ public class DriveSubsystem extends Subsystem {
 
 
 
-  public void teleopDrive(double robotSpeed, double robotAngle){
+  public void teleopDrive(double robotSpeed, double robotAngle, boolean aligning){
     SmartDashboard.putBoolean("Sees cell", canSeePowercell());
     switch (teleopDriveState) {
       case Manual:
         SmartDashboard.putBoolean("Can See Target", canSeeTarget());
-        if (oi.isAutoTargeting() == true && canSeeTarget() == true) {
+        if (aligning == true && canSeeTarget() == true) {
             targetController.reset();
             navX.reset();
             originalAngleToTarget = angleToTargetFromVision();
@@ -185,9 +188,9 @@ public class DriveSubsystem extends Subsystem {
         if (oi.isAutoTargeting() == false /*|| canSeeTarget() == false*/){
           teleopDriveState = TeleopDriveState.Manual;
         } else {
-            double angleToTarget = originalAngleToTarget - (navX.getAngle()*Constants.degreesToRadiansFactor);
+            currentAngleToTarget = originalAngleToTarget - (navX.getAngle()*Constants.degreesToRadiansFactor);
             SmartDashboard.putNumber("NavX Value", navX.getAngle());
-            double output = targetController.calculate(angleToTarget);
+            double output = targetController.calculate(currentAngleToTarget);
             leftBackSide.set(ControlMode.Velocity, output * Constants.VelocityInputConversionFactor);
             rightBackSide.set(ControlMode.Velocity, output * Constants.VelocityInputConversionFactor);
         }
@@ -205,6 +208,11 @@ public class DriveSubsystem extends Subsystem {
         }
         break;
       }
+  }
+
+
+  public boolean getIsAligned(){
+    return currentAngleToTarget < Constants.angleThreshold;
   }
 
   
