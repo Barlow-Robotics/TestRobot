@@ -64,6 +64,7 @@ public class ArmSubsystem extends Subsystem {
   NetworkTableEntry wheelState;
  
   ColourFilter colourFilter;
+  int colorForCalibration; //G, B, Y, R
  
   long waitStartTime;
  
@@ -84,6 +85,7 @@ public class ArmSubsystem extends Subsystem {
     wheelDeployed = false;
     desiredNumberOfColorChanges = 0;
     desiredColor = 'N';
+    colorForCalibration = 0;
 
     //Map colors under the wheel sensor to colors under *our* sensor
     FMSColourToDesiredColour = new HashMap<Character, Character>();
@@ -199,6 +201,11 @@ public class ArmSubsystem extends Subsystem {
 
   public void setStateToIdle(){
     armState = ArmState.Idle;
+  }
+
+
+  public void calibrationMode(){
+    SmartDashboard.putString("Put color "+)
   }
 
 
