@@ -7,6 +7,8 @@
 
 package frc.robot;
 
+import com.revrobotics.ColorSensorV3;
+
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -18,6 +20,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.OI;
+import frc.robot.components.ColorSensor;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.IndexingSubsystem;
@@ -40,13 +43,16 @@ public class Robot extends TimedRobot {
   private int cycleIndex, cellCount;
 
   
-  OI oi = new OI();
+  public OI oi = new OI();
 
   //Encoder left = new Encoder(Constants.leftEncoderPorts[0], Constants.leftEncoderPorts[1]);
 
   DriveSubsystem driveSubsystem;
   ShooterSubsystem shooterSubsystem;
-  ArmSubsystem armSubsystem;
+
+  // ArmSubsystem armSubsystem;
+  ColorSensor colorSensor;
+
   ClimbSubsystem climbSubsystem;
   IndexingSubsystem indexingSubsystem;
   IntakeSubsystem intakeSubsystem;
@@ -57,6 +63,7 @@ public class Robot extends TimedRobot {
   NetworkTableEntry wheelState;
 
   // Compressor compressor;
+  
 
   public enum AutoState{
     Idle, Backing, Searching, Aligning, Firing, SearchingForCells, ChasingCells
@@ -82,7 +89,10 @@ public class Robot extends TimedRobot {
 
     // driveSubsystem = new DriveSubsystem();
     // shooterSubsystem = new ShooterSubsystem();
-    armSubsystem = new ArmSubsystem();
+
+    // armSubsystem = new ArmSubsystem();
+    colorSensor = new ColorSensor();
+
     // climbSubsystem = new ClimbSubsystem();
     // indexingSubsystem = new IndexingSubsystem();
     // intakeSubsystem = new IntakeSubsystem();
@@ -113,12 +123,12 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
-    armSubsystem.setStateToIdle();
+    // armSubsystem.setStateToIdle();
   }
 
   @Override
   public void disabledPeriodic() {
-    armSubsystem.sendCurrentColour();
+    // armSubsystem.sendCurrentColour();
   }
 
   /**
@@ -230,7 +240,8 @@ public class Robot extends TimedRobot {
     // shooterSubsystem.operateShooter(true);
     // indexingSubsystem.operateIndex();
     // wheelState.forceSetBoolean(oi.isAutoTargeting());
-    armSubsystem.OperateControlPanel();
+    // armSubsystem.OperateControlPanel();
+    colorSensor.calibrateColor(1);
   }
 
   public void incrementBallCount(){cellCount++;}
