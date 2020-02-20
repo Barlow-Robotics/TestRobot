@@ -54,6 +54,7 @@ public class Constants{
     public static final int closeSolenoidDeployPort = 0;
     
     public static final double maxSpinSpeed = -0.35;
+    public static final double minSpinSpeed = 0.02;
  
     public static final int colourFilterLength = 3;
     public static final int minColorChangeCountGoal= 26;
