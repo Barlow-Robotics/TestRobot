@@ -170,7 +170,7 @@ public class ArmSubsystem extends Subsystem {
       break;
     case SpinningDown:
     wheelSpinner.set(wheelSpinner.get()*Constants.wheelDecrementFactor);
-      if(wheelSpinner.get()>=0){
+      if(Math.abs(wheelSpinner.get()) <= Constants.minSpinSpeed){
         wheelSpinner.set(0);
         armState = ArmState.WaitingForTimeout;
         waitStartTime = System.currentTimeMillis();
