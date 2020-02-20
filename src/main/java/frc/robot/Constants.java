@@ -50,16 +50,16 @@ public class Constants{
 
     //Wheel
     public static final int wheelRotationTalonID = 7;
-    public static final int openSolenoidDeployPort = 0;
-    public static final int closeSolenoidDeployPort = 1;
+    public static final int openSolenoidDeployPort = 1;
+    public static final int closeSolenoidDeployPort = 0;
     
-    public static final double maxSpinSpeed = -0.25;
+    public static final double maxSpinSpeed = -0.35;
  
     public static final int colourFilterLength = 3;
     public static final int minColorChangeCountGoal= 26;
  
     public static final long wheelWaitTime = 5000;
-    public static final double wheelDecrementFactor = 0.02;
+    public static final double wheelDecrementFactor = 0.9;
 
     public static final char Blue = 'B';
     public static final char Red = 'R';
