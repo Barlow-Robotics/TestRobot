@@ -56,7 +56,7 @@ public class Robot extends TimedRobot {
   NetworkTableEntry loopTime;
   NetworkTableEntry wheelState;
 
-  Compressor compressor;
+  // Compressor compressor;
 
   public enum AutoState{
     Idle, Backing, Searching, Aligning, Firing, SearchingForCells, ChasingCells
@@ -82,7 +82,7 @@ public class Robot extends TimedRobot {
 
     // driveSubsystem = new DriveSubsystem();
     // shooterSubsystem = new ShooterSubsystem();
-    // armSubsystem = new ArmSubsystem();
+    armSubsystem = new ArmSubsystem();
     // climbSubsystem = new ClimbSubsystem();
     // indexingSubsystem = new IndexingSubsystem();
     // intakeSubsystem = new IntakeSubsystem();
@@ -94,7 +94,7 @@ public class Robot extends TimedRobot {
     loopTime = networkTable.getTable("performance").getEntry("loopTime");
     wheelState = networkTable.getTable("WheelOfFortune").getEntry("wheelState");
 
-    // compressor = new Compressor(0);
+    // compressor = new Compressor(1);
     // compressor.clearAllPCMStickyFaults();
   }
 
@@ -109,6 +109,16 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     
+  }
+
+  @Override
+  public void disabledInit() {
+    armSubsystem.setStateToIdle();
+  }
+
+  @Override
+  public void disabledPeriodic() {
+    armSubsystem.sendCurrentColour();
   }
 
   /**
@@ -193,7 +203,7 @@ public class Robot extends TimedRobot {
 
     //ARM SUBSYSTEM
     // armSubsystem.OperateControlPanel();
-    armSubsystem.sendState();
+    // armSubsystem.sendState();
 
     //CLIMB SUBSYSTEM
     // if(oi.getRTopTrigger()) climbSubsystem.moveUp();
@@ -219,7 +229,8 @@ public class Robot extends TimedRobot {
   public void testPeriodic() {
     // shooterSubsystem.operateShooter(true);
     // indexingSubsystem.operateIndex();
-    wheelState.forceSetBoolean(oi.isAutoTargeting());
+    // wheelState.forceSetBoolean(oi.isAutoTargeting());
+    armSubsystem.OperateControlPanel();
   }
 
   public void incrementBallCount(){cellCount++;}
