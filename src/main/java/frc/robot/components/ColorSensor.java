@@ -32,6 +32,8 @@ public class ColorSensor{
         oi = new OI();
     }
 
+
+
     public void postData(){
         Color detectedColor = colorSensor.getColor();
         ColorMatchResult decidedColor = colorMatcher.matchClosestColor(detectedColor);
@@ -41,15 +43,21 @@ public class ColorSensor{
         SmartDashboard.putNumber("Blue", detectedColor.blue);
     }
 
+
+
     public void postColor(){
         Color detectedColor = colorSensor.getColor();
         ColorMatchResult decidedColor = colorMatcher.matchClosestColor(detectedColor);
         SmartDashboard.putString("Color", decidedColor + " ");
     }
 
+
+
     public void postColor(int index){
         SmartDashboard.putString("Color: " + colors[index], allColors[index].toString());
     }
+
+
 
     public void calibrateColor(int index){
         Color detectedColor = colorSensor.getColor();
@@ -58,6 +66,11 @@ public class ColorSensor{
             postData();
             postColor(index);
         }
+    }
+
+
+    public String getColorAtIndex(int index){
+        return colors[index] + " ";
     }
 
 }
