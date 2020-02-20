@@ -208,7 +208,6 @@ public class ArmSubsystem extends Subsystem {
     SmartDashboard.putNumber("Red", m_colorSensor.getRed());
     SmartDashboard.putNumber("Green", m_colorSensor.getGreen());
     SmartDashboard.putNumber("Blue", m_colorSensor.getBlue());
-
   }
 
 
