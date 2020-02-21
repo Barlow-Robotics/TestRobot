@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.revrobotics.ColorMatch;
 import com.revrobotics.ColorMatchResult;
 
-import edu.wpi.first.wpilibj.util.ColorShim;
 import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.OI;
 
@@ -72,5 +71,19 @@ public class ColorSensor{
     public String getColorAtIndex(int index){
         return colors[index] + " ";
     }
+
+
+    public Color getCurrentColor(){
+        Color detectedColor = colorSensor.getColor();
+        ColorMatchResult result = colorMatcher.matchClosestColor(detectedColor);
+        return result.color;
+    }
+
+
+
+    public double getRed() {return colorSensor.getColor().red;}
+    public double getBlue() {return colorSensor.getColor().blue;}
+    public double getGreen() {return colorSensor.getColor().green;}
+
 
 }
