@@ -7,6 +7,7 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.command.Subsystem;
@@ -37,7 +38,7 @@ public class IntakeSubsystem extends Subsystem {
     oi = new OI();
     intakeDeploy = new Solenoid(Constants.intakeDeployPort);
     intakeRetract = new Solenoid(Constants.intakeRetractPort);
-    intakeMotor = new Spark(Constants.intakeMotorPort);
+    intakeMotor = new Spark(Constants.PWMPORT_intakeMotorPort);
   }
 
 
