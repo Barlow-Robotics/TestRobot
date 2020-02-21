@@ -12,6 +12,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import frc.robot.Constants;
 import frc.robot.OI;
+import edu.wpi.first.wpilibj.Spark;
 
 
 
@@ -23,8 +24,7 @@ public class IndexingSubsystem extends Subsystem {
   // here. Call these from Commands.
   //private WPI_TalonSRX wheelDriver;
   private WPI_TalonSRX indexingWheelDriver;
-  private WPI_TalonSRX agitatorMotor;
-  private OI oi;
+  private Spark agitatorMotor;
   private int cellCount;
   enum IndexingState{
     Idle,
@@ -36,10 +36,8 @@ public class IndexingSubsystem extends Subsystem {
   
 
   public IndexingSubsystem(){
-//    wheelDriver = new WPI_TalonSRX(Constants.indexingWheelMotor);
-    indexingWheelDriver = new WPI_TalonSRX(7);
-    agitatorMotor = new WPI_TalonSRX(6);
-    oi = new OI();
+    indexingWheelDriver = new WPI_TalonSRX(Constants.ID_shooterFeedMotor);
+    agitatorMotor = new Spark(Constants.PWMPORT_intakeMotorPort);
     cellCount = 0;
     indexingState = IndexingState.Idle;
   } 
@@ -54,19 +52,20 @@ public class IndexingSubsystem extends Subsystem {
 
 
   
-  public void operateIndex(){
-    
+  public void operateIndex(boolean firing, boolean cellChasing){
     switch(indexingState){
       case Idle:
-        if(oi.getIsShooting())
+        if(firing)
           indexingState = IndexingState.Feeding;
-        else if(oi.isBallChasing())
+        else if(cellChasing)
           indexingState = IndexingState.Agitating;
-        else
+        else {
           indexingWheelDriver.set(0.0);
+          agitatorMotor.set(0.0);
+        }
         break;
       case Feeding:
-        if(!oi.getIsShooting()){
+        if(!firing){
           indexingWheelDriver.set(0);
           agitatorMotor.set(0);
           indexingState = IndexingState.Idle;
@@ -76,10 +75,12 @@ public class IndexingSubsystem extends Subsystem {
           // agitatorMotor.set(Constants.agitatingSpeed);
           if(false/*Sensor detects ball exit*/)
             cellCount--;
+          if(false/*Other sensors detect ball entry*/)
+            cellCount++;
         }
         break;
       case Agitating:
-        if(!oi.isBallChasing()){
+        if(!cellChasing){
           agitatorMotor.set(0);
           indexingState = IndexingState.Idle;
         }
@@ -88,4 +89,6 @@ public class IndexingSubsystem extends Subsystem {
         }
     } 
   }
+
+  public int getCellCount(){return cellCount;}
 }
