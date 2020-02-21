@@ -21,6 +21,7 @@ import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.OI;
 import frc.robot.components.ColorSensor;
+import frc.robot.components.PathParams;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.IndexingSubsystem;
@@ -40,8 +41,6 @@ public class Robot extends TimedRobot {
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
   private long startTime, endTime, duration, totalDuration, previousStartTime;
-  private int cycleIndex, cellCount;
-
   
   public OI oi = new OI();
 
@@ -66,7 +65,7 @@ public class Robot extends TimedRobot {
   
 
   public enum AutoState{
-    Idle, Backing, Searching, Aligning, Firing, SearchingForCells, ChasingCells
+    Idle, DrivingPath, Searching, Aligning, Firing
   };
 
   AutoState autoState;
@@ -83,15 +82,10 @@ public class Robot extends TimedRobot {
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
 
-    //======================
-    cellCount = 0;
-    //======================
-
     // driveSubsystem = new DriveSubsystem();
     // shooterSubsystem = new ShooterSubsystem();
 
     // armSubsystem = new ArmSubsystem();
-    colorSensor = new ColorSensor();
 
     // climbSubsystem = new ClimbSubsystem();
     // indexingSubsystem = new IndexingSubsystem();
@@ -156,25 +150,30 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {
     switch(autoState){
       case Idle:
-
+        shooterSubsystem.operateShooter(true);
+        indexingSubsystem.operateIndex(false, false);
+        driveSubsystem.teleopDrive(0, 0, false, false, false, null);
       break;
-      case Backing:
-
-      break;
-      case Searching:
-
+      case DrivingPath:
+        shooterSubsystem.operateShooter(true);
+        driveSubsystem.teleopDrive(0, 0, false, false, true, new PathParams());
+        if(driveSubsystem.pathIsFinished())
+          autoState = AutoState.Aligning;
       break;
       case Aligning:
-
+        shooterSubsystem.operateShooter(true);
+        driveSubsystem.teleopDrive(0, 0, true, false, false, null);
+        if(driveSubsystem.finishedAligning())
+          autoState = AutoState.Firing;
       break;
       case Firing:
-
+        shooterSubsystem.operateShooter(true);
+        indexingSubsystem.operateIndex(true, false);
+        if(indexingSubsystem.getCellCount() == 0)
+          autoState = AutoState.Idle;
       break;
-      case SearchingForCells:
-
-      break;
-      case ChasingCells:
-
+      default:
+        autoState = AutoState.Idle;
       break;
     }
     /*switch (m_autoSelected) {
@@ -241,8 +240,5 @@ public class Robot extends TimedRobot {
     // indexingSubsystem.operateIndex();
     // wheelState.forceSetBoolean(oi.isAutoTargeting());
     // armSubsystem.OperateControlPanel();
-    colorSensor.calibrateColor(1);
   }
-
-  public void incrementBallCount(){cellCount++;}
 }
