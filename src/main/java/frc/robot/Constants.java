@@ -15,6 +15,13 @@ public class Constants{
         public static final int PWMPORT_agitatorMotor = 0;
         public static final int PWMPORT_intakeMotorPort = 2;
 
+    //Sensors
+        //Indexing ball count sensors
+        public static final int DIOPORT_intakeSensor = 0;
+        public static final int DIOPORT_intakeTransmitter = 1;
+        public static final int DIOPORT_exitSensor = 2;
+        public static final int DIOPORT_exitTransmitter = 3;
+
 
     //General
         public static final double degreesToRadiansFactor = Math.PI/180;
