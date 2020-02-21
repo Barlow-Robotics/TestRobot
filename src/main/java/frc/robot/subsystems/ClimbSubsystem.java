@@ -10,7 +10,7 @@ import frc.robot.OI;
 
 public class ClimbSubsystem extends Subsystem {
     OI oi = new OI();
-    private WPI_TalonSRX climbController = new WPI_TalonSRX(Constants.ClimbMotorPortNumber);
+    private WPI_TalonSRX climbController = new WPI_TalonSRX(Constants.ID_climbMotor);
   
     Encoder liftMotorEncoder ;
 
