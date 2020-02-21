@@ -59,19 +59,11 @@ public class DriveSubsystem extends Subsystem {
   enum TeleopDriveState {
     Manual,
     AutoTargetAlign,
-    Powercell
-  }
-
-  enum AutoDriveState{
-    Backing,
-    SearchingForTarget,
-    Firing,
-    TargetingMoreCells, //Optimistically
-    ChasingCells
+    Powercell,
+    PathFollowing
   }
 
   TeleopDriveState teleopDriveState;
-  AutoDriveState autoDriveState;
 
   NetworkTableInstance networkTableInst ;
   NetworkTableEntry canSeeTargetEntry ;
@@ -82,14 +74,16 @@ public class DriveSubsystem extends Subsystem {
   NetworkTableEntry powercellAngleEntry ;
   NetworkTableEntry powercellDistanceEntry ;
 
+  private boolean finishedAligning;
+
   // Put methods for controlling this subsystem
   // here. Call these from Commands.
 
   public DriveSubsystem(){
-    leftFrontSide = new WPI_TalonSRX(Constants.leftFrontMotor);
-    leftBackSide = new WPI_TalonSRX(Constants.leftBackMotor);
-    rightFrontSide = new WPI_TalonSRX(Constants.rightFrontMotor);
-    rightBackSide = new WPI_TalonSRX(Constants.rightBackMotor);
+    leftFrontSide = new WPI_TalonSRX(Constants.ID_leftFrontMotor);
+    leftBackSide = new WPI_TalonSRX(Constants.ID_leftBackMotor);
+    rightFrontSide = new WPI_TalonSRX(Constants.ID_rightFrontMotor);
+    rightBackSide = new WPI_TalonSRX(Constants.ID_rightBackMotor);
 
     navX = new AHRS(SerialPort.Port.kUSB);
 
@@ -111,7 +105,6 @@ public class DriveSubsystem extends Subsystem {
     powerCellController.setSetpoint(0.0);
   
     teleopDriveState = TeleopDriveState.Manual;
-    autoDriveState = AutoDriveState.Backing;
 
     networkTableInst = NetworkTableInstance.getDefault() ;
 
@@ -125,6 +118,8 @@ public class DriveSubsystem extends Subsystem {
 
     currentAngleToTarget = 0;
     lastCycleAngleToTarget = 0;
+
+    finishedAligning = false;
   }
 
 
@@ -140,15 +135,19 @@ public class DriveSubsystem extends Subsystem {
     switch (teleopDriveState) {
       case Manual:
         SmartDashboard.putBoolean("Can See Target", canSeeTarget());
-        if (targetAligning && canSeeTarget() == true) {
+        if (targetAligning && canSeeTarget()) {
             targetController.reset();
             navX.reset();
             originalAngleToTarget = angleToTargetFromVision();
             teleopDriveState = TeleopDriveState.AutoTargetAlign;
+            finishedAligning = false;
         } 
-        else if (chaseCell && canSeePowercell() ) {
+        else if (chaseCell && canSeePowercell()) {
           teleopDriveState = TeleopDriveState.Powercell ;
-        }  
+        }
+        else if (driveOnPath){
+          teleopDriveState = TeleopDriveState.PathFollowing;
+        }
         else {
           arcadeDrive(leftJoy, rightJoy);
         }
@@ -158,10 +157,12 @@ public class DriveSubsystem extends Subsystem {
         if (!targetAligning){
           teleopDriveState = TeleopDriveState.Manual;
         } 
-        else if(finishedAligning()){
+        else if(finishedAligningUncorrected()){
           originalAngleToTarget = angleToTargetFromVision();
-          if(NavXAndVisionAgree())
+          if(NavXAndVisionAgree()){
             teleopDriveState = TeleopDriveState.Manual;
+            finishedAligning = true;
+          }
           else
             currentAngleToTarget = angleToTargetFromVision();
         }
@@ -186,6 +187,8 @@ public class DriveSubsystem extends Subsystem {
           rightBackSide.set(ControlMode.Velocity, (output + Constants.speedConstantForBallChase) * Constants.VelocityInputConversionFactor);
         }
         break;
+      case PathFollowing:
+        // leftBackSide.set(ControlMode., value);
       }
   }
 
@@ -214,7 +217,7 @@ public class DriveSubsystem extends Subsystem {
   }
 
 
-  private boolean finishedAligning(){
+  private boolean finishedAligningUncorrected(){
     return Math.abs(currentAngleToTarget - lastCycleAngleToTarget) < Constants.maxAngleChangeForAlignFinish;
   }
 
@@ -262,5 +265,16 @@ public class DriveSubsystem extends Subsystem {
     //Set motor output
     leftBackSide.set(ControlMode.Velocity, leftPower * 500 * Constants.unitsPerRotation / 600);
     rightBackSide.set(ControlMode.Velocity, rightPower * 500 * Constants.unitsPerRotation / 600);
+  }
+
+
+  public boolean finishedAligning(){
+    return finishedAligning;
+  }
+
+
+
+  public boolean pathIsFinished(){
+    return true;
   }
 }
