@@ -25,7 +25,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 public class ShooterSubsystem extends Subsystem {
   // Put methods for controlling this subsystem
   // here. Call these from Commands.
-  private WPI_TalonSRX shooterController = new WPI_TalonSRX(Constants.shooterMotorTalonID);
+  private WPI_TalonSRX shooterController = new WPI_TalonSRX(Constants.ID_shooterMotor);
   // private WPI_TalonFX falconController = new WPI_TalonFX(Constants.shooterMotorTalonID);
   private Servo angleServo = new Servo(0);
   private double flywheelSpeedPercent = 0;
