@@ -11,7 +11,8 @@ import edu.wpi.first.wpilibj.command.Subsystem;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import frc.robot.Constants;
-import frc.robot.OI;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.Spark;
 
 
@@ -26,10 +27,13 @@ public class IndexingSubsystem extends Subsystem {
   private WPI_TalonSRX indexingWheelDriver;
   private Spark agitatorMotor;
   private int cellCount;
+  private DigitalInput ballIntakeSensor, ballExitSensor;
+  private DigitalOutput ballIntakeTransmitter, ballExitTransmitter;
+  private boolean prevIntakeValue, prevExitValue;
   enum IndexingState{
     Idle,
     Feeding,
-    Agitating
+    ProcessingIntake
   }
   
   IndexingState indexingState;
@@ -40,6 +44,11 @@ public class IndexingSubsystem extends Subsystem {
     agitatorMotor = new Spark(Constants.PWMPORT_intakeMotorPort);
     cellCount = 0;
     indexingState = IndexingState.Idle;
+
+    ballExitSensor = new DigitalInput(Constants.DIOPORT_exitSensor);
+    ballExitTransmitter = new DigitalOutput(Constants.DIOPORT_exitTransmitter);
+    ballIntakeSensor = new DigitalInput(Constants.DIOPORT_intakeSensor);
+    ballIntakeTransmitter = new DigitalOutput(Constants.DIOPORT_intakeTransmitter);
   } 
 
 
@@ -53,12 +62,13 @@ public class IndexingSubsystem extends Subsystem {
 
   
   public void operateIndex(boolean firing, boolean cellChasing){
+    keepTransmittersActive();
     switch(indexingState){
       case Idle:
         if(firing)
           indexingState = IndexingState.Feeding;
         else if(cellChasing)
-          indexingState = IndexingState.Agitating;
+          indexingState = IndexingState.ProcessingIntake;
         else {
           indexingWheelDriver.set(0.0);
           agitatorMotor.set(0.0);
@@ -73,22 +83,48 @@ public class IndexingSubsystem extends Subsystem {
         else{
           indexingWheelDriver.set(-Constants.feedingSpeed);
           // agitatorMotor.set(Constants.agitatingSpeed);
-          if(false/*Sensor detects ball exit*/)
+          if(ballHasExited())
             cellCount--;
-          if(false/*Other sensors detect ball entry*/)
-            cellCount++;
         }
+        updatePreviousValues();
         break;
-      case Agitating:
+      case ProcessingIntake:
         if(!cellChasing){
           agitatorMotor.set(0);
           indexingState = IndexingState.Idle;
         }
         else{
+          if(ballHasEntered())
+            cellCount++;
           agitatorMotor.set(Constants.agitatingSpeed);
         }
+      updatePreviousValues();
     } 
   }
 
+
+  private boolean ballHasExited(){
+    return prevExitValue != ballExitSensor.get() && !ballExitSensor.get();
+  }
+
+
+  private boolean ballHasEntered(){
+    return prevIntakeValue != ballIntakeSensor.get() && !ballIntakeSensor.get();
+  }
+
+
+  private void updatePreviousValues(){
+    prevExitValue = ballExitSensor.get();
+    prevIntakeValue = ballIntakeSensor.get();
+  } 
+
+
+  private void keepTransmittersActive(){
+    ballIntakeTransmitter.set(true);
+    ballExitTransmitter.set(true);
+  }
+
+
+  
   public int getCellCount(){return cellCount;}
 }
