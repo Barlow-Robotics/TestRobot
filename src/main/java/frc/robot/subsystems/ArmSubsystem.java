@@ -22,6 +22,8 @@ import edu.wpi.first.wpilibj.I2C;
 import com.revrobotics.ColorMatchResult;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.revrobotics.ColorMatch;
+
+import frc.robot.components.ColorSensor;
 import frc.robot.components.ColourFilter;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -44,10 +46,8 @@ public class ArmSubsystem extends Subsystem {
 
   private boolean previousInput;
  
-  private final static I2C.Port i2cPort = I2C.Port.kOnboard;
-  private ColorSensorV3 m_colorSensor = new ColorSensorV3(i2cPort);
-  private ColorMatch m_colorMatcher = new ColorMatch();
- 
+  ColorSensor colorSensor;
+
   private final Color kBlueTarget = ColorMatch.makeColor(0.143, 0.427, 0.429);
   private final Color kGreenTarget = ColorMatch.makeColor(0.197, 0.561, 0.240);
   private final Color kRedTarget = ColorMatch.makeColor(0.561, 0.232, 0.114);
@@ -80,6 +80,7 @@ public class ArmSubsystem extends Subsystem {
  
   public ArmSubsystem() {
     armState = ArmState.Idle;
+    colorSensor = new ColorSensor();
     colourFilter = new ColourFilter(Constants.colourFilterLength, 'n');
     previousInput = false;
     wheelDeployed = false;
@@ -93,11 +94,6 @@ public class ArmSubsystem extends Subsystem {
     FMSColourToDesiredColour.put('B', 'R'); 
     FMSColourToDesiredColour.put('G', 'Y'); 
     FMSColourToDesiredColour.put('Y', 'G'); 
-
-    m_colorMatcher.addColorMatch(kBlueTarget);
-    m_colorMatcher.addColorMatch(kGreenTarget);
-    m_colorMatcher.addColorMatch(kRedTarget);
-    m_colorMatcher.addColorMatch(kYellowTarget); 
 
     openSolenoidDeploy = new Solenoid(Constants.openSolenoidDeployPort);
     closeSolenoidDeploy = new Solenoid(Constants.closeSolenoidDeployPort);
@@ -205,16 +201,20 @@ public class ArmSubsystem extends Subsystem {
 
 
   public void calibrationMode(){
-    SmartDashboard.putString("Put color "+)
+    SmartDashboard.putString("Calibrate", "Put color "+ colorSensor.getColorAtIndex(colorForCalibration) + " under sensor, then press the pink button");
+    if(oi.getPinkButton()){
+      colorSensor.calibrateColor(colorForCalibration);
+      colorForCalibration++;
+    }
   }
 
 
   public void sendCurrentColour(){
     String color = getColourFromSensor() + " ";
     SmartDashboard.putString("Color", color);
-    SmartDashboard.putNumber("Red", m_colorSensor.getRed());
-    SmartDashboard.putNumber("Green", m_colorSensor.getGreen());
-    SmartDashboard.putNumber("Blue", m_colorSensor.getBlue());
+    SmartDashboard.putNumber("Red", colorSensor.getRed());
+    SmartDashboard.putNumber("Green", colorSensor.getGreen());
+    SmartDashboard.putNumber("Blue", colorSensor.getBlue());
   }
 
 
@@ -234,15 +234,14 @@ public class ArmSubsystem extends Subsystem {
   
   private char getColourFromSensor() { 
     char result;
-    Color detectedColor = m_colorSensor.getColor();
-    ColorMatchResult match = m_colorMatcher.matchClosestColor(detectedColor);
-    if (match.color == kBlueTarget) {
-      result = 'B';
-    } else if (match.color == kRedTarget) {
+    Color match = colorSensor.getCurrentColor();
+    if (match == kBlueTarget) {
+      result = Constants.Blue;
+    } else if (match == kRedTarget) {
       result = Constants.Red;
-    } else if (match.color == kGreenTarget) {
+    } else if (match == kGreenTarget) {
       result = Constants.Green;
-    } else if (match.color == kYellowTarget) {
+    } else if (match == kYellowTarget) {
       result = Constants.Yellow;
     } else {
       result = Constants.NullColorConstant;
