@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.kauailabs.navx.frc.AHRS;
 
 import frc.robot.Constants;
-import frc.robot.OI;
+import frc.robot.components.PathParams;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.networktables.*;
 
@@ -28,7 +28,6 @@ import edu.wpi.first.networktables.*;
  */
 public class DriveSubsystem extends Subsystem {
 
-  OI oi = new OI();
   WPI_TalonSRX leftBackSide;
   WPI_TalonSRX leftFrontSide;
   WPI_TalonSRX rightFrontSide;
@@ -54,6 +53,7 @@ public class DriveSubsystem extends Subsystem {
   final double powerSpeed = 0.0;
   
   private double originalAngleToTarget;
+  private double lastCycleAngleToTarget;
   private double currentAngleToTarget;
 
   enum TeleopDriveState {
@@ -124,6 +124,7 @@ public class DriveSubsystem extends Subsystem {
     powercellDistanceEntry = networkTableInst.getTable("vision").getEntry("powercellDistance") ;
 
     currentAngleToTarget = 0;
+    lastCycleAngleToTarget = 0;
   }
 
 
@@ -134,48 +135,48 @@ public class DriveSubsystem extends Subsystem {
   }
 
 
-
-  public void driveStraightDistance(double distanceInFeet, boolean foward){
-    double targetPos = Constants.unitsPerRotation * Constants.autoBackingDistance;
-    leftBackSide.set(ControlMode.MotionMagic, targetPos);
-    rightBackSide.set(ControlMode.MotionMagic, targetPos);
-  }
-
-
-
-  public void teleopDrive(double robotSpeed, double robotAngle, boolean aligning){
+  public void teleopDrive(double leftJoy, double rightJoy, boolean targetAligning, boolean chaseCell, boolean driveOnPath, PathParams pathParams){
     SmartDashboard.putBoolean("Sees cell", canSeePowercell());
     switch (teleopDriveState) {
       case Manual:
         SmartDashboard.putBoolean("Can See Target", canSeeTarget());
-        if (aligning == true && canSeeTarget() == true) {
+        if (targetAligning && canSeeTarget() == true) {
             targetController.reset();
             navX.reset();
             originalAngleToTarget = angleToTargetFromVision();
             teleopDriveState = TeleopDriveState.AutoTargetAlign;
         } 
-        else if ( oi.isBallChasing() && canSeePowercell() ) {
+        else if (chaseCell && canSeePowercell() ) {
           teleopDriveState = TeleopDriveState.Powercell ;
         }  
         else {
-          arcadeDrive(robotSpeed, robotAngle);
+          arcadeDrive(leftJoy, rightJoy);
         }
         break;
 
       case AutoTargetAlign:
-        if (oi.isAutoTargeting() == false /*|| canSeeTarget() == false*/){
+        if (!targetAligning){
           teleopDriveState = TeleopDriveState.Manual;
-        } else {
+        } 
+        else if(finishedAligning()){
+          originalAngleToTarget = angleToTargetFromVision();
+          if(NavXAndVisionAgree())
+            teleopDriveState = TeleopDriveState.Manual;
+          else
+            currentAngleToTarget = angleToTargetFromVision();
+        }
+        else {
             currentAngleToTarget = originalAngleToTarget - (navX.getAngle()*Constants.degreesToRadiansFactor);
             SmartDashboard.putNumber("NavX Value", navX.getAngle());
             double output = targetController.calculate(currentAngleToTarget);
             leftBackSide.set(ControlMode.Velocity, output * Constants.VelocityInputConversionFactor);
             rightBackSide.set(ControlMode.Velocity, output * Constants.VelocityInputConversionFactor);
+            lastCycleAngleToTarget = currentAngleToTarget;
         }
         break;
 
       case Powercell:
-        if (!oi.isBallChasing() ||  !canSeePowercell()){
+        if (!chaseCell || !canSeePowercell()){
           teleopDriveState = TeleopDriveState.Manual;
         } 
         else {
@@ -186,12 +187,6 @@ public class DriveSubsystem extends Subsystem {
         }
         break;
       }
-  }
-
-  
-
-  public boolean getIsAligned(){
-    return currentAngleToTarget < Constants.angleThreshold;
   }
 
   
@@ -216,6 +211,16 @@ public class DriveSubsystem extends Subsystem {
 
   private double angleToPowercell() {
     return powercellAngleEntry.getDouble(0.0);
+  }
+
+
+  private boolean finishedAligning(){
+    return Math.abs(currentAngleToTarget - lastCycleAngleToTarget) < Constants.maxAngleChangeForAlignFinish;
+  }
+
+
+  private boolean NavXAndVisionAgree(){
+    return Math.abs(originalAngleToTarget - currentAngleToTarget) < Constants.maxAngleDifferenceBetweenNavXAndVision;
   }
 
 
