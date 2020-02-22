@@ -14,6 +14,8 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Servo;
 import frc.robot.OI;
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -31,6 +33,8 @@ public class ShooterSubsystem extends Subsystem {
   private double flywheelSpeedPercent = 0;
   private double servoAngle = 0;
   private OI oi;
+  private NetworkTableInstance networkTableInst;
+  private NetworkTableEntry distanceToTarget, kF_Shooter, kP_Shooter, kI_Shooter, kD_Shooter;
 
   public enum ShooterState{
     IdleSpin,
@@ -45,6 +49,29 @@ public class ShooterSubsystem extends Subsystem {
     shooterController.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, Constants.mainFeedbackLoop, Constants.timeoutTime);
     // falconController.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, Constants.mainFeedbackLoop, Constants.timeoutTime);
     
+    networkTableInst = NetworkTableInstance.getDefault();
+    distanceToTarget = networkTableInst.getTable("shooter").getEntry("distanceToTarget");
+
+    kF_Shooter = networkTableInst.getTable("shooter").getEntry("kF_Shooter");
+    kP_Shooter = networkTableInst.getTable("shooter").getEntry("kP_Shooter");
+    kI_Shooter = networkTableInst.getTable("shooter").getEntry("kI_Shooter");
+    kD_Shooter = networkTableInst.getTable("shooter").getEntry("kD_Shooter");
+
+    kF_Shooter.setNumber(0.2);
+    kP_Shooter.setNumber(0.2);
+    kI_Shooter.setNumber(0);
+    kD_Shooter.setNumber(0);
+
+
+
+    // shooterController.configMotionAcceleration(sensorUnitsPer100msPerSec);
+    // shooterController.configMotionCruiseVelocity(sensorUnitsPer100ms);
+    shooterController.config_kF(0, 0.2); 
+    shooterController.config_kP(0, 0.2);
+    shooterController.config_kI(0, 0);
+    shooterController.config_kD(0, 0);
+
+    
     oi = new OI();
   }
 
@@ -54,7 +81,7 @@ public class ShooterSubsystem extends Subsystem {
     // setDefaultCommand(new MySpecialCommand());
   }
 
-  public void operateShooter(boolean doSpin, double distanceFromTarget){
+  public void operateShooter(boolean doSpin){
     switch(shooterState){
       case IdleSpin:
         if(doSpin){
