@@ -89,7 +89,7 @@ public class Robot extends TimedRobot {
 
     // climbSubsystem = new ClimbSubsystem();
     // indexingSubsystem = new IndexingSubsystem();
-    // intakeSubsystem = new IntakeSubsystem();
+    intakeSubsystem = new IntakeSubsystem();
 
     autoState = AutoState.Idle;
 
@@ -157,7 +157,7 @@ public class Robot extends TimedRobot {
       break;
       case DrivingPath:
         shooterSubsystem.operateShooter(true);
-        driveSubsystem.teleopDrive(0, 0, false, false, true, new PathParams());
+        // driveSubsystem.teleopDrive(0, 0, false, false, true, new PathParams());
         if(driveSubsystem.pathIsFinished())
           autoState = AutoState.Aligning;
       break;
@@ -205,24 +205,6 @@ public class Robot extends TimedRobot {
     loopTime.forceSetNumber(System.currentTimeMillis() - previousStartTime);
     previousStartTime = System.currentTimeMillis();
 
-    //SHOOTER SUBSYSTEM
-    // shooterSubsystem.operateShooter(true);
-
-    //DRIVE SUBSYSTEM   
-    // driveSubsystem.teleopDrive(oi.getForwardSpeed(), oi.getTurnAngle());
-
-    //ARM SUBSYSTEM
-    // armSubsystem.OperateControlPanel();
-    // armSubsystem.sendState();
-
-    //CLIMB SUBSYSTEM
-    // if(oi.getRTopTrigger()) climbSubsystem.moveUp();
-    // else if(oi.getRBottomTrigger()) climbSubsystem.moveDown();
-    // else climbSubsystem.stopClimb();
-
-    //INDEXING SUBSYSTEM
-    // indexingSubsystem.operateIndex();
-
     endTime = System.currentTimeMillis();
     duration = endTime - startTime;
 
@@ -237,9 +219,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
-    // shooterSubsystem.operateShooter(true);
-    // indexingSubsystem.operateIndex();
-    // wheelState.forceSetBoolean(oi.isAutoTargeting());
-    // armSubsystem.OperateControlPanel();
+    intakeSubsystem.operateIntake(oi.getDeployIntakeManual());;
   }
 }
