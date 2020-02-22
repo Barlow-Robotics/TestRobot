@@ -13,7 +13,7 @@ public class Constants{
         public static final int ID_climbMotor = 8;
 
         public static final int PWMPORT_agitatorMotor = 0;
-        public static final int PWMPORT_intakeMotorPort = 2;
+        public static final int PWMPORT_intakeMotorPort = 1;
 
     //Sensors
         //Indexing ball count sensors
@@ -25,6 +25,7 @@ public class Constants{
 
     //General
         public static final double degreesToRadiansFactor = Math.PI/180;
+        public static final double wheelTurnsToDistanceFactor = 7.65 * Math.PI;
 
     //Drivetrain
         public static final double drivetrainMinPower = 0.05;
@@ -49,6 +50,9 @@ public class Constants{
         public static final double maxAngleChangeForAlignFinish = 0.01;
         public static final double maxAngleDifferenceBetweenNavXAndVision = 0.01;
 
+        //Physical
+            public static final double halfDistanceBetweenWheels = 10.75; //Inches
+
     //OI //hi :)
         public static final int joystickPort = 1;
         public static final int boxControlPort = 0;
@@ -60,7 +64,7 @@ public class Constants{
     //Intake
         public static final int intakeDeployPort = 2;
         public static final int intakeRetractPort = 3;
-        public static final double intakeSpeed = 0.4;
+        public static final double intakeSpeed = 0.8;
 
     //Wheel
         public static final int openSolenoidDeployPort = 1;
