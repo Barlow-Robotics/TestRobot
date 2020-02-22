@@ -14,6 +14,9 @@ import frc.robot.Constants;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.Spark;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 
 
@@ -37,11 +40,13 @@ public class IndexingSubsystem extends Subsystem {
   }
   
   IndexingState indexingState;
-  
+
+  NetworkTableInstance networkTableInst;
+  NetworkTableEntry kF_Index, kP_Index, kI_Index, kD_Index;
 
   public IndexingSubsystem(){
     indexingWheelDriver = new WPI_TalonSRX(Constants.ID_shooterFeedMotor);
-    agitatorMotor = new Spark(Constants.PWMPORT_intakeMotorPort);
+    agitatorMotor = new Spark(Constants.PWMPORT_agitatorMotor);
     cellCount = 0;
     indexingState = IndexingState.Idle;
 
@@ -82,7 +87,7 @@ public class IndexingSubsystem extends Subsystem {
         }
         else{
           indexingWheelDriver.set(-Constants.feedingSpeed);
-          // agitatorMotor.set(Constants.agitatingSpeed);
+          agitatorMotor.set(Constants.agitatingSpeed);
           if(ballHasExited())
             cellCount--;
         }
