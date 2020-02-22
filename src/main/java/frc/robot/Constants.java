@@ -7,13 +7,13 @@ public class Constants{
         public static final int ID_leftFrontMotor = 2;
         public static final int ID_rightFrontMotor = 3;
         public static final int ID_rightBackMotor = 4;
-        public static final int ID_shooterMotor = 5;
-        public static final int ID_wheelRotationMotor = 6;
+        public static final int ID_wheelRotationMotor = 5;
+        public static final int ID_shooterMotor = 6;
         public static final int ID_shooterFeedMotor = 7;
         public static final int ID_climbMotor = 8;
 
-        public static final int PWMPORT_agitatorMotor = 0;
-        public static final int PWMPORT_intakeMotorPort = 1;
+        public static final int PWMPORT_agitatorMotor = 1;
+        public static final int PWMPORT_intakeMotorPort = 0;
 
     //Sensors
         //Indexing ball count sensors
@@ -54,17 +54,17 @@ public class Constants{
             public static final double halfDistanceBetweenWheels = 10.75; //Inches
 
     //OI //hi :)
-        public static final int joystickPort = 1;
-        public static final int boxControlPort = 0;
+        public static final int joystickPort = 0;
+        public static final int boxControlPort = 1;
 
     //Index
         public static final double feedingSpeed = 0.4;
-        public static final double agitatingSpeed = 0.5;
+        public static final double agitatingSpeed = 0.3;
 
     //Intake
         public static final int intakeDeployPort = 2;
         public static final int intakeRetractPort = 3;
-        public static final double intakeSpeed = 0.8;
+        public static final double intakeSpeed = 0.5;
 
     //Wheel
         public static final int openSolenoidDeployPort = 1;
