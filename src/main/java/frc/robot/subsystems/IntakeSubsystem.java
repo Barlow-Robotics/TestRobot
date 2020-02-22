@@ -67,7 +67,7 @@ public class IntakeSubsystem extends Subsystem {
           intakeState = IntakeState.Retracting;
         }
         else if(intake){
-          intakeMotor.set(-Constants.intakeSpeed);
+          intakeMotor.set(-0.75);
         }
         break;
       case Retracting:
