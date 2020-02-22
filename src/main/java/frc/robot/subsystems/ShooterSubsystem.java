@@ -54,7 +54,7 @@ public class ShooterSubsystem extends Subsystem {
     // setDefaultCommand(new MySpecialCommand());
   }
 
-  public void operateShooter(boolean doSpin){
+  public void operateShooter(boolean doSpin, double distanceFromTarget){
     switch(shooterState){
       case IdleSpin:
         if(doSpin){
@@ -66,7 +66,6 @@ public class ShooterSubsystem extends Subsystem {
           shooterController.set(0.0);
           // falconController.set(ControlMode.Velocity, 0);
         }
-          
         if(oi.isAutoTargeting())
           shooterState = ShooterState.Targeting;
       case Targeting:
