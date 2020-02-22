@@ -83,12 +83,12 @@ public class Robot extends TimedRobot {
     SmartDashboard.putData("Auto choices", m_chooser);
 
     // driveSubsystem = new DriveSubsystem();
-    // shooterSubsystem = new ShooterSubsystem();
+    shooterSubsystem = new ShooterSubsystem(networkTable);
 
     // armSubsystem = new ArmSubsystem();
 
     // climbSubsystem = new ClimbSubsystem();
-    // indexingSubsystem = new IndexingSubsystem();
+    indexingSubsystem = new IndexingSubsystem();
     intakeSubsystem = new IntakeSubsystem();
 
     autoState = AutoState.Idle;
@@ -219,6 +219,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
-    intakeSubsystem.operateIntake(oi.getDeployIntakeManual());;
+    intakeSubsystem.operateIntake(oi.getDeployIntakeManual());
+    indexingSubsystem.operateIndex(oi.getIsShooting(), false);
+    shooterSubsystem.operateShooter(true);
   }
 }
