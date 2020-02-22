@@ -29,7 +29,7 @@ public class ShooterSubsystem extends Subsystem {
   // here. Call these from Commands.
   private WPI_TalonSRX shooterController = new WPI_TalonSRX(Constants.ID_shooterMotor);
   // private WPI_TalonFX falconController = new WPI_TalonFX(Constants.shooterMotorTalonID);
-  private Servo angleServo = new Servo(0);
+  // private Servo angleServo = new Servo(0);
   private double flywheelSpeedPercent = 0;
   private double servoAngle = 0;
   private OI oi;
@@ -43,7 +43,7 @@ public class ShooterSubsystem extends Subsystem {
 
   private ShooterState shooterState;
 
-  public ShooterSubsystem(){
+  public ShooterSubsystem(NetworkTableInstance networkTableInst){
     shooterState = ShooterState.IdleSpin;
 
     shooterController.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, Constants.mainFeedbackLoop, Constants.timeoutTime);
@@ -57,20 +57,17 @@ public class ShooterSubsystem extends Subsystem {
     kI_Shooter = networkTableInst.getTable("shooter").getEntry("kI_Shooter");
     kD_Shooter = networkTableInst.getTable("shooter").getEntry("kD_Shooter");
 
-    kF_Shooter.setNumber(0.2);
-    kP_Shooter.setNumber(0.2);
+    kF_Shooter.setNumber(Constants.DrivetrainKf);
+    kP_Shooter.setNumber(0.75);
     kI_Shooter.setNumber(0);
     kD_Shooter.setNumber(0);
 
-
-
-    // shooterController.configMotionAcceleration(sensorUnitsPer100msPerSec);
-    // shooterController.configMotionCruiseVelocity(sensorUnitsPer100ms);
-    shooterController.config_kF(0, 0.2); 
-    shooterController.config_kP(0, 0.2);
+    // shooterController.configMotionAcceleration();
+    shooterController.configMotionCruiseVelocity(8192 * 10000);
+    shooterController.config_kF(0, Constants.DrivetrainKf); 
+    shooterController.config_kP(0, 0.75);
     shooterController.config_kI(0, 0);
     shooterController.config_kD(0, 0);
-
     
     oi = new OI();
   }
@@ -124,7 +121,7 @@ public class ShooterSubsystem extends Subsystem {
         else
           shooterState = ShooterState.IdleSpin;
         checkAndMoveMotor();
-        angleServo.set(servoAngle);
+        // angleServo.set(servoAngle);
     }
   }
 
