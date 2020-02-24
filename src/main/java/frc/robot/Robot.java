@@ -65,7 +65,11 @@ public class Robot extends TimedRobot {
   
 
   public enum AutoState{
-    Idle, DrivingPath, Searching, Aligning, Firing
+    Idle, 
+    DrivingPath, 
+    Searching, 
+    Aligning, 
+    Firing
   };
 
   AutoState autoState;
@@ -78,6 +82,8 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     //e = new Encoder(Constants.leftEncoderPorts[0], Constants.leftEncoderPorts[1]);
+    networkTable = NetworkTableInstance.getDefault(); 
+
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
@@ -88,12 +94,12 @@ public class Robot extends TimedRobot {
     // armSubsystem = new ArmSubsystem();
 
     // climbSubsystem = new ClimbSubsystem();
-    indexingSubsystem = new IndexingSubsystem();
-    intakeSubsystem = new IntakeSubsystem();
+    indexingSubsystem = new IndexingSubsystem(networkTable);
+    // intakeSubsystem = new IntakeSubsystem();
 
     autoState = AutoState.Idle;
 
-    networkTable = NetworkTableInstance.getDefault(); 
+    
     frameTime = networkTable.getTable("performance").getEntry("frameTime");
     loopTime = networkTable.getTable("performance").getEntry("loopTime");
     wheelState = networkTable.getTable("WheelOfFortune").getEntry("wheelState");
@@ -205,13 +211,16 @@ public class Robot extends TimedRobot {
     loopTime.forceSetNumber(System.currentTimeMillis() - previousStartTime);
     previousStartTime = System.currentTimeMillis();
 
+    // intakeSubsystem.operateIntake(oi.getDeployIntakeManual());
+    indexingSubsystem.operateIndex(oi.getIsShooting(), false);
+    shooterSubsystem.operateShooter(true);
+
     endTime = System.currentTimeMillis();
     duration = endTime - startTime;
 
     frameTime.forceSetNumber(duration);
     //Send data to NetworkTable "performance" with entry "frameTime" for every cycle
     //Send lastTime difference to entry "loopTime"
-    
   }
 
   /**
@@ -219,8 +228,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
-    intakeSubsystem.operateIntake(oi.getDeployIntakeManual());
-    indexingSubsystem.operateIndex(oi.getIsShooting(), false);
-    shooterSubsystem.operateShooter(true);
+    
   }
 }
