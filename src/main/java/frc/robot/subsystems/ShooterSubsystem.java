@@ -50,6 +50,10 @@ public class ShooterSubsystem extends Subsystem {
     shooterState = ShooterState.IdleSpin;
 
     shooterController.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, Constants.mainFeedbackLoop, Constants.timeoutTime);
+    shooterController.configNominalOutputForward(0.0);
+    shooterController.configNominalOutputReverse(0.0);
+    shooterController.configPeakOutputForward(1.0);
+    shooterController.configPeakOutputReverse(-1.0);
     // falconController.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, Constants.mainFeedbackLoop, Constants.timeoutTime);
     
     this.networkTableInst = networkTableInst;
@@ -87,7 +91,7 @@ public class ShooterSubsystem extends Subsystem {
           updatePIDValues();
           shooterController.set(ControlMode.Velocity, -Constants.maxShooterSpeed); //CHANGE
           // falconController.set(ControlMode.Velocity, -Constants.maxShooterSpeed);
-          SmartDashboard.putNumber("Shooter Flywheel Speed", shooterController.get());
+          SmartDashboard.putNumber("Shooter Flywheel Speed", shooterController.getSelectedSensorVelocity(0));
         }
         else {
           shooterController.set(0.0);
