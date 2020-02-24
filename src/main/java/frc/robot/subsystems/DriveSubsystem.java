@@ -188,7 +188,11 @@ public class DriveSubsystem extends Subsystem {
         }
         break;
       case PathFollowing:
-        // leftBackSide.set(ControlMode., value);
+        leftBackSide.set(ControlMode.MotionMagic, pathParams.getLeftRotations());
+        rightBackSide.set(ControlMode.MotionMagic, pathParams.getRightRotations());
+        if(true/*Path is done*/){
+          teleopDriveState = TeleopDriveState.Manual;
+        }
       }
   }
 
