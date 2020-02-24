@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Servo;
-import frc.robot.OI;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 
 
@@ -32,9 +31,13 @@ public class ShooterSubsystem extends Subsystem {
   // private Servo angleServo = new Servo(0);
   private double flywheelSpeedPercent = 0;
   private double servoAngle = 0;
-  private OI oi;
   private NetworkTableInstance networkTableInst;
-  private NetworkTableEntry distanceToTarget, kF_Shooter, kP_Shooter, kI_Shooter, kD_Shooter;
+  private NetworkTableEntry distanceToTarget;
+  private NetworkTableEntry kF_Shooter;
+  private NetworkTableEntry kP_Shooter;
+  private NetworkTableEntry kI_Shooter;
+  private NetworkTableEntry kD_Shooter;
+
 
   public enum ShooterState{
     IdleSpin,
@@ -49,7 +52,7 @@ public class ShooterSubsystem extends Subsystem {
     shooterController.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, Constants.mainFeedbackLoop, Constants.timeoutTime);
     // falconController.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, Constants.mainFeedbackLoop, Constants.timeoutTime);
     
-    networkTableInst = NetworkTableInstance.getDefault();
+    this.networkTableInst = networkTableInst;
     distanceToTarget = networkTableInst.getTable("shooter").getEntry("distanceToTarget");
 
     kF_Shooter = networkTableInst.getTable("shooter").getEntry("kF_Shooter");
@@ -58,18 +61,17 @@ public class ShooterSubsystem extends Subsystem {
     kD_Shooter = networkTableInst.getTable("shooter").getEntry("kD_Shooter");
 
     kF_Shooter.setNumber(Constants.DrivetrainKf);
-    kP_Shooter.setNumber(0.75);
+    kP_Shooter.setNumber(0.02);
     kI_Shooter.setNumber(0);
     kD_Shooter.setNumber(0);
 
     // shooterController.configMotionAcceleration();
     shooterController.configMotionCruiseVelocity(8192 * 10000);
-    shooterController.config_kF(0, Constants.DrivetrainKf); 
-    shooterController.config_kP(0, 0.75);
-    shooterController.config_kI(0, 0);
-    shooterController.config_kD(0, 0);
+    shooterController.config_kF(0, (double)kF_Shooter.getNumber(Constants.DrivetrainKf)); 
+    shooterController.config_kP(0, (double)kP_Shooter.getNumber(0.02));
+    shooterController.config_kI(0, (double)kI_Shooter.getNumber(0.0));
+    shooterController.config_kD(0, (double)kD_Shooter.getNumber(0.0));
     
-    oi = new OI();
   }
 
   @Override
@@ -82,6 +84,7 @@ public class ShooterSubsystem extends Subsystem {
     switch(shooterState){
       case IdleSpin:
         if(doSpin){
+          updatePIDValues();
           shooterController.set(ControlMode.Velocity, -Constants.maxShooterSpeed); //CHANGE
           // falconController.set(ControlMode.Velocity, -Constants.maxShooterSpeed);
           SmartDashboard.putNumber("Shooter Flywheel Speed", shooterController.get());
@@ -90,20 +93,65 @@ public class ShooterSubsystem extends Subsystem {
           shooterController.set(0.0);
           // falconController.set(ControlMode.Velocity, 0);
         }
-        if(oi.isAutoTargeting())
-          shooterState = ShooterState.Targeting;
-      case Targeting:
-        if(!oi.isAutoTargeting())
-          shooterState = ShooterState.IdleSpin;
-        else{
-          shooterController.set(ControlMode.Velocity, Constants.maxShooterPercent);
-          // falconController.set(ControlMode.Velocity, Constants.maxShooterSpeed);
-          // INSERT ANGLE ADJUSTMENT CODE HERE
-        }
+          
+      //   if()
+      //     shooterState = ShooterState.Targeting;
+      // case Targeting:
+      //   if(!oi.isAutoTargeting())
+      //     shooterState = ShooterState.IdleSpin;
+      //   else{
+      //     shooterController.set(ControlMode.Velocity, Constants.maxShooterPercent);
+      //     // falconController.set(ControlMode.Velocity, Constants.maxShooterSpeed);
+      //     // INSERT ANGLE ADJUSTMENT CODE HERE
+      //   }
     }
   }
 
-  public void operateShooterWithButtonAdjustments(){
+  
+
+  private void log(){
+    SmartDashboard.putNumber("Current Speed", flywheelSpeedPercent);
+    SmartDashboard.putNumber("Current Angle", servoAngle * 90);
+  }
+
+
+
+  private double threshold(double speed){
+    if(speed > Constants.maxShooterSpeed)
+      speed = Constants.maxShooterSpeed;
+    else if(speed < 0)
+      speed = 0;
+    //else if(speed < Constants.minShooterSpeed)
+      //speed = 0;
+    //else if(speed > -Constants.minShooterSpeed)
+      //speed = 0;
+
+    return speed;
+  }
+
+
+
+  public ShooterState getShooterState(){
+    return shooterState;
+  }
+
+
+
+  private void updatePIDValues(){
+    shooterController.config_kF(0, (double)kF_Shooter.getNumber(Constants.DrivetrainKf)); 
+    shooterController.config_kP(0, (double)kP_Shooter.getNumber(0.69));
+    shooterController.config_kI(0, (double)kI_Shooter.getNumber(0.0));
+    shooterController.config_kD(0, (double)kD_Shooter.getNumber(0.0));
+    if(System.currentTimeMillis()%1000 <= 20)
+      System.out.println("kP of Shooter:" + kP_Shooter.getNumber(0.02));
+  }
+}
+
+
+
+
+/*
+public void operateShooterWithButtonAdjustments(){
     // Gonna leave trigger commands in here for the moment for testing purposes
     switch(shooterState){
       case IdleSpin:
@@ -139,25 +187,4 @@ public class ShooterSubsystem extends Subsystem {
     log();
   }
 
-  private void log(){
-    SmartDashboard.putNumber("Current Speed", flywheelSpeedPercent);
-    SmartDashboard.putNumber("Current Angle", servoAngle * 90);
-  }
-
-  private double threshold(double speed){
-    if(speed > Constants.maxShooterSpeed)
-      speed = Constants.maxShooterSpeed;
-    else if(speed < 0)
-      speed = 0;
-    //else if(speed < Constants.minShooterSpeed)
-      //speed = 0;
-    //else if(speed > -Constants.minShooterSpeed)
-      //speed = 0;
-
-    return speed;
-  }
-
-  public ShooterState getShooterState(){
-    return shooterState;
-  }
-}
+*/
