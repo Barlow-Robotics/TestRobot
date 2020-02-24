@@ -14,8 +14,16 @@ public class PathParams {
         rightRotations = (radius - Constants.halfDistanceBetweenWheels) * degreeChangeInRadians/(2 * Math.PI);
     }
 
+    
+
     public double getLeftRotations(){
         return leftRotations;
+    }
+
+
+
+    public double getRightRotations(){
+        return rightRotations;
     }
     
 }
