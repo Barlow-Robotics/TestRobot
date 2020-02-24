@@ -74,7 +74,8 @@ public class Constants{
         public static final double minSpinSpeed = 0.02;
     
         public static final int colourFilterLength = 3;
-        public static final int minColorChangeCountGoal= 26;
+	    public static final int minColorChangeCountGoalTurn= 26;
+	    public static final int minColorChangeCountGoalSpecificColor= 4;
     
         public static final long wheelWaitTime = 5000;
         public static final double wheelDecrementFactor = 0.9;
@@ -86,9 +87,9 @@ public class Constants{
         public static final char NullColorConstant = 'N';
 
     //Shooter
-        public static final double maxShooterSpeed = 0.85 * VelocityInputConversionFactor;
-        public static final double maxShooterPercent = 0.85;
-        public static final double minShooterSpeed = 0.05;
+	    public static final double maxShooterSpeed = 0.85 * VelocityInputConversionFactor;
+	    public static final double maxShooterPercent = 0.85;
+	    public static final double minShooterSpeed = 0.05;
 
         public static final int leftServoPort = 0;
         public static final int rightServoPort = 1;
