@@ -8,7 +8,15 @@ import frc.robot.Constants;
 import edu.wpi.first.wpilibj.Encoder;
 import frc.robot.OI;
 
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+
 public class ClimbSubsystem extends Subsystem {
+    NetworkTableInstance networkTableInst;
+    NetworkTableEntry liftPercentage;
+    NetworkTableEntry climbPercentage;
+    double percentCompleteClimb; //actually climbing with robot
+    double percentCompleteLift; //lifting the hook up
     OI oi = new OI();
     private WPI_TalonSRX climbController = new WPI_TalonSRX(Constants.ID_climbMotor);
   
@@ -34,6 +42,9 @@ public class ClimbSubsystem extends Subsystem {
     void OperateClimb() {
         switch (climbState){
             case Idle:
+                percentCompleteClimb = 0.0;
+                percentCompleteLift = 0.0;
+            
                 if(oi.isClimbing()){
                     climbController.set(ControlMode.Position, Constants.unitsPerRotation * Constants.desiredClimberRotationsUp);
                     liftMotorEncoder.reset();
@@ -50,6 +61,7 @@ public class ClimbSubsystem extends Subsystem {
                 else{
                     climbController.set(ControlMode.Position, Constants.unitsPerRotation * Constants.desiredClimberRotationsUp);
                 }
+                percentCompleteLift = liftMotorEncoder.get()/1000;
                 break ;
             case HookAtTop:
                 if(oi.isClimbing()){
@@ -58,15 +70,22 @@ public class ClimbSubsystem extends Subsystem {
                 }
                 break ;
             case LiftingBot:
+                liftMotorEncoder.reset();
                 if(climbController.getClosedLoopError() < Constants.tolerableUnitsFromMaxClimberValue){
                     stopMotor();
                     climbState = ClimbState.Stopped ;
                 }
+                percentCompleteClimb = liftMotorEncoder.get()/1000;
                 break ;
             case Stopped:
                 //Bot is immobile
                 break ;
         }
+            climbPercentage.setNumber(percentCompleteClimb);
+            climbPercentage = networkTableInst.getTable("ClimbData").getEntry("climbPercentage");
+            liftPercentage.setNumber(percentCompleteLift);
+            liftPercentage = networkTableInst.getTable("ClimbData").getEntry("liftPercentage");
+
     }
 
 
