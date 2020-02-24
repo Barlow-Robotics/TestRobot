@@ -42,13 +42,33 @@ public class IndexingSubsystem extends Subsystem {
   IndexingState indexingState;
 
   NetworkTableInstance networkTableInst;
-  NetworkTableEntry kF_Index, kP_Index, kI_Index, kD_Index;
+  private NetworkTableEntry kF_Index;
+  private NetworkTableEntry kP_Index;
+  private NetworkTableEntry kI_Index;
+  private NetworkTableEntry kD_Index;
 
-  public IndexingSubsystem(){
+  public IndexingSubsystem(NetworkTableInstance networkTableInst){
     indexingWheelDriver = new WPI_TalonSRX(Constants.ID_shooterFeedMotor);
     agitatorMotor = new Spark(Constants.PWMPORT_agitatorMotor);
     cellCount = 0;
     indexingState = IndexingState.Idle;
+
+    this.networkTableInst = networkTableInst;
+    kF_Index = networkTableInst.getTable("shooter").getEntry("kF_Index");
+    kP_Index = networkTableInst.getTable("shooter").getEntry("kP_Index");
+    kI_Index = networkTableInst.getTable("shooter").getEntry("kI_Index");
+    kD_Index = networkTableInst.getTable("shooter").getEntry("kD_Index");
+
+    kF_Index.setNumber(Constants.DrivetrainKf);
+    kP_Index.setNumber(0.02);
+    kI_Index.setNumber(0);
+    kD_Index.setNumber(0);
+
+    indexingWheelDriver.configMotionCruiseVelocity(8192 * 10000);
+    indexingWheelDriver.config_kF(0, (double)kF_Index.getNumber(Constants.DrivetrainKf)); 
+    indexingWheelDriver.config_kP(0, (double)kP_Index.getNumber(0.02));
+    indexingWheelDriver.config_kI(0, (double)kI_Index.getNumber(0.0));
+    indexingWheelDriver.config_kD(0, (double)kD_Index.getNumber(0.0));
 
     ballExitSensor = new DigitalInput(Constants.DIOPORT_exitSensor);
     ballExitTransmitter = new DigitalOutput(Constants.DIOPORT_exitTransmitter);
@@ -68,6 +88,7 @@ public class IndexingSubsystem extends Subsystem {
   
   public void operateIndex(boolean firing, boolean cellChasing){
     keepTransmittersActive();
+    updatePIDValues();
     switch(indexingState){
       case Idle:
         if(firing)
@@ -127,6 +148,15 @@ public class IndexingSubsystem extends Subsystem {
   private void keepTransmittersActive(){
     ballIntakeTransmitter.set(true);
     ballExitTransmitter.set(true);
+  }
+
+
+
+  private void updatePIDValues(){
+    indexingWheelDriver.config_kF(0, (double)kF_Index.getNumber(Constants.DrivetrainKf)); 
+    indexingWheelDriver.config_kP(0, (double)kP_Index.getNumber(0.02));
+    indexingWheelDriver.config_kI(0, (double)kI_Index.getNumber(0.0));
+    indexingWheelDriver.config_kD(0, (double)kD_Index.getNumber(0.0));
   }
 
 
