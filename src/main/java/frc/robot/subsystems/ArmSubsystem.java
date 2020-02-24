@@ -57,19 +57,32 @@ public class ArmSubsystem extends Subsystem {
  
   private Solenoid openSolenoidDeploy;
   private Solenoid closeSolenoidDeploy;
-  private boolean wheelDeployed, colorMatched;
+  private boolean colorMatched;
   private Spark wheelSpinner = new Spark(0);
   
   NetworkTableInstance networkTableInst;
   NetworkTableEntry wheelState;
+  NetworkTableEntry timeOut;
+  NetworkTableEntry wheelPercentage;
+
+  long timeElapsed;
+
+  int colourTurn;
  
   ColourFilter colourFilter;
   int colorForCalibration; //G, B, Y, R
  
+  double percentCompleteArm;
+ 
   long waitStartTime;
  
   enum ArmState {
-    Idle, DeployingArm, SpinningWheel, SpinningDown, WaitingForTimeout, RetractingArm
+    Idle, 
+    DeployingArm, 
+    SpinningWheel, 
+    SpinningDown, 
+    WaitingForTimeout, 
+    RetractingArm
   };
  
   ArmState armState;
@@ -77,13 +90,16 @@ public class ArmSubsystem extends Subsystem {
   int desiredNumberOfColorChanges;
   char desiredColor;
  
+  int colourChangeCountGoal;
  
   public ArmSubsystem() {
+    percentCompleteArm = 0.0;
+    wheelPercentage.setNumber(percentCompleteArm);
+    wheelPercentage = networkTableInst.getTable("WheelOfFortune").getEntry("wheelPercentage");
     armState = ArmState.Idle;
     colorSensor = new ColorSensor();
     colourFilter = new ColourFilter(Constants.colourFilterLength, 'n');
     previousInput = false;
-    wheelDeployed = false;
     desiredNumberOfColorChanges = 0;
     desiredColor = 'N';
     colorForCalibration = 0;
@@ -119,6 +135,7 @@ public class ArmSubsystem extends Subsystem {
       wheelSpinner.set(0.0);
       deployWheel(false);
       if (oi.isOperatingWheel()) {
+        percentCompleteArm = 0.0;
         deployWheel(true);
         armState = ArmState.DeployingArm;
         previousInput = true;
@@ -132,15 +149,19 @@ public class ArmSubsystem extends Subsystem {
         FMSColour = getFMSColour();
         previousInput = oi.isOperatingWheel();
         desiredNumberOfColorChanges = 0;
-        if (FMSColour == Constants.NullColorConstant)
-          desiredNumberOfColorChanges = Constants.minColorChangeCountGoal;
+        if (FMSColour == Constants.NullColorConstant){
+          desiredNumberOfColorChanges = Constants.minColorChangeCountGoalTurn;
+          colourChangeCountGoal = Constants.minColorChangeCountGoalTurn; }
         else{
           desiredColor = FMSColourToDesiredColour.get(FMSColour);
+          desiredNumberOfColorChanges = Constants.minColorChangeCountGoalSpecificColor;
+          colourChangeCountGoal = Constants.minColorChangeCountGoalSpecificColor;
         }
         System.out.println(desiredColor);
         armState = ArmState.SpinningWheel;
       }
       break;
+      
     case SpinningWheel:
       wheelSpinner.set(Constants.maxSpinSpeed);
       currentColour = getColourFromSensor();
@@ -165,6 +186,8 @@ public class ArmSubsystem extends Subsystem {
         }
       }
       lastColour = currentColour;
+      percentCompleteArm = 0.6 * (colourChangeCountGoal -desiredNumberOfColorChanges ) ;
+
       break;
     case SpinningDown:
     wheelSpinner.set(wheelSpinner.get()*Constants.wheelDecrementFactor);
@@ -175,23 +198,31 @@ public class ArmSubsystem extends Subsystem {
       }
     break;
     case WaitingForTimeout:
+      timeElapsed = System.currentTimeMillis() - waitStartTime;
       if (!oi.isOperatingWheel()) {
         armState = ArmState.Idle;
       } 
-      else if (System.currentTimeMillis() - waitStartTime > Constants.wheelWaitTime) {
+      else if (timeElapsed > Constants.wheelWaitTime) {
         armState = ArmState.RetractingArm;
       }
+      timeOut.setNumber((double)(Constants.wheelWaitTime-timeElapsed)/1000.0);
+      timeOut = networkTableInst.getTable("WheelOfFortune").getEntry("timeOut");
+      percentCompleteArm = .6 + (double)((Constants.wheelWaitTime-timeElapsed)/1000.0) *0.4;
+
       break;
     case RetractingArm:
       deployWheel(false);
       armState = ArmState.Idle;
       break;
     }
+
+    wheelPercentage.setNumber(percentCompleteArm);
+    wheelPercentage = networkTableInst.getTable("WheelOfFortune").getEntry("wheelPercentage");
   }
 
 
   public void sendState(){
-    wheelState.forceSetString(armState.toString());
+    wheelState.setString(armState.toString());
   }
 
 
