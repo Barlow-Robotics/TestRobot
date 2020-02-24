@@ -36,8 +36,8 @@ public class Constants{
         public static final double PID_Period = 1.0/20.0;
         public static final double DrivetrainKf = 0.1797; //0.1797
 
-        public static final int unitsPerRotation = 8192;
-        public static final int desiredRPMs = 500;
+        public static final double unitsPerRotation = 8192;
+        public static final double desiredRPMs = 500;
         public static final double RPMsToUnitsPerHundredMilliseconds = 1.0/600.0;
         public static final double VelocityInputConversionFactor = desiredRPMs * unitsPerRotation * RPMsToUnitsPerHundredMilliseconds;
 
