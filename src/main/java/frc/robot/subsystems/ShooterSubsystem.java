@@ -88,8 +88,9 @@ public class ShooterSubsystem extends Subsystem {
     switch(shooterState){
       case IdleSpin:
         if(doSpin){
-          updatePIDValues();
-          shooterController.set(ControlMode.Velocity, -Constants.maxShooterSpeed); //CHANGE
+          // updatePIDValues();
+          shooterController.set(0.85);
+          // shooterController.set(ControlMode.Velocity, -Constants.maxShooterSpeed); //CHANGE
           // falconController.set(ControlMode.Velocity, -Constants.maxShooterSpeed);
           SmartDashboard.putNumber("Shooter Flywheel Speed", shooterController.getSelectedSensorVelocity(0));
         }
@@ -143,7 +144,7 @@ public class ShooterSubsystem extends Subsystem {
 
   private void updatePIDValues(){
     shooterController.config_kF(0, (double)kF_Shooter.getNumber(Constants.DrivetrainKf)); 
-    shooterController.config_kP(0, (double)kP_Shooter.getNumber(0.69));
+    shooterController.config_kP(0, (double)kP_Shooter.getNumber(0.0));
     shooterController.config_kI(0, (double)kI_Shooter.getNumber(0.0));
     shooterController.config_kD(0, (double)kD_Shooter.getNumber(0.0));
     if(System.currentTimeMillis()%1000 <= 20)
