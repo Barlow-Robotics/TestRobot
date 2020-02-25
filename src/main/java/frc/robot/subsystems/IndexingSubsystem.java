@@ -8,6 +8,8 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import frc.robot.Constants;
@@ -17,6 +19,7 @@ import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import frc.robot.components.BeamSensor;
 
 
 
@@ -30,8 +33,8 @@ public class IndexingSubsystem extends Subsystem {
   private WPI_TalonSRX indexingWheelDriver;
   private Spark agitatorMotor;
   private int cellCount;
-  private DigitalInput ballIntakeSensor, ballExitSensor;
-  private DigitalOutput ballIntakeTransmitter, ballExitTransmitter;
+  private BeamSensor exitSensor;
+  private BeamSensor entrySensor;
   private boolean prevIntakeValue, prevExitValue;
   enum IndexingState{
     Idle,
@@ -70,10 +73,8 @@ public class IndexingSubsystem extends Subsystem {
     indexingWheelDriver.config_kI(0, (double)kI_Index.getNumber(0.0));
     indexingWheelDriver.config_kD(0, (double)kD_Index.getNumber(0.0));
 
-    ballExitSensor = new DigitalInput(Constants.DIOPORT_exitSensor);
-    ballExitTransmitter = new DigitalOutput(Constants.DIOPORT_exitTransmitter);
-    ballIntakeSensor = new DigitalInput(Constants.DIOPORT_intakeSensor);
-    ballIntakeTransmitter = new DigitalOutput(Constants.DIOPORT_intakeTransmitter);
+    exitSensor = new BeamSensor(Constants.DIOPORT_exitSensor, Constants.DIOPORT_exitTransmitter);
+    entrySensor = new BeamSensor(Constants.DIOPORT_intakeSensor, Constants.DIOPORT_intakeTransmitter);
   } 
 
 
@@ -124,30 +125,46 @@ public class IndexingSubsystem extends Subsystem {
             cellCount++;
           agitatorMotor.set(Constants.agitatingSpeed);
         }
-      updatePreviousValues();
+      break;
     } 
+    if(ballHasEntered()) cellCount++;
+    if(ballHasExited()) cellCount--;
+    SmartDashboard.putNumber("Ball Count", cellCount);
+    updatePreviousValues();
   }
 
 
   private boolean ballHasExited(){
-    return prevExitValue != ballExitSensor.get() && !ballExitSensor.get();
+    return prevExitValue != exitSensor.getSensorValue() && !exitSensor.getSensorValue();
   }
 
 
   private boolean ballHasEntered(){
-    return prevIntakeValue != ballIntakeSensor.get() && !ballIntakeSensor.get();
+    return prevIntakeValue != entrySensor.getSensorValue() && !entrySensor.getSensorValue();
   }
 
 
   private void updatePreviousValues(){
-    prevExitValue = ballExitSensor.get();
-    prevIntakeValue = ballIntakeSensor.get();
+    prevExitValue = exitSensor.getSensorValue();
+    prevIntakeValue = entrySensor.getSensorValue();
   } 
 
 
+  public void postSensorValues(){
+    exitSensor.getSensorValue();
+    entrySensor.getSensorValue();
+  }
+
+
+  public void setSensorValues(boolean set){
+    exitSensor.setOutputValue(set);
+    entrySensor.setOutputValue(set);
+  }
+
+
   private void keepTransmittersActive(){
-    ballIntakeTransmitter.set(true);
-    ballExitTransmitter.set(true);
+    entrySensor.setOutputValue(true);
+    exitSensor.setOutputValue(true);
   }
 
 
