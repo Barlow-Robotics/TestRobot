@@ -210,17 +210,13 @@ public class Robot extends TimedRobot {
 
     loopTime.forceSetNumber(System.currentTimeMillis() - previousStartTime);
     previousStartTime = System.currentTimeMillis();
-
-    // intakeSubsystem.operateIntake(oi.getDeployIntakeManual());
-    // shooterSubsystem.operateShooter(true);
+    //============================================================
     indexingSubsystem.operateIndex(false, false);
-
+    //============================================================
     endTime = System.currentTimeMillis();
     duration = endTime - startTime;
 
     frameTime.forceSetNumber(duration);
-    //Send data to NetworkTable "performance" with entry "frameTime" for every cycle
-    //Send lastTime difference to entry "loopTime"
   }
 
   /**
