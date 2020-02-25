@@ -49,8 +49,6 @@ public class DriveSubsystem extends Subsystem {
   final double powerCellKd = 0.0;
   final double powerCellPeriod = 1.0/20.0;
   PIDController powerCellController; 
-
-  final double powerSpeed = 0.0;
   
   private double originalAngleToTarget;
   private double lastCycleAngleToTarget;
@@ -75,6 +73,7 @@ public class DriveSubsystem extends Subsystem {
   NetworkTableEntry powercellDistanceEntry ;
 
   private boolean finishedAligning;
+  private boolean finishedPath;
 
   // Put methods for controlling this subsystem
   // here. Call these from Commands.
@@ -88,14 +87,11 @@ public class DriveSubsystem extends Subsystem {
     navX = new AHRS(SerialPort.Port.kUSB);
 
     leftFrontSide.follow(leftBackSide);
-    leftBackSide.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, Constants.mainFeedbackLoop, Constants.timeoutTime); //Encoder as feedback device, main PID loop, 30 ms timeout time
-    leftBackSide.configClosedloopRamp(Constants.voltageRampingConstant);
-    leftBackSide.config_kF(Constants.PID_id, Constants.DrivetrainKf);
+    initializePIDConfig(leftBackSide);
 
     rightFrontSide.follow(rightBackSide);
-    rightBackSide.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, Constants.mainFeedbackLoop, Constants.timeoutTime); //Encoder as feedback device, main PID loop, 30 ms timeout time
-    rightBackSide.configClosedloopRamp(Constants.voltageRampingConstant);
-    rightBackSide.config_kF(Constants.PID_id, Constants.DrivetrainKf);
+    initializePIDConfig(rightBackSide);
+
 
     targetController = new PIDController(targetControllerKp, targetControllerKi, targetControllerKd, targetControllerPeriod);
     targetController.setTolerance(Constants.angleThreshold);
@@ -120,6 +116,7 @@ public class DriveSubsystem extends Subsystem {
     lastCycleAngleToTarget = 0;
 
     finishedAligning = false;
+    finishedPath = false;
   }
 
 
@@ -131,10 +128,8 @@ public class DriveSubsystem extends Subsystem {
 
 
   public void teleopDrive(double leftJoy, double rightJoy, boolean targetAligning, boolean chaseCell, boolean driveOnPath, PathParams pathParams){
-    SmartDashboard.putBoolean("Sees cell", canSeePowercell());
     switch (teleopDriveState) {
       case Manual:
-        SmartDashboard.putBoolean("Can See Target", canSeeTarget());
         if (targetAligning && canSeeTarget()) {
             targetController.reset();
             navX.reset();
@@ -190,8 +185,9 @@ public class DriveSubsystem extends Subsystem {
       case PathFollowing:
         leftBackSide.set(ControlMode.MotionMagic, pathParams.getLeftRotations());
         rightBackSide.set(ControlMode.MotionMagic, pathParams.getRightRotations());
-        if(true/*Path is done*/){
-          teleopDriveState = TeleopDriveState.Manual;
+        if(Math.abs(leftBackSide.getActiveTrajectoryPosition() - leftBackSide.getClosedLoopTarget()) < 20 
+           && Math.abs(leftBackSide.getActiveTrajectoryPosition() - leftBackSide.getClosedLoopTarget()) < 20){
+          finishedPath = true;
         }
       }
   }
@@ -228,6 +224,23 @@ public class DriveSubsystem extends Subsystem {
 
   private boolean NavXAndVisionAgree(){
     return Math.abs(originalAngleToTarget - currentAngleToTarget) < Constants.maxAngleDifferenceBetweenNavXAndVision;
+  }
+
+
+
+  private void initializePIDConfig(WPI_TalonSRX talon){
+    talon.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, Constants.mainFeedbackLoop, Constants.timeoutTime); //Encoder as feedback device, main PID loop, 30 ms timeout time
+    talon.configClosedloopRamp(Constants.voltageRampingConstant);
+    talon.configNominalOutputForward(0);
+    talon.configNominalOutputReverse(0);
+    talon.configPeakOutputForward(1.0);
+    talon.configPeakOutputReverse(1.0);
+    talon.configMotionCruiseVelocity((int)(Constants.unitsPerRotation * Constants.desiredRPMs));
+    talon.config_kF(Constants.PID_id, Constants.DrivetrainKf);
+    talon.config_kP(Constants.PID_id, Constants.DrivetrainkP);
+    talon.config_kI(Constants.PID_id, 0);
+    talon.config_kD(Constants.PID_id, 0);
+ 
   }
 
 
@@ -279,6 +292,6 @@ public class DriveSubsystem extends Subsystem {
 
 
   public boolean pathIsFinished(){
-    return true;
+    return finishedPath;
   }
 }
