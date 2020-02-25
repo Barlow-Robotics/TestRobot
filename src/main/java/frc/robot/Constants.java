@@ -17,8 +17,8 @@ public class Constants{
 
     //Sensors
         //Indexing ball count sensors
-        public static final int DIOPORT_intakeSensor = 0;
-        public static final int DIOPORT_intakeTransmitter = 1;
+        public static final int DIOPORT_intakeSensor = 1;
+        public static final int DIOPORT_intakeTransmitter = 0;
         public static final int DIOPORT_exitSensor = 2;
         public static final int DIOPORT_exitTransmitter = 3;
 
@@ -35,16 +35,19 @@ public class Constants{
         public static final int PID_id = 0;
         public static final double PID_Period = 1.0/20.0;
         public static final double DrivetrainKf = 0.1797; //0.1797
+        public static final double DrivetrainkP = 0.02;
 
         public static final double unitsPerRotation = 8192;
         public static final double desiredRPMs = 500;
         public static final double RPMsToUnitsPerHundredMilliseconds = 1.0/600.0;
         public static final double VelocityInputConversionFactor = desiredRPMs * unitsPerRotation * RPMsToUnitsPerHundredMilliseconds;
 
+
         public static final int timeoutTime = 30;
         public static final int mainFeedbackLoop = 0;
 
         public static final double autoBackingDistance = 3.5; //3.5 rotations of the wheel ~ 65"
+        public static final double pathFollowingThreshold = 20;
 
         public static final double speedConstantForBallChase = 0.5;
         public static final double maxAngleChangeForAlignFinish = 0.01;
