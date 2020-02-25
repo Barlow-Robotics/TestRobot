@@ -16,7 +16,6 @@ import com.revrobotics.ColorSensorV3;
 import edu.wpi.first.wpilibj.Solenoid;
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.OI;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.I2C;
 import com.revrobotics.ColorMatchResult;
@@ -35,9 +34,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  
 public class ArmSubsystem extends Subsystem {
   char colourGoal;
- 
-  OI oi = new OI();
- 
+  
   char currentColour = Constants.NullColorConstant;
   char lastColour = Constants.NullColorConstant;
   char FMSColour = Constants.NullColorConstant;
@@ -58,7 +55,7 @@ public class ArmSubsystem extends Subsystem {
   private Solenoid openSolenoidDeploy;
   private Solenoid closeSolenoidDeploy;
   private boolean colorMatched;
-  private Spark wheelSpinner = new Spark(0);
+  private WPI_TalonSRX wheelSpinner;
   
   NetworkTableInstance networkTableInst;
   NetworkTableEntry wheelState;
@@ -114,6 +111,8 @@ public class ArmSubsystem extends Subsystem {
     openSolenoidDeploy = new Solenoid(Constants.openSolenoidDeployPort);
     closeSolenoidDeploy = new Solenoid(Constants.closeSolenoidDeployPort);
 
+    wheelSpinner = new WPI_TalonSRX(Constants.ID_wheelRotationMotor);
+
     networkTableInst = NetworkTableInstance.getDefault();
     wheelState = networkTableInst.getTable("WheelOfFortune").getEntry("wheelState");
   }
@@ -127,14 +126,14 @@ public class ArmSubsystem extends Subsystem {
   
   
  
-  public void OperateControlPanel() {
+  public void OperateControlPanel(boolean operate) {
     wheelState.forceSetString(armState.toString());
     // SmartDashboard.putString("Arm State", armState.toString());
     switch (armState) {
     case Idle:
       wheelSpinner.set(0.0);
       deployWheel(false);
-      if (oi.isOperatingWheel()) {
+      if (operate) {
         percentCompleteArm = 0.0;
         deployWheel(true);
         armState = ArmState.DeployingArm;
@@ -142,12 +141,7 @@ public class ArmSubsystem extends Subsystem {
       }
       break;
     case DeployingArm:
-      if (previousInput != oi.isOperatingWheel() || colorMatched) {
-        armState = ArmState.Idle;
-      } 
-      else {
         FMSColour = getFMSColour();
-        previousInput = oi.isOperatingWheel();
         desiredNumberOfColorChanges = 0;
         if (FMSColour == Constants.NullColorConstant){
           desiredNumberOfColorChanges = Constants.minColorChangeCountGoalTurn;
@@ -157,26 +151,21 @@ public class ArmSubsystem extends Subsystem {
           desiredNumberOfColorChanges = Constants.minColorChangeCountGoalSpecificColor;
           colourChangeCountGoal = Constants.minColorChangeCountGoalSpecificColor;
         }
-        System.out.println(desiredColor);
         armState = ArmState.SpinningWheel;
-      }
       break;
       
     case SpinningWheel:
       wheelSpinner.set(Constants.maxSpinSpeed);
       currentColour = getColourFromSensor();
-      if(previousInput != oi.isOperatingWheel() && oi.isOperatingWheel()){
-        System.out.println("OP opt-out");
-        armState = ArmState.SpinningDown;
+      if(previousInput != operate && operate){
+        armState = ArmState.Idle;
       }
       else if(currentColour == desiredColor){
         System.out.println("Control exit");
-        wheelSpinner.set(0.0);
-        armState= ArmState.SpinningDown;
+        armState = ArmState.SpinningDown;
       }
       else if(desiredNumberOfColorChanges <= 0 && FMSColour == Constants.NullColorConstant){
         System.out.println("Color Change number exit");
-        wheelSpinner.set(0.0);
         armState= ArmState.SpinningDown;
       }
       else{
@@ -186,11 +175,13 @@ public class ArmSubsystem extends Subsystem {
         }
       }
       lastColour = currentColour;
-      percentCompleteArm = 0.6 * (colourChangeCountGoal -desiredNumberOfColorChanges ) ;
-
+      percentCompleteArm = 0.6 * (colourChangeCountGoal - desiredNumberOfColorChanges ) ;
       break;
     case SpinningDown:
-    wheelSpinner.set(wheelSpinner.get()*Constants.wheelDecrementFactor);
+      if(operate != previousInput && operate){
+        armState = ArmState.Idle;
+      }
+      wheelSpinner.set(wheelSpinner.get()*Constants.wheelDecrementFactor);
       if(Math.abs(wheelSpinner.get()) <= Constants.minSpinSpeed){
         wheelSpinner.set(0);
         armState = ArmState.WaitingForTimeout;
@@ -199,26 +190,27 @@ public class ArmSubsystem extends Subsystem {
     break;
     case WaitingForTimeout:
       timeElapsed = System.currentTimeMillis() - waitStartTime;
-      if (!oi.isOperatingWheel()) {
+      if(operate != previousInput && operate){
         armState = ArmState.Idle;
-      } 
+      }
       else if (timeElapsed > Constants.wheelWaitTime) {
         armState = ArmState.RetractingArm;
       }
       timeOut.setNumber((double)(Constants.wheelWaitTime-timeElapsed)/1000.0);
       timeOut = networkTableInst.getTable("WheelOfFortune").getEntry("timeOut");
       percentCompleteArm = .6 + (double)((Constants.wheelWaitTime-timeElapsed)/1000.0) *0.4;
-
       break;
     case RetractingArm:
+      wheelSpinner.set(0.0);
       deployWheel(false);
       armState = ArmState.Idle;
       break;
     }
-
+    previousInput = operate;
     wheelPercentage.setNumber(percentCompleteArm);
     wheelPercentage = networkTableInst.getTable("WheelOfFortune").getEntry("wheelPercentage");
   }
+
 
 
   public void sendState(){
@@ -226,18 +218,21 @@ public class ArmSubsystem extends Subsystem {
   }
 
 
+
   public void setStateToIdle(){
     armState = ArmState.Idle;
   }
 
 
-  public void calibrationMode(){
+
+  public void calibrationMode(boolean buttonPressed){
     SmartDashboard.putString("Calibrate", "Put color "+ colorSensor.getColorAtIndex(colorForCalibration) + " under sensor, then press the pink button");
-    if(oi.getPinkButton()){
+    if(buttonPressed){
       colorSensor.calibrateColor(colorForCalibration);
       colorForCalibration++;
     }
   }
+
 
 
   public void sendCurrentColour(){
