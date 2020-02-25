@@ -230,6 +230,7 @@ public class ArmSubsystem extends Subsystem {
     if(buttonPressed){
       colorSensor.calibrateColor(colorForCalibration);
       colorForCalibration++;
+      colorForCalibration %= 4;
     }
   }
 
