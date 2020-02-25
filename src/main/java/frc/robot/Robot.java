@@ -228,6 +228,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
-    
+    indexingSubsystem.operateIndex(oi.getIsShooting(), false);
+    shooterSubsystem.operateShooter(true);
   }
 }
