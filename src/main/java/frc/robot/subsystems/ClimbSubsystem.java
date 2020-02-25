@@ -6,7 +6,6 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj.Encoder;
-import frc.robot.OI;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -17,7 +16,6 @@ public class ClimbSubsystem extends Subsystem {
     NetworkTableEntry climbPercentage;
     double percentCompleteClimb; //actually climbing with robot
     double percentCompleteLift; //lifting the hook up
-    OI oi = new OI();
     private WPI_TalonSRX climbController = new WPI_TalonSRX(Constants.ID_climbMotor);
   
     Encoder liftMotorEncoder ;
@@ -39,13 +37,13 @@ public class ClimbSubsystem extends Subsystem {
 
     ClimbState climbState ;
 
-    void OperateClimb() {
+    void OperateClimb(boolean operate) {
         switch (climbState){
             case Idle:
                 percentCompleteClimb = 0.0;
                 percentCompleteLift = 0.0;
             
-                if(oi.isClimbing()){
+                if(operate){
                     climbController.set(ControlMode.Position, Constants.unitsPerRotation * Constants.desiredClimberRotationsUp);
                     liftMotorEncoder.reset();
                     climbState = ClimbState.LiftHook; 
@@ -55,7 +53,7 @@ public class ClimbSubsystem extends Subsystem {
                 if(climbController.getClosedLoopError() < Constants.tolerableUnitsFromMaxClimberValue){
                     climbState = ClimbState.HookAtTop ;
                 }
-                else if(!oi.isClimbing()){
+                else if(!operate){
                     stopMotor();
                 }
                 else{
@@ -64,11 +62,11 @@ public class ClimbSubsystem extends Subsystem {
                 percentCompleteLift = liftMotorEncoder.get()/1000;
                 break ;
             case HookAtTop:
-                if(oi.isClimbing()){
+                if(operate){
                     climbController.set(ControlMode.Position, Constants.unitsPerRotation * -Constants.desiredClimberRotationsDown);
                     climbState = ClimbState.LiftingBot ;
                 }
-                break ;
+                break;
             case LiftingBot:
                 liftMotorEncoder.reset();
                 if(climbController.getClosedLoopError() < Constants.tolerableUnitsFromMaxClimberValue){
