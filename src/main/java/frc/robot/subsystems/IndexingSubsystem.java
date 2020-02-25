@@ -130,6 +130,7 @@ public class IndexingSubsystem extends Subsystem {
     if(ballHasEntered()) cellCount++;
     if(ballHasExited()) cellCount--;
     SmartDashboard.putNumber("Ball Count", cellCount);
+    System.out.println(ballHasEntered());
     updatePreviousValues();
   }
 
