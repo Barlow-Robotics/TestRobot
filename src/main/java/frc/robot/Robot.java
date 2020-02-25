@@ -118,17 +118,17 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    
+    indexingSubsystem.setSensorValues(true);
+    indexingSubsystem.postSensorValues();
   }
 
   @Override
   public void disabledInit() {
-    // armSubsystem.setStateToIdle();
+    // indexingSubsystem.setSensorValues(false);
   }
 
   @Override
   public void disabledPeriodic() {
-    // armSubsystem.sendCurrentColour();
   }
 
   /**
@@ -212,8 +212,8 @@ public class Robot extends TimedRobot {
     previousStartTime = System.currentTimeMillis();
 
     // intakeSubsystem.operateIntake(oi.getDeployIntakeManual());
-    indexingSubsystem.operateIndex(oi.getIsShooting(), false);
-    shooterSubsystem.operateShooter(true);
+    // shooterSubsystem.operateShooter(true);
+    indexingSubsystem.operateIndex(false, false);
 
     endTime = System.currentTimeMillis();
     duration = endTime - startTime;
