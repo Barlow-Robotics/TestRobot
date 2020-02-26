@@ -17,8 +17,6 @@ import edu.wpi.first.wpilibj.Solenoid;
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.I2C;
-import com.revrobotics.ColorMatchResult;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.revrobotics.ColorMatch;
 
@@ -26,7 +24,6 @@ import frc.robot.components.ColorSensor;
 import frc.robot.components.ColourFilter;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 /**
  * Add your docs here.
@@ -45,16 +42,15 @@ public class ArmSubsystem extends Subsystem {
  
   ColorSensor colorSensor;
 
-  private final Color kBlueTarget = ColorMatch.makeColor(0.143, 0.427, 0.429);
-  private final Color kGreenTarget = ColorMatch.makeColor(0.197, 0.561, 0.240);
-  private final Color kRedTarget = ColorMatch.makeColor(0.561, 0.232, 0.114);
-  private final Color kYellowTarget = ColorMatch.makeColor(0.361, 0.524, 0.113);
+  private Color kBlueTarget = ColorMatch.makeColor(0.143, 0.427, 0.429);
+  private Color kGreenTarget = ColorMatch.makeColor(0.197, 0.561, 0.240);
+  private Color kRedTarget = ColorMatch.makeColor(0.561, 0.232, 0.114);
+  private Color kYellowTarget = ColorMatch.makeColor(0.361, 0.524, 0.113);
  
   //put calibrated colours here
  
   private Solenoid openSolenoidDeploy;
   private Solenoid closeSolenoidDeploy;
-  private boolean colorMatched;
   private WPI_TalonSRX wheelSpinner;
   
   NetworkTableInstance networkTableInst;
