@@ -86,6 +86,5 @@ public class IntakeSubsystem extends Subsystem {
   private void setIntakeDeploy(boolean deploy){
     intakeDeploy.set(deploy);
     intakeRetract.set(!deploy);
-
   }
 }
