@@ -72,6 +72,12 @@ public class Robot extends TimedRobot {
     Firing
   };
 
+  public enum StartingPosition{
+    Close,
+    Middle,
+    Far
+  };
+
   AutoState autoState;
 
 
@@ -88,7 +94,7 @@ public class Robot extends TimedRobot {
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
 
-    // driveSubsystem = new DriveSubsystem();
+    driveSubsystem = new DriveSubsystem();
     shooterSubsystem = new ShooterSubsystem(networkTable);
 
     // armSubsystem = new ArmSubsystem();
@@ -163,7 +169,7 @@ public class Robot extends TimedRobot {
       break;
       case DrivingPath:
         shooterSubsystem.operateShooter(true);
-        // driveSubsystem.teleopDrive(0, 0, false, false, true, new PathParams());
+        driveSubsystem.teleopDrive(0, 0, false, false, true, new PathParams(Math.PI/12, 2));
         if(driveSubsystem.pathIsFinished())
           autoState = AutoState.Aligning;
       break;
