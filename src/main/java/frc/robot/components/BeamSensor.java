@@ -2,6 +2,7 @@ package frc.robot.components;
 
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.AnalogOutput;
+import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
 
@@ -13,10 +14,12 @@ public class BeamSensor{
 
     DigitalInput receiver;
     DigitalOutput transmitter;
+    Counter digitalCounter;
 
     public BeamSensor(int inputChannel, int outputChannel){
         receiver = new DigitalInput(inputChannel);
         transmitter = new DigitalOutput(outputChannel);
+        digitalCounter = new Counter(receiver);
     }
 
 
