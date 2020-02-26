@@ -240,7 +240,6 @@ public class DriveSubsystem extends Subsystem {
     talon.config_kP(Constants.PID_id, Constants.DrivetrainkP);
     talon.config_kI(Constants.PID_id, 0);
     talon.config_kD(Constants.PID_id, 0);
- 
   }
 
 
