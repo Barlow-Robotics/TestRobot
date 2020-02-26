@@ -217,7 +217,7 @@ public class Robot extends TimedRobot {
     loopTime.forceSetNumber(System.currentTimeMillis() - previousStartTime);
     previousStartTime = System.currentTimeMillis();
     //============================================================
-    indexingSubsystem.operateIndex(false, false);
+    indexingSubsystem.operateIndex(false, oi.isBallChasing());
     //============================================================
     endTime = System.currentTimeMillis();
     duration = endTime - startTime;
