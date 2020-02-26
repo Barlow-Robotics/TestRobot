@@ -62,7 +62,7 @@ public class Constants{
 
     //Index
         public static final double feedingSpeed = 0.4;
-        public static final double agitatingSpeed = 0.3;
+        public static final double agitatingSpeed = 0.5;
 
     //Intake
         public static final int intakeDeployPort = 2;
