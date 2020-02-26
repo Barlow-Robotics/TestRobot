@@ -49,6 +49,7 @@ public class IndexingSubsystem extends Subsystem {
   private NetworkTableEntry kP_Index;
   private NetworkTableEntry kI_Index;
   private NetworkTableEntry kD_Index;
+  private NetworkTableEntry cellCountEntry;
 
   public IndexingSubsystem(NetworkTableInstance networkTableInst){
     indexingWheelDriver = new WPI_TalonSRX(Constants.ID_shooterFeedMotor);
@@ -61,11 +62,13 @@ public class IndexingSubsystem extends Subsystem {
     kP_Index = networkTableInst.getTable("shooter").getEntry("kP_Index");
     kI_Index = networkTableInst.getTable("shooter").getEntry("kI_Index");
     kD_Index = networkTableInst.getTable("shooter").getEntry("kD_Index");
+    cellCountEntry = networkTableInst.getTable("shooter").getEntry("cellCount");
 
     kF_Index.setNumber(Constants.DrivetrainKf);
     kP_Index.setNumber(0.02);
     kI_Index.setNumber(0);
     kD_Index.setNumber(0);
+    cellCountEntry.setNumber(0);
 
     indexingWheelDriver.configMotionCruiseVelocity(8192 * 10000);
     indexingWheelDriver.config_kF(0, (double)kF_Index.getNumber(Constants.DrivetrainKf)); 
@@ -130,7 +133,7 @@ public class IndexingSubsystem extends Subsystem {
     if(ballHasEntered()) cellCount++;
     if(ballHasExited()) cellCount--;
     SmartDashboard.putNumber("Ball Count", cellCount);
-    System.out.println(ballHasEntered());
+    cellCountEntry.setNumber(cellCount);
     updatePreviousValues();
   }
 
