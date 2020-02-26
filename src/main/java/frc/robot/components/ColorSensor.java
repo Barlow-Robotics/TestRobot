@@ -8,7 +8,6 @@ import com.revrobotics.ColorMatch;
 import com.revrobotics.ColorMatchResult;
 
 import edu.wpi.first.wpilibj.util.Color;
-import frc.robot.OI;
 
 //ESSENTIAL NOTE:
 //THIS CLASS CANNOT BE IN Robot WHILE ARMSUBSYSTEM IS ALSO THERE
@@ -19,7 +18,6 @@ public class ColorSensor{
     private ColorMatch colorMatcher = new ColorMatch();
     private final I2C.Port i2cPort =  I2C.Port.kOnboard;
     private char[] colors = {'G', 'B', 'Y', 'R'};
-    OI oi;
 
     private Color[] allColors = {colorMatcher.makeColor(0.197, 0.561, 0.240), //G
                                  colorMatcher.makeColor(0.143, 0.427, 0.429), //B
@@ -28,7 +26,6 @@ public class ColorSensor{
     
     public ColorSensor(){
         colorSensor = new ColorSensorV3(i2cPort);
-        oi = new OI();
     }
 
 
@@ -58,13 +55,12 @@ public class ColorSensor{
 
 
 
-    public void calibrateColor(int index){
+    public Color calibrateColor(int index){
         Color detectedColor = colorSensor.getColor();
-        if(oi.getTealButton()){
-            allColors[index] = colorMatcher.makeColor(detectedColor.red, detectedColor.green, detectedColor.blue);
-            postData();
-            postColor(index);
-        }
+        allColors[index] = colorMatcher.makeColor(detectedColor.red, detectedColor.green, detectedColor.blue);
+        postData();
+        postColor(index);
+        return allColors[index];
     }
 
 
