@@ -12,7 +12,6 @@ package frc.robot.subsystems;
  
 import edu.wpi.first.wpilibj.command.Subsystem;
 import java.util.HashMap;
-import com.revrobotics.ColorSensorV3;
 import edu.wpi.first.wpilibj.Solenoid;
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj.DriverStation;
