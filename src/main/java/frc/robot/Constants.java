@@ -38,7 +38,7 @@ public class Constants{
         public static final double DrivetrainkP = 0.02;
 
         public static final double unitsPerRotation = 8192;
-        public static final double desiredRPMs = 500;
+        public static final double desiredRPMs = 2000;
         public static final double RPMsToUnitsPerHundredMilliseconds = 1.0/600.0;
         public static final double VelocityInputConversionFactor = desiredRPMs * unitsPerRotation * RPMsToUnitsPerHundredMilliseconds;
 
@@ -61,7 +61,7 @@ public class Constants{
         public static final int boxControlPort = 1;
 
     //Index
-        public static final double feedingSpeed = 0.4;
+        public static final double feedingSpeed = 0.6;
         public static final double agitatingSpeed = 0.5;
 
     //Intake
@@ -90,7 +90,7 @@ public class Constants{
         public static final char NullColorConstant = 'N';
 
     //Shooter
-	    public static final double maxShooterSpeed = 0.85 * VelocityInputConversionFactor;
+	    public static final double maxShooterSpeed = 9881; //VelocityInputConversionFactor;
 	    public static final double maxShooterPercent = 0.85;
 	    public static final double minShooterSpeed = 0.05;
 
