@@ -27,7 +27,7 @@ public class OI{
 
         public boolean isAutoTargeting() {return controller.getRawButton(5);} //Top left trigger
         public boolean isBallChasing() {return controller.getRawButton(7);} //Bottom left trigger
-
+ 
         public boolean getIsShooting() {return controller.getRawButton(6);}     // Top right trigger
         public boolean getDeployIntakeManual() {return controller.getRawButton(8);} //Bottom right trigger
 
