@@ -21,6 +21,7 @@ import com.kauailabs.navx.frc.AHRS;
 import frc.robot.Constants;
 import frc.robot.components.PathParams;
 import edu.wpi.first.wpilibj.controller.PIDController;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.networktables.*;
 
 /**
@@ -38,10 +39,10 @@ public class DriveSubsystem extends Subsystem {
   
   AHRS navX;
 
-  final double targetControllerKp = 1.05; 
+  final double targetControllerKp = 1.0; 
   final double targetControllerKi = 0.0;
-  final double targetControllerKd = 0.2;
-  final double targetControllerPeriod = 1.0/20.0;
+  final double targetControllerKd = 0.4;
+  final double targetControllerPeriod = 1.0/50.0;
   PIDController targetController;
   
   final double powerCellKp = 0.375; 
@@ -86,12 +87,15 @@ public class DriveSubsystem extends Subsystem {
 
     navX = new AHRS(SerialPort.Port.kUSB);
 
+    leftBackSide.setInverted(false);
+    leftBackSide.setInverted(false);
     leftFrontSide.follow(leftBackSide);
     initializePIDConfig(leftBackSide);
 
+    rightBackSide.setInverted(true);
+    rightFrontSide.setInverted(true);
     rightFrontSide.follow(rightBackSide);
     initializePIDConfig(rightBackSide);
-
 
     targetController = new PIDController(targetControllerKp, targetControllerKi, targetControllerKd, targetControllerPeriod);
     targetController.setTolerance(Constants.angleThreshold);
@@ -152,21 +156,21 @@ public class DriveSubsystem extends Subsystem {
         if (!targetAligning){
           teleopDriveState = TeleopDriveState.Manual;
         } 
-        else if(finishedAligningUncorrected()){
-          originalAngleToTarget = angleToTargetFromVision();
-          if(NavXAndVisionAgree()){
-            teleopDriveState = TeleopDriveState.Manual;
-            finishedAligning = true;
-          }
-          else
-            currentAngleToTarget = angleToTargetFromVision();
-        }
+        // else if(finishedAligningUncorrected()){
+        //   originalAngleToTarget = angleToTargetFromVision();
+        //   if(NavXAndVisionAgree()){
+        //     teleopDriveState = TeleopDriveState.Manual;
+        //     finishedAligning = true;
+        //   }
+        //   else
+        //     currentAngleToTarget = angleToTargetFromVision();
+        // }
         else {
             currentAngleToTarget = originalAngleToTarget - (navX.getAngle()*Constants.degreesToRadiansFactor);
             SmartDashboard.putNumber("NavX Value", navX.getAngle());
             double output = targetController.calculate(currentAngleToTarget);
             leftBackSide.set(ControlMode.Velocity, output * Constants.VelocityInputConversionFactor);
-            rightBackSide.set(ControlMode.Velocity, output * Constants.VelocityInputConversionFactor);
+            rightBackSide.set(ControlMode.Velocity, -output * Constants.VelocityInputConversionFactor);
             lastCycleAngleToTarget = currentAngleToTarget;
         }
         break;
@@ -234,7 +238,7 @@ public class DriveSubsystem extends Subsystem {
     talon.configNominalOutputForward(0);
     talon.configNominalOutputReverse(0);
     talon.configPeakOutputForward(1.0);
-    talon.configPeakOutputReverse(1.0);
+    talon.configPeakOutputReverse(-1.0);
     talon.configMotionCruiseVelocity((int)(Constants.unitsPerRotation * Constants.desiredRPMs));
     talon.config_kF(Constants.PID_id, Constants.DrivetrainKf);
     talon.config_kP(Constants.PID_id, Constants.DrivetrainkP);
@@ -246,46 +250,37 @@ public class DriveSubsystem extends Subsystem {
 
   private void arcadeDrive(double speed, double angle){
 
+    speed = -speed;
+
+    System.out.println("Speed: " + speed);
+    System.out.println("Angle: "+angle);
+
     double leftPower = 0;
     double rightPower = 0;
 
-    //Figure out which input is stronger, adjust sign accordingly
-    double defaultInput = Math.copySign(Math.max(Math.abs(speed), Math.abs(angle)), speed);
+    angle *= 0.3;
 
-    if(speed >= Constants.drivetrainMinPower){
-      //Right-forward, else left-forward
-      if(angle >= Constants.drivetrainMinPower){
-        leftPower = defaultInput;
-        rightPower = speed - angle;
-      }
-      else if(angle <= Constants.drivetrainMinPower){
-        leftPower = speed - angle;
-        rightPower = defaultInput;
-      }
-    }
-    else if(speed <= -Constants.drivetrainMinPower){
-      //Left-backward, else right-backward
-      if(angle >= Constants.drivetrainMinPower){
-        leftPower = speed + angle;
-        rightPower = defaultInput;
-      }
-      else if(angle <= Constants.drivetrainMinPower){
-        leftPower = defaultInput;
-        rightPower = speed - angle;
-      }
-    }
-    else {
-      leftPower = 0;
-      rightPower = 0;
-    }
-    //Set motor output
-    leftBackSide.set(ControlMode.Velocity, leftPower * 500 * Constants.unitsPerRotation / 600);
-    rightBackSide.set(ControlMode.Velocity, rightPower * 500 * Constants.unitsPerRotation / 600);
+    leftPower = speed + angle;
+    rightPower = speed - angle;
+
+    System.out.println("Left power: " + leftPower);
+    System.out.println("Right power: " + rightPower);
+
+
+    leftBackSide.set(leftPower);
+    rightBackSide.set(rightPower);
+    // leftBackSide.set(ControlMode.Velocity, leftPower * 500 * Constants.unitsPerRotation / 600);
+    // rightBackSide.set(ControlMode.Velocity, rightPower * 500 * Constants.unitsPerRotation / 600);
   }
 
 
   public boolean finishedAligning(){
     return finishedAligning;
+  }
+
+
+  public void driveRight(){
+    rightBackSide.set(0.5);
   }
 
 
