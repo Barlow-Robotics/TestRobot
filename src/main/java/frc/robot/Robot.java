@@ -217,7 +217,9 @@ public class Robot extends TimedRobot {
     loopTime.forceSetNumber(System.currentTimeMillis() - previousStartTime);
     previousStartTime = System.currentTimeMillis();
     //============================================================
-    indexingSubsystem.operateIndex(false, oi.isBallChasing());
+    driveSubsystem.teleopDrive(oi.getForwardSpeed(), oi.getTurnAngle(), oi.isAutoTargeting(), oi.isBallChasing(), false, null);
+    shooterSubsystem.operateShooter(true);
+    indexingSubsystem.operateIndex(oi.getIsShooting(), oi.isBallChasing());
     //============================================================
     endTime = System.currentTimeMillis();
     duration = endTime - startTime;
@@ -230,7 +232,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
-    indexingSubsystem.operateIndex(oi.getIsShooting(), false);
-    shooterSubsystem.operateShooter(true);
+    shooterSubsystem.shooterManualControl(oi.getTriangleButton());
   }
 }
