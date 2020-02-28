@@ -21,7 +21,6 @@ import com.kauailabs.navx.frc.AHRS;
 import frc.robot.Constants;
 import frc.robot.components.PathParams;
 import edu.wpi.first.wpilibj.controller.PIDController;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.networktables.*;
 
 /**
@@ -48,7 +47,7 @@ public class DriveSubsystem extends Subsystem {
   final double powerCellKp = 0.375; 
   final double powerCellKi = 0.0;
   final double powerCellKd = 0.0;
-  final double powerCellPeriod = 1.0/20.0;
+  final double powerCellPeriod = 1.0/50.0;
   PIDController powerCellController; 
   
   private double originalAngleToTarget;
