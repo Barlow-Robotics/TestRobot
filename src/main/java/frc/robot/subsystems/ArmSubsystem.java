@@ -6,9 +6,6 @@
 /*----------------------------------------------------------------------------*/
  
 package frc.robot.subsystems;
-//servo port 0 
- 
-//sure we'll say the motor is port 1
  
 import edu.wpi.first.wpilibj.command.Subsystem;
 import java.util.HashMap;
@@ -45,9 +42,7 @@ public class ArmSubsystem extends Subsystem {
   private Color kGreenTarget = ColorMatch.makeColor(0.197, 0.561, 0.240);
   private Color kRedTarget = ColorMatch.makeColor(0.561, 0.232, 0.114);
   private Color kYellowTarget = ColorMatch.makeColor(0.361, 0.524, 0.113);
- 
-  //put calibrated colours here
- 
+  
   private Solenoid openSolenoidDeploy;
   private Solenoid closeSolenoidDeploy;
   private WPI_TalonSRX wheelSpinner;
