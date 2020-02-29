@@ -27,6 +27,14 @@ import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.IndexingSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.NetworkInterface;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the TimedRobot
@@ -41,10 +49,11 @@ public class Robot extends TimedRobot {
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
   private long startTime, endTime, duration, totalDuration, previousStartTime;
-  
+
   public OI oi = new OI();
 
-  //Encoder left = new Encoder(Constants.leftEncoderPorts[0], Constants.leftEncoderPorts[1]);
+  // Encoder left = new Encoder(Constants.leftEncoderPorts[0],
+  // Constants.leftEncoderPorts[1]);
 
   DriveSubsystem driveSubsystem;
   ShooterSubsystem shooterSubsystem;
@@ -56,39 +65,43 @@ public class Robot extends TimedRobot {
   IndexingSubsystem indexingSubsystem;
   IntakeSubsystem intakeSubsystem;
 
+  NetworkInterface networkInterface;
   NetworkTableInstance networkTable;
   NetworkTableEntry frameTime;
   NetworkTableEntry loopTime;
   NetworkTableEntry wheelState;
+  NetworkTableEntry IP_Address;
+
+  NetworkTableEntry startOnFarSide; // This is all data for the robot's autonomous mode
+  NetworkTableEntry startOnMiddle;
+  NetworkTableEntry startOnCloseSide;
+
+  byte[] ethernetByteList;
+  Enumeration<NetworkInterface> allNetworkInterfaces;
+
 
   // Compressor compressor;
-  
 
-  public enum AutoState{
-    Idle, 
-    DrivingPath, 
-    Searching, 
-    Aligning, 
-    Firing
+  public enum AutoState {
+    Idle, DrivingPath, Searching, Aligning, Firing
   };
 
-  public enum StartingPosition{
-    Close,
-    Middle,
-    Far
+  public enum StartingPosition {
+    Close, Middle, Far
   };
 
   AutoState autoState;
 
+  PathParams autoDriveParams;
 
   /**
-   * This function is run when the robot is first started up and should be
-   * used for any initialization code.
+   * This function is run when the robot is first started up and should be used
+   * for any initialization code.
    */
   @Override
   public void robotInit() {
-    //e = new Encoder(Constants.leftEncoderPorts[0], Constants.leftEncoderPorts[1]);
-    networkTable = NetworkTableInstance.getDefault(); 
+    
+    networkTable = NetworkTableInstance.getDefault();
 
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
@@ -98,19 +111,21 @@ public class Robot extends TimedRobot {
     shooterSubsystem = new ShooterSubsystem(networkTable);
 
     // armSubsystem = new ArmSubsystem();
-
     // climbSubsystem = new ClimbSubsystem();
     indexingSubsystem = new IndexingSubsystem(networkTable);
-    // intakeSubsystem = new IntakeSubsystem();
+    intakeSubsystem = new IntakeSubsystem();
 
-    autoState = AutoState.Idle;
-
+    autoState = AutoState.Aligning;
     
     frameTime = networkTable.getTable("performance").getEntry("frameTime");
     loopTime = networkTable.getTable("performance").getEntry("loopTime");
     wheelState = networkTable.getTable("WheelOfFortune").getEntry("wheelState");
 
-    // compressor = new Compressor(1);
+    startOnFarSide = networkTable.getTable("autoData").getEntry("startOnFarSide");
+    startOnMiddle = networkTable.getTable("autoData").getEntry("startOnMiddle");
+    startOnCloseSide = networkTable.getTable("autoData").getEntry("startOnCloseSide");
+
+    // compressor = new Compressor();
     // compressor.clearAllPCMStickyFaults();
   }
 
@@ -124,8 +139,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    indexingSubsystem.setSensorValues(true);
-    indexingSubsystem.postSensorValues();
+
   }
 
   @Override
@@ -153,6 +167,21 @@ public class Robot extends TimedRobot {
     m_autoSelected = m_chooser.getSelected();
     // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
     System.out.println("Auto selected: " + m_autoSelected);
+
+    //Owen | Change these values during testing to reflect a proper drive path
+    if(startOnCloseSide.getBoolean(false)){
+      autoDriveParams = new PathParams(0.0, 0.0);
+    }
+    else if(startOnMiddle.getBoolean(false)){
+      autoDriveParams = new PathParams(0.0, 0.0);
+    }
+    else if(startOnFarSide.getBoolean(false)){
+      autoDriveParams = new PathParams(0.0, 0.0);
+    }
+    else{
+      autoDriveParams = new PathParams(0.0, 0.0);
+    }
+
     autoState = AutoState.DrivingPath;
   }
 
@@ -164,14 +193,8 @@ public class Robot extends TimedRobot {
     switch(autoState){
       case Idle:
         shooterSubsystem.operateShooter(true);
-        indexingSubsystem.operateIndex(false, false);
+        indexingSubsystem.operateIndex(false, false, false);
         driveSubsystem.teleopDrive(0, 0, false, false, false, null);
-      break;
-      case DrivingPath:
-        shooterSubsystem.operateShooter(true);
-        driveSubsystem.teleopDrive(0, 0, false, false, true, new PathParams(Math.PI/12, 2));
-        if(driveSubsystem.pathIsFinished())
-          autoState = AutoState.Aligning;
       break;
       case Aligning:
         shooterSubsystem.operateShooter(true);
@@ -181,8 +204,14 @@ public class Robot extends TimedRobot {
       break;
       case Firing:
         shooterSubsystem.operateShooter(true);
-        indexingSubsystem.operateIndex(true, false);
+        indexingSubsystem.operateIndex(true, false, false);
         if(indexingSubsystem.getCellCount() == 0)
+          autoState = AutoState.Idle;
+      break;
+      case DrivingPath:
+        shooterSubsystem.operateShooter(true);
+        driveSubsystem.teleopDrive(0, 0, false, false, true, autoDriveParams);
+        if(driveSubsystem.pathIsFinished())
           autoState = AutoState.Idle;
       break;
       default:
@@ -205,6 +234,7 @@ public class Robot extends TimedRobot {
     super.teleopInit();
     System.out.println("Period: " + this.m_period);
     previousStartTime = System.currentTimeMillis();
+    System.out.println(ethernetByteList);
   }
 
   /**
@@ -219,7 +249,8 @@ public class Robot extends TimedRobot {
     //============================================================
     driveSubsystem.teleopDrive(oi.getForwardSpeed(), oi.getTurnAngle(), oi.isAutoTargeting(), oi.isBallChasing(), false, null);
     shooterSubsystem.operateShooter(true);
-    indexingSubsystem.operateIndex(oi.getIsShooting(), oi.isBallChasing());
+    indexingSubsystem.operateIndex(oi.getIsShooting(), oi.getDeployIntakeManual(), false);
+    intakeSubsystem.operateIntake(oi.getDeployIntakeManual());
     //============================================================
     endTime = System.currentTimeMillis();
     duration = endTime - startTime;
@@ -227,11 +258,18 @@ public class Robot extends TimedRobot {
     frameTime.forceSetNumber(duration);
   }
 
+  PathParams testParams;
+
+  @Override
+  public void testInit() {
+    testParams = new PathParams(1.0, 12);
+  }
+
   /**
    * This function is called periodically during test mode.
    */
   @Override
   public void testPeriodic() {
-    shooterSubsystem.shooterManualControl(oi.getTriangleButton());
+    driveSubsystem.teleopDrive(0.0, 0.0, true, false, false, null);
   }
 }
