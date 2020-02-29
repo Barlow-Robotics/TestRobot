@@ -18,7 +18,7 @@ import frc.robot.Constants;
 
 
 public class IntakeSubsystem extends Subsystem {
-  private Solenoid intakeDeploy, intakeRetract;
+  // private Solenoid intakeDeploy, intakeRetract;
   private Spark intakeMotor;
   private boolean priorOperatorInput = false;
 
@@ -32,9 +32,10 @@ public class IntakeSubsystem extends Subsystem {
   IntakeState intakeState;
 
   public IntakeSubsystem(){
-    intakeDeploy = new Solenoid(Constants.intakeDeployPort);
-    intakeRetract = new Solenoid(Constants.intakeRetractPort);
+    // intakeDeploy = new Solenoid(Constants.intakeDeployPort);
+    // intakeRetract = new Solenoid(Constants.intakeRetractPort);
     intakeMotor = new Spark(Constants.PWMPORT_intakeMotorPort);
+    intakeState = IntakeState.RetractedIdle ;
   }
 
 
@@ -84,7 +85,7 @@ public class IntakeSubsystem extends Subsystem {
 
 
   private void setIntakeDeploy(boolean deploy){
-    intakeDeploy.set(deploy);
-    intakeRetract.set(!deploy);
+    // intakeDeploy.set(deploy);
+    // intakeRetract.set(!deploy);
   }
 }
