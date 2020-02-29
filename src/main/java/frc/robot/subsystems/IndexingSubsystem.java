@@ -10,6 +10,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import frc.robot.Constants;
@@ -36,7 +37,8 @@ public class IndexingSubsystem extends Subsystem {
   enum IndexingState{
     Idle,
     Feeding,
-    ProcessingIntake
+    ProcessingIntake,
+    ManualIntake
   }
   
   IndexingState indexingState;
@@ -61,17 +63,17 @@ public class IndexingSubsystem extends Subsystem {
     kD_Index = networkTableInst.getTable("shooter").getEntry("kD_Index");
     cellCountEntry = networkTableInst.getTable("shooter").getEntry("cellCount");
 
-    kF_Index.setNumber(Constants.DrivetrainKf);
-    kP_Index.setNumber(0.02);
+    kF_Index.setNumber(0.028);
+    kP_Index.setNumber(0.015);
     kI_Index.setNumber(0);
-    kD_Index.setNumber(0);
+    kD_Index.setNumber(0.003);
     cellCountEntry.setNumber(0);
 
     indexingWheelDriver.configMotionCruiseVelocity(8192 * 10000);
-    indexingWheelDriver.config_kF(0, (double)kF_Index.getNumber(Constants.DrivetrainKf)); 
-    indexingWheelDriver.config_kP(0, (double)kP_Index.getNumber(0.02));
+    indexingWheelDriver.config_kF(0, (double)kF_Index.getNumber(0.028)); 
+    indexingWheelDriver.config_kP(0, (double)kP_Index.getNumber(0.015));
     indexingWheelDriver.config_kI(0, (double)kI_Index.getNumber(0.0));
-    indexingWheelDriver.config_kD(0, (double)kD_Index.getNumber(0.0));
+    indexingWheelDriver.config_kD(0, (double)kD_Index.getNumber(0.003));
 
     exitSensor = new BeamSensor(Constants.DIOPORT_exitSensor, Constants.DIOPORT_exitTransmitter);
     entrySensor = new BeamSensor(Constants.DIOPORT_intakeSensor, Constants.DIOPORT_intakeTransmitter);
@@ -87,7 +89,7 @@ public class IndexingSubsystem extends Subsystem {
 
 
   
-  public void operateIndex(boolean firing, boolean cellChasing){
+  public void operateIndex(boolean firing, boolean manualIntake, boolean cellChasing){
     keepTransmittersActive();
     updatePIDValues();
     switch(indexingState){
@@ -96,6 +98,8 @@ public class IndexingSubsystem extends Subsystem {
           indexingState = IndexingState.Feeding;
         else if(cellChasing)
           indexingState = IndexingState.ProcessingIntake;
+        else if(manualIntake)
+          indexingState = IndexingState.ManualIntake;
         else {
           indexingWheelDriver.set(0.0);
           agitatorMotor.set(0.0);
@@ -108,7 +112,7 @@ public class IndexingSubsystem extends Subsystem {
           indexingState = IndexingState.Idle;
         }
         else{
-          indexingWheelDriver.set(-Constants.feedingSpeed);
+          indexingWheelDriver.set(ControlMode.Velocity, -0.60 * Constants.feedingVelocity);
           agitatorMotor.set(Constants.agitatingSpeed);
           if(ballHasExited())
             cellCount--;
@@ -117,6 +121,17 @@ public class IndexingSubsystem extends Subsystem {
         break;
       case ProcessingIntake:
         if(!cellChasing){
+          agitatorMotor.set(0);
+          indexingState = IndexingState.Idle;
+        }
+        else{
+          if(ballHasEntered())
+            cellCount++;
+          agitatorMotor.set(Constants.agitatingSpeed);
+        }
+      break;
+      case ManualIntake:
+        if(!manualIntake){
           agitatorMotor.set(0);
           indexingState = IndexingState.Idle;
         }
