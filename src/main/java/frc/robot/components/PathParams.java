@@ -17,13 +17,13 @@ public class PathParams {
     
 
     public double getLeftRotations(){
-        return leftRotations;
+        return leftRotations * 8192.0;
     }
 
 
 
     public double getRightRotations(){
-        return rightRotations;
+        return rightRotations * 8192.0;
     }
     
 }
