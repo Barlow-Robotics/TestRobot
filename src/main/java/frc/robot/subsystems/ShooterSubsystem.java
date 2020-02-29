@@ -64,17 +64,17 @@ public class ShooterSubsystem extends Subsystem {
     kI_Shooter = networkTableInst.getTable("shooter").getEntry("kI_Shooter");
     kD_Shooter = networkTableInst.getTable("shooter").getEntry("kD_Shooter");
 
-    kF_Shooter.setNumber(Constants.DrivetrainKf);
-    kP_Shooter.setNumber(0.0);
-    kI_Shooter.setNumber(0);
-    kD_Shooter.setNumber(0);
+    kF_Shooter.setNumber(0.021);
+    kP_Shooter.setNumber(0.013);
+    kI_Shooter.setNumber(0.000);
+    kD_Shooter.setNumber(0.003);
 
     // shooterController.configMotionAcceleration();
     shooterController.configMotionCruiseVelocity(8192 * 10000);
-    shooterController.config_kF(0, (double)kF_Shooter.getNumber(Constants.DrivetrainKf)); 
-    shooterController.config_kP(0, (double)kP_Shooter.getNumber(0.0));
-    shooterController.config_kI(0, (double)kI_Shooter.getNumber(0.0));
-    shooterController.config_kD(0, (double)kD_Shooter.getNumber(0.0));
+    shooterController.config_kF(0, (double)kF_Shooter.getNumber(0.021)); 
+    shooterController.config_kP(0, (double)kP_Shooter.getNumber(0.013));
+    shooterController.config_kI(0, (double)kI_Shooter.getNumber(0.000));
+    shooterController.config_kD(0, (double)kD_Shooter.getNumber(0.003));
     
   }
 
@@ -89,8 +89,7 @@ public class ShooterSubsystem extends Subsystem {
       case IdleSpin:
         if(doSpin){
           updatePIDValues();
-          //shooterController.set(1.0);
-          shooterController.set(ControlMode.Velocity, 0.75 * Constants.maxShooterSpeed); //CHANGE
+          shooterController.set(ControlMode.Velocity, 0.85 * Constants.maxShooterSpeed); //CHANGE
           // falconController.set(ControlMode.Velocity, -Constants.maxShooterSpeed);
           SmartDashboard.putNumber("Shooter Flywheel Speed", shooterController.getSelectedSensorVelocity(0));
         }
@@ -119,20 +118,6 @@ public class ShooterSubsystem extends Subsystem {
     SmartDashboard.putNumber("Current Angle", servoAngle * 90);
   }
 
-
-
-  private double threshold(double speed){
-    if(speed > Constants.maxShooterSpeed)
-      speed = Constants.maxShooterSpeed;
-    else if(speed < 0)
-      speed = 0;
-    //else if(speed < Constants.minShooterSpeed)
-      //speed = 0;
-    //else if(speed > -Constants.minShooterSpeed)
-      //speed = 0;
-
-    return speed;
-  }
 
 
   public void shooterManualControl(boolean spin){
