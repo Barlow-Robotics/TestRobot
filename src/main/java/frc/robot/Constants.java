@@ -12,8 +12,8 @@ public class Constants{
         public static final int ID_shooterFeedMotor = 7;
         public static final int ID_climbMotor = 8;
 
-        public static final int PWMPORT_agitatorMotor = 1;
         public static final int PWMPORT_intakeMotorPort = 0;
+        public static final int PWMPORT_agitatorMotor = 1;
 
     //Sensors
         //Indexing ball count sensors
@@ -30,7 +30,7 @@ public class Constants{
     //Drivetrain
         public static final double drivetrainMinPower = 0.05;
         public static final double drivetrainMaxPower = 1.0;
-        public static final double voltageRampingConstant = 0.3;
+        public static final double voltageRampingConstant = 0.6;
 
         public static final int PID_id = 0;
         public static final double PID_Period = 1.0/20.0;
@@ -38,9 +38,9 @@ public class Constants{
         public static final double DrivetrainkP = 0.02;
 
         public static final double unitsPerRotation = 8192;
-        public static final double desiredRPMs = 2000;
         public static final double RPMsToUnitsPerHundredMilliseconds = 1.0/600.0;
-        public static final double VelocityInputConversionFactor = desiredRPMs * unitsPerRotation * RPMsToUnitsPerHundredMilliseconds;
+        public static final double desiredRPMsForDrive = 500.0;
+        public static final double VelocityInputConversionFactor = desiredRPMsForDrive * unitsPerRotation * RPMsToUnitsPerHundredMilliseconds;
 
 
         public static final int timeoutTime = 30;
@@ -62,12 +62,13 @@ public class Constants{
 
     //Index
         public static final double feedingSpeed = 0.6;
-        public static final double agitatingSpeed = 0.5;
+        public static final double agitatingSpeed = -0.45;
+        public static final double feedingVelocity = 33500;
 
     //Intake
         public static final int intakeDeployPort = 2;
         public static final int intakeRetractPort = 3;
-        public static final double intakeSpeed = 0.5;
+        public static final double intakeSpeed = 0.75;
 
     //Wheel
         public static final int openSolenoidDeployPort = 1;
@@ -90,9 +91,10 @@ public class Constants{
         public static final char NullColorConstant = 'N';
 
     //Shooter
-	    public static final double maxShooterSpeed = 9881; //VelocityInputConversionFactor;
+	    public static final double maxShooterSpeed = 46000; //Units per 100 milliseconds
 	    public static final double maxShooterPercent = 0.85;
-	    public static final double minShooterSpeed = 0.05;
+        public static final double minShooterSpeed = 0.05;        
+        public static final double desiredSensorUnitsPerHundredMilliseconds = 46000;
 
         public static final int leftServoPort = 0;
         public static final int rightServoPort = 1;
