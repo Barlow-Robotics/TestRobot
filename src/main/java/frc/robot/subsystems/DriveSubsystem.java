@@ -38,9 +38,9 @@ public class DriveSubsystem extends Subsystem {
   
   AHRS navX;
 
-  final double targetControllerKp = 1.0; 
+  final double targetControllerKp = 7.5; 
   final double targetControllerKi = 0.0;
-  final double targetControllerKd = 0.4;
+  final double targetControllerKd = 0.5;
   final double targetControllerPeriod = 1.0/50.0;
   PIDController targetController;
   
@@ -238,7 +238,7 @@ public class DriveSubsystem extends Subsystem {
     talon.configNominalOutputReverse(0);
     talon.configPeakOutputForward(1.0);
     talon.configPeakOutputReverse(-1.0);
-    talon.configMotionCruiseVelocity((int)(Constants.unitsPerRotation * Constants.desiredRPMs));
+    talon.configMotionCruiseVelocity((int)(Constants.unitsPerRotation * Constants.desiredRPMsForDrive));
     talon.config_kF(Constants.PID_id, Constants.DrivetrainKf);
     talon.config_kP(Constants.PID_id, Constants.DrivetrainkP);
     talon.config_kI(Constants.PID_id, 0);
@@ -251,23 +251,19 @@ public class DriveSubsystem extends Subsystem {
 
     speed = -speed;
 
-    System.out.println("Speed: " + speed);
-    System.out.println("Angle: "+angle);
-
     double leftPower = 0;
     double rightPower = 0;
 
-    angle *= 0.3;
+    angle *= 0.5;
 
     leftPower = speed + angle;
     rightPower = speed - angle;
 
-    System.out.println("Left power: " + leftPower);
-    System.out.println("Right power: " + rightPower);
-
-
     leftBackSide.set(leftPower);
     rightBackSide.set(rightPower);
+
+    SmartDashboard.putNumber("Left Power", leftPower);
+    
     // leftBackSide.set(ControlMode.Velocity, leftPower * 500 * Constants.unitsPerRotation / 600);
     // rightBackSide.set(ControlMode.Velocity, rightPower * 500 * Constants.unitsPerRotation / 600);
   }
