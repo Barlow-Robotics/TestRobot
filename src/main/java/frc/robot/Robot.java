@@ -13,6 +13,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -81,6 +82,7 @@ public class Robot extends TimedRobot {
 
 
   // Compressor compressor;
+  PowerDistributionPanel PDP;
 
   public enum AutoState {
     Idle, DrivingPath, Searching, Aligning, Firing
@@ -124,6 +126,9 @@ public class Robot extends TimedRobot {
     startOnFarSide = networkTable.getTable("autoData").getEntry("startOnFarSide");
     startOnMiddle = networkTable.getTable("autoData").getEntry("startOnMiddle");
     startOnCloseSide = networkTable.getTable("autoData").getEntry("startOnCloseSide");
+
+    PDP = new PowerDistributionPanel();
+    PDP.clearStickyFaults();
 
     // compressor = new Compressor();
     // compressor.clearAllPCMStickyFaults();
