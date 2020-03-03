@@ -38,9 +38,9 @@ public class DriveSubsystem extends Subsystem {
   
   AHRS navX;
 
-  final double targetControllerKp = 7.5; 
+  final double targetControllerKp = 2.8; 
   final double targetControllerKi = 0.0;
-  final double targetControllerKd = 0.5;
+  final double targetControllerKd = 0.0;
   final double targetControllerPeriod = 1.0/50.0;
   PIDController targetController;
   
@@ -233,8 +233,8 @@ public class DriveSubsystem extends Subsystem {
 
   private void initializePIDConfig(WPI_TalonSRX talon){
     talon.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, Constants.mainFeedbackLoop, Constants.timeoutTime); //Encoder as feedback device, main PID loop, 30 ms timeout time
-    talon.configClosedloopRamp(Constants.voltageRampingConstant);
-    talon.configOpenloopRamp(Constants.voltageRampingConstant);
+    talon.configClosedloopRamp(Constants.closedVoltageRampingConstant);
+    talon.configOpenloopRamp(Constants.manualVoltageRampingConstant);
     talon.configNominalOutputForward(0);
     talon.configNominalOutputReverse(0);
     talon.configPeakOutputForward(1.0);
@@ -256,7 +256,7 @@ public class DriveSubsystem extends Subsystem {
     double rightPower = 0;
 
     angle *= 0.5;
-    // speed *= 0.85;
+    speed *= 0.5;
 
     leftPower = speed + angle;
     rightPower = speed - angle;
@@ -266,6 +266,7 @@ public class DriveSubsystem extends Subsystem {
     leftBackSide.set(ControlMode.Velocity, leftPower * Constants.maxDriveVelocity);
     rightBackSide.set(ControlMode.Velocity, rightPower * Constants.maxDriveVelocity);
   }
+
 
 
   public boolean finishedAligning(){
