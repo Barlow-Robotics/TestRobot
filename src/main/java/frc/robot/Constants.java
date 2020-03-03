@@ -32,7 +32,8 @@ public class Constants{
     //Drivetrain
         public static final double drivetrainMinPower = 0.05;
         public static final double drivetrainMaxPower = 1.0;
-        public static final double voltageRampingConstant = 0.6;
+        public static final double manualVoltageRampingConstant = 1.0;
+        public static final double closedVoltageRampingConstant = 0.6;
 
         public static final int PID_id = 0;
         public static final double PID_Period = 1.0/20.0;
@@ -65,7 +66,7 @@ public class Constants{
 
     //Index
         public static final double desiredFeedingPercent = 0.75;
-        public static final double agitatingSpeed = -0.55;
+        public static final double agitatingSpeed = -0.40;
         public static final double maxFeedingVelocity = -34712;
 
         public static final double indexingkF = 0.028;
@@ -99,7 +100,7 @@ public class Constants{
 
     //Shooter
 	    public static final double maxShooterSpeed = 47816; //Units per 100 milliseconds
-	    public static final double desiredShooterPercent = 0.75;
+	    public static final double desiredShooterPercent = 0.25;
         public static final double minShooterSpeed = 0.05;        
         public static final double desiredSensorUnitsPerHundredMilliseconds = 47618;
 
