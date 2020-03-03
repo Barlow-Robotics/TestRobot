@@ -128,8 +128,8 @@ public class Robot extends TimedRobot {
     startOnMiddle = networkTable.getTable("autoData").getEntry("startOnMiddle");
     startOnCloseSide = networkTable.getTable("autoData").getEntry("startOnCloseSide");
 
-    PDP = new PowerDistributionPanel();
-    PDP.clearStickyFaults();
+    // PDP = new PowerDistributionPanel();
+    // PDP.clearStickyFaults();
 
     // compressor = new Compressor();
     // compressor.clearAllPCMStickyFaults();
@@ -254,7 +254,7 @@ public class Robot extends TimedRobot {
     loopTime.forceSetNumber(System.currentTimeMillis() - previousStartTime);
     previousStartTime = System.currentTimeMillis();
     //============================================================
-    // driveSubsystem.teleopDrive(oi.getForwardSpeed(), oi.getTurnAngle(), oi.isAutoTargeting(), oi.isBallChasing(), false, null);
+    driveSubsystem.teleopDrive(oi.getForwardSpeed(), oi.getTurnAngle(), oi.isAutoTargeting(), oi.isBallChasing(), false, null);
     shooterSubsystem.operateShooter(false, false);
     indexingSubsystem.operateIndex(oi.getIsShooting(), oi.getDeployIntakeManual(), false);
     intakeSubsystem.operateIntake(oi.getDeployIntakeManual());
@@ -278,7 +278,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
-    armSubsystem.OperateControlPanel(oi.getTriangleButton());
+    indexingSubsystem.operateIndex(false, oi.getIsShooting(), false);
   }
 
 }
