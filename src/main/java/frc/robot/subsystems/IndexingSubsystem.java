@@ -35,14 +35,23 @@ public class IndexingSubsystem extends Subsystem {
   private BeamSensor exitSensor;
   private BeamSensor entrySensor;
   private boolean prevIntakeValue, prevExitValue;
+  private boolean agitatingDirection;
+  private double cycleStart;
   enum IndexingState{
     Idle,
     Feeding,
     ProcessingIntake,
     ManualIntake
   }
+
+  enum AgitatingState{
+    Clockwise, 
+    Counterclockwise, 
+    Off
+  }
   
   IndexingState indexingState;
+  AgitatingState agitatingState;
 
   NetworkTableInstance networkTableInst;
   private NetworkTableEntry kF_Index;
@@ -79,6 +88,9 @@ public class IndexingSubsystem extends Subsystem {
 
     exitSensor = new BeamSensor(Constants.DIOPORT_exitSensor, Constants.DIOPORT_exitTransmitter);
     entrySensor = new BeamSensor(Constants.DIOPORT_intakeSensor, Constants.DIOPORT_intakeTransmitter);
+    
+    agitatingState = AgitatingState.Off;
+    cycleStart = 0;
   } 
 
 
@@ -96,8 +108,11 @@ public class IndexingSubsystem extends Subsystem {
     updatePIDValues();
     switch(indexingState){
       case Idle:
-        if(firing)
+        if(firing){
           indexingState = IndexingState.Feeding;
+          agitatingState = AgitatingState.Clockwise;
+          cycleStart = System.currentTimeMillis();
+        }
         else if(cellChasing)
           indexingState = IndexingState.ProcessingIntake;
         else if(manualIntake)
@@ -112,10 +127,21 @@ public class IndexingSubsystem extends Subsystem {
           indexingWheelDriver.set(0);
           agitatorMotor.set(0);
           indexingState = IndexingState.Idle;
+          agitatingState = AgitatingState.Off;
         }
         else{
           indexingWheelDriver.set(ControlMode.Velocity, Constants.desiredFeedingPercent * Constants.maxFeedingVelocity);
-          agitatorMotor.set(Constants.agitatingSpeed);
+          switch(agitatingState){
+            case Off:
+              agitatorMotor.set(0.0);
+              break;
+            case Clockwise:
+              agitatorMotor.set(-Constants.agitatingSpeed);
+              break;
+            case Counterclockwise:
+              agitatorMotor.set(Constants.agitatingSpeed);
+              break;
+          }
           SmartDashboard.putNumber("Agitation", agitatorMotor.get());
           if(ballHasExited())
             cellCount--;
