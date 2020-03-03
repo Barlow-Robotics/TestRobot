@@ -64,17 +64,17 @@ public class ShooterSubsystem extends Subsystem {
     kI_Shooter = networkTableInst.getTable("shooter").getEntry("kI_Shooter");
     kD_Shooter = networkTableInst.getTable("shooter").getEntry("kD_Shooter");
 
-    kF_Shooter.setNumber(0.021);
-    kP_Shooter.setNumber(0.013);
+    kF_Shooter.setNumber(Constants.shooterkF);
+    kP_Shooter.setNumber(Constants.shooterkP);
     kI_Shooter.setNumber(0.000);
-    kD_Shooter.setNumber(0.003);
+    kD_Shooter.setNumber(Constants.shooterkD);
 
     // shooterController.configMotionAcceleration();
     shooterController.configMotionCruiseVelocity(8192 * 10000);
-    shooterController.config_kF(0, (double)kF_Shooter.getNumber(0.021)); 
-    shooterController.config_kP(0, (double)kP_Shooter.getNumber(0.013));
+    shooterController.config_kF(0, (double)kF_Shooter.getNumber(Constants.shooterkF)); 
+    shooterController.config_kP(0, (double)kP_Shooter.getNumber(Constants.shooterkP));
     shooterController.config_kI(0, (double)kI_Shooter.getNumber(0.000));
-    shooterController.config_kD(0, (double)kD_Shooter.getNumber(0.003));
+    shooterController.config_kD(0, (double)kD_Shooter.getNumber(Constants.shooterkD));
     
   }
 
@@ -84,14 +84,17 @@ public class ShooterSubsystem extends Subsystem {
     // setDefaultCommand(new MySpecialCommand());
   }
 
-  public void operateShooter(boolean doSpin){
+  public void operateShooter(boolean doSpin, boolean directPercent){
     switch(shooterState){
       case IdleSpin:
-        if(doSpin){
+        if(doSpin && !directPercent){
           updatePIDValues();
-          shooterController.set(ControlMode.Velocity, 0.85 * Constants.maxShooterSpeed); //CHANGE
+          shooterController.set(ControlMode.Velocity, Constants.desiredShooterPercent * Constants.maxShooterSpeed); //CHANGE
           // falconController.set(ControlMode.Velocity, -Constants.maxShooterSpeed);
           SmartDashboard.putNumber("Shooter Flywheel Speed", shooterController.getSelectedSensorVelocity(0));
+        }
+        else if(doSpin && directPercent){
+          shooterController.set(0.85);
         }
         else {
           shooterController.set(0.0);
@@ -120,9 +123,14 @@ public class ShooterSubsystem extends Subsystem {
 
 
 
-  public void shooterManualControl(boolean spin){
-    if(spin)
-      shooterController.set(ControlMode.Velocity, -.5 * Constants.maxShooterSpeed);
+  public void shooterManualControl(boolean spin, double speed){
+    if(spin){
+      // shooterController.set(ControlMode.Velocity, -speed * Constants.maxShooterSpeed);
+      shooterController.set(speed);
+      SmartDashboard.putNumber("Measured Shooter Speed", shooterController.getSelectedSensorVelocity());
+    }
+    else
+      shooterController.set(0.0);
   }
 
 
@@ -134,10 +142,10 @@ public class ShooterSubsystem extends Subsystem {
 
 
   private void updatePIDValues(){
-    shooterController.config_kF(0, (double)kF_Shooter.getNumber(Constants.DrivetrainKf)); 
-    shooterController.config_kP(0, (double)kP_Shooter.getNumber(0.0));
+    shooterController.config_kF(0, (double)kF_Shooter.getNumber(Constants.shooterkF)); 
+    shooterController.config_kP(0, (double)kP_Shooter.getNumber(Constants.shooterkP));
     shooterController.config_kI(0, (double)kI_Shooter.getNumber(0.0));
-    shooterController.config_kD(0, (double)kD_Shooter.getNumber(0.0));
+    shooterController.config_kD(0, (double)kD_Shooter.getNumber(Constants.shooterkD));
     if(System.currentTimeMillis()%1000 <= 20)
       System.out.println("kP of Shooter:" + kP_Shooter.getNumber(0.02));
   }
