@@ -59,7 +59,7 @@ public class Robot extends TimedRobot {
   DriveSubsystem driveSubsystem;
   ShooterSubsystem shooterSubsystem;
 
-  // ArmSubsystem armSubsystem;
+  ArmSubsystem armSubsystem;
   ColorSensor colorSensor;
 
   ClimbSubsystem climbSubsystem;
@@ -96,6 +96,7 @@ public class Robot extends TimedRobot {
 
   PathParams autoDriveParams;
 
+
   /**
    * This function is run when the robot is first started up and should be used
    * for any initialization code.
@@ -112,7 +113,7 @@ public class Robot extends TimedRobot {
     driveSubsystem = new DriveSubsystem();
     shooterSubsystem = new ShooterSubsystem(networkTable);
 
-    // armSubsystem = new ArmSubsystem();
+    armSubsystem = new ArmSubsystem(networkTable);
     // climbSubsystem = new ClimbSubsystem();
     indexingSubsystem = new IndexingSubsystem(networkTable);
     intakeSubsystem = new IntakeSubsystem();
@@ -150,6 +151,7 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     // indexingSubsystem.setSensorValues(false);
+    armSubsystem.stopWheel();
   }
 
   @Override
@@ -197,24 +199,24 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {
     switch(autoState){
       case Idle:
-        shooterSubsystem.operateShooter(true);
+        shooterSubsystem.operateShooter(true, false);
         indexingSubsystem.operateIndex(false, false, false);
         driveSubsystem.teleopDrive(0, 0, false, false, false, null);
       break;
       case Aligning:
-        shooterSubsystem.operateShooter(true);
+        shooterSubsystem.operateShooter(true, false);
         driveSubsystem.teleopDrive(0, 0, true, false, false, null);
         if(driveSubsystem.finishedAligning())
           autoState = AutoState.Firing;
       break;
       case Firing:
-        shooterSubsystem.operateShooter(true);
+        shooterSubsystem.operateShooter(true, false);
         indexingSubsystem.operateIndex(true, false, false);
         if(indexingSubsystem.getCellCount() == 0)
           autoState = AutoState.Idle;
       break;
       case DrivingPath:
-        shooterSubsystem.operateShooter(true);
+        shooterSubsystem.operateShooter(true, false);
         driveSubsystem.teleopDrive(0, 0, false, false, true, autoDriveParams);
         if(driveSubsystem.pathIsFinished())
           autoState = AutoState.Idle;
@@ -252,10 +254,11 @@ public class Robot extends TimedRobot {
     loopTime.forceSetNumber(System.currentTimeMillis() - previousStartTime);
     previousStartTime = System.currentTimeMillis();
     //============================================================
-    driveSubsystem.teleopDrive(oi.getForwardSpeed(), oi.getTurnAngle(), oi.isAutoTargeting(), oi.isBallChasing(), false, null);
-    shooterSubsystem.operateShooter(true);
+    // driveSubsystem.teleopDrive(oi.getForwardSpeed(), oi.getTurnAngle(), oi.isAutoTargeting(), oi.isBallChasing(), false, null);
+    shooterSubsystem.operateShooter(false, false);
     indexingSubsystem.operateIndex(oi.getIsShooting(), oi.getDeployIntakeManual(), false);
     intakeSubsystem.operateIntake(oi.getDeployIntakeManual());
+    armSubsystem.OperateControlPanel(oi.getTriangleButton());
     //============================================================
     endTime = System.currentTimeMillis();
     duration = endTime - startTime;
@@ -275,6 +278,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
-    driveSubsystem.teleopDrive(0.0, 0.0, true, false, false, null);
+    armSubsystem.OperateControlPanel(oi.getTriangleButton());
   }
+
 }
