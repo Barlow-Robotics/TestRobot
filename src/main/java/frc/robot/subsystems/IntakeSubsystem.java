@@ -7,7 +7,6 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.robot.Constants;
@@ -20,7 +19,6 @@ import frc.robot.Constants;
 public class IntakeSubsystem extends Subsystem {
   // private Solenoid intakeDeploy, intakeRetract;
   private Spark intakeMotor;
-  private boolean priorOperatorInput = false;
 
   public enum IntakeState{
     RetractedIdle,
@@ -32,8 +30,6 @@ public class IntakeSubsystem extends Subsystem {
   IntakeState intakeState;
 
   public IntakeSubsystem(){
-    // intakeDeploy = new Solenoid(Constants.intakeDeployPort);
-    // intakeRetract = new Solenoid(Constants.intakeRetractPort);
     intakeMotor = new Spark(Constants.PWMPORT_intakeMotorPort);
     intakeState = IntakeState.RetractedIdle ;
   }
@@ -53,7 +49,6 @@ public class IntakeSubsystem extends Subsystem {
     switch(intakeState){
       case RetractedIdle:
         if(intake){
-          // setIntakeDeploy(true);
           intakeState = IntakeState.Deploying;
         }
         break;
@@ -66,12 +61,11 @@ public class IntakeSubsystem extends Subsystem {
           intakeState = IntakeState.Retracting;
         }
         else if(intake){
-          intakeMotor.set(-0.75);
+          intakeMotor.set(-Constants.intakeSpeed);
         }
         break;
       case Retracting:
         intakeMotor.set(0);
-        setIntakeDeploy(false);
         intakeState = IntakeState.RetractedIdle;
         break;
     }
@@ -81,11 +75,5 @@ public class IntakeSubsystem extends Subsystem {
 
   public IntakeState getIntakeState(){
     return intakeState;
-  }
-
-
-  private void setIntakeDeploy(boolean deploy){
-    // intakeDeploy.set(deploy);
-    // intakeRetract.set(!deploy);
   }
 }
