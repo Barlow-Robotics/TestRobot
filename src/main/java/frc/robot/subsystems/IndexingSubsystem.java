@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import frc.robot.Constants;
@@ -63,17 +64,18 @@ public class IndexingSubsystem extends Subsystem {
     kD_Index = networkTableInst.getTable("shooter").getEntry("kD_Index");
     cellCountEntry = networkTableInst.getTable("shooter").getEntry("cellCount");
 
-    kF_Index.setNumber(0.028);
-    kP_Index.setNumber(0.015);
-    kI_Index.setNumber(0);
-    kD_Index.setNumber(0.003);
+    kF_Index.setNumber(Constants.indexingkF);
+    kP_Index.setNumber(Constants.indexingkP);
+    kI_Index.setNumber(0.000);
+    kD_Index.setNumber(Constants.indexingkD);
     cellCountEntry.setNumber(0);
 
+    indexingWheelDriver.setNeutralMode(NeutralMode.Coast);
     indexingWheelDriver.configMotionCruiseVelocity(8192 * 10000);
-    indexingWheelDriver.config_kF(0, (double)kF_Index.getNumber(0.028)); 
-    indexingWheelDriver.config_kP(0, (double)kP_Index.getNumber(0.015));
-    indexingWheelDriver.config_kI(0, (double)kI_Index.getNumber(0.0));
-    indexingWheelDriver.config_kD(0, (double)kD_Index.getNumber(0.003));
+    indexingWheelDriver.config_kF(0, (double)kF_Index.getNumber(Constants.indexingkF)); 
+    indexingWheelDriver.config_kP(0, (double)kP_Index.getNumber(Constants.indexingkP));
+    indexingWheelDriver.config_kI(0, (double)kI_Index.getNumber(0.000));
+    indexingWheelDriver.config_kD(0, (double)kD_Index.getNumber(Constants.indexingkD));
 
     exitSensor = new BeamSensor(Constants.DIOPORT_exitSensor, Constants.DIOPORT_exitTransmitter);
     entrySensor = new BeamSensor(Constants.DIOPORT_intakeSensor, Constants.DIOPORT_intakeTransmitter);
@@ -112,8 +114,9 @@ public class IndexingSubsystem extends Subsystem {
           indexingState = IndexingState.Idle;
         }
         else{
-          indexingWheelDriver.set(ControlMode.Velocity, -0.60 * Constants.feedingVelocity);
+          indexingWheelDriver.set(ControlMode.Velocity, Constants.desiredFeedingPercent * Constants.maxFeedingVelocity);
           agitatorMotor.set(Constants.agitatingSpeed);
+          SmartDashboard.putNumber("Agitation", agitatorMotor.get());
           if(ballHasExited())
             cellCount--;
         }
@@ -147,6 +150,16 @@ public class IndexingSubsystem extends Subsystem {
     SmartDashboard.putNumber("Ball Count", cellCount);
     cellCountEntry.setNumber(cellCount);
     updatePreviousValues();
+  }
+
+
+  public void manualFeed(boolean spin, double speed){
+    if(spin){
+      indexingWheelDriver.set(speed);
+      SmartDashboard.putNumber("Measured indexing speed", indexingWheelDriver.getSelectedSensorVelocity());
+    }
+    else
+      indexingWheelDriver.set(0.0);
   }
 
 
@@ -186,10 +199,10 @@ public class IndexingSubsystem extends Subsystem {
 
 
   private void updatePIDValues(){
-    indexingWheelDriver.config_kF(0, (double)kF_Index.getNumber(Constants.DrivetrainKf)); 
-    indexingWheelDriver.config_kP(0, (double)kP_Index.getNumber(0.02));
-    indexingWheelDriver.config_kI(0, (double)kI_Index.getNumber(0.0));
-    indexingWheelDriver.config_kD(0, (double)kD_Index.getNumber(0.0));
+    indexingWheelDriver.config_kF(0, (double)kF_Index.getNumber(Constants.indexingkF)); 
+    indexingWheelDriver.config_kP(0, (double)kP_Index.getNumber(Constants.indexingkP));
+    indexingWheelDriver.config_kI(0, (double)kI_Index.getNumber(0.000));
+    indexingWheelDriver.config_kD(0, (double)kD_Index.getNumber(Constants.indexingkD));
   }
 
 
