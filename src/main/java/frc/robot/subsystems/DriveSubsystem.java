@@ -234,6 +234,7 @@ public class DriveSubsystem extends Subsystem {
   private void initializePIDConfig(WPI_TalonSRX talon){
     talon.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, Constants.mainFeedbackLoop, Constants.timeoutTime); //Encoder as feedback device, main PID loop, 30 ms timeout time
     talon.configClosedloopRamp(Constants.voltageRampingConstant);
+    talon.configOpenloopRamp(Constants.voltageRampingConstant);
     talon.configNominalOutputForward(0);
     talon.configNominalOutputReverse(0);
     talon.configPeakOutputForward(1.0);
@@ -255,17 +256,15 @@ public class DriveSubsystem extends Subsystem {
     double rightPower = 0;
 
     angle *= 0.5;
+    // speed *= 0.85;
 
     leftPower = speed + angle;
     rightPower = speed - angle;
 
-    leftBackSide.set(leftPower);
-    rightBackSide.set(rightPower);
-
     SmartDashboard.putNumber("Left Power", leftPower);
     
-    // leftBackSide.set(ControlMode.Velocity, leftPower * 500 * Constants.unitsPerRotation / 600);
-    // rightBackSide.set(ControlMode.Velocity, rightPower * 500 * Constants.unitsPerRotation / 600);
+    leftBackSide.set(ControlMode.Velocity, leftPower * Constants.maxDriveVelocity);
+    rightBackSide.set(ControlMode.Velocity, rightPower * Constants.maxDriveVelocity);
   }
 
 
