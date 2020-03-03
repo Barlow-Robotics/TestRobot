@@ -10,6 +10,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import java.util.HashMap;
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.Spark;
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.util.Color;
@@ -43,9 +44,9 @@ public class ArmSubsystem extends Subsystem {
   private Color kRedTarget = ColorMatch.makeColor(0.561, 0.232, 0.114);
   private Color kYellowTarget = ColorMatch.makeColor(0.361, 0.524, 0.113);
   
-  private Solenoid openSolenoidDeploy;
-  private Solenoid closeSolenoidDeploy;
-  private WPI_TalonSRX wheelSpinner;
+  // private Solenoid openSolenoidDeploy;
+  // private Solenoid closeSolenoidDeploy;
+  private Spark wheelSpinner;
   
   NetworkTableInstance networkTableInst;
   NetworkTableEntry wheelState;
@@ -79,10 +80,11 @@ public class ArmSubsystem extends Subsystem {
  
   int colourChangeCountGoal;
  
-  public ArmSubsystem() {
+  public ArmSubsystem(NetworkTableInstance networkTableInst) {
+    this.networkTableInst = networkTableInst;
     percentCompleteArm = 0.0;
-    wheelPercentage.setNumber(percentCompleteArm);
     wheelPercentage = networkTableInst.getTable("WheelOfFortune").getEntry("wheelPercentage");
+    wheelPercentage.setNumber(percentCompleteArm);
     armState = ArmState.Idle;
     colorSensor = new ColorSensor();
     colourFilter = new ColourFilter(Constants.colourFilterLength, 'n');
@@ -90,6 +92,7 @@ public class ArmSubsystem extends Subsystem {
     desiredNumberOfColorChanges = 0;
     desiredColor = 'N';
     colorForCalibration = 0;
+    lastColour = 'N';
 
     //Map colors under the wheel sensor to colors under *our* sensor
     FMSColourToDesiredColour = new HashMap<Character, Character>();
@@ -98,10 +101,10 @@ public class ArmSubsystem extends Subsystem {
     FMSColourToDesiredColour.put('G', 'Y'); 
     FMSColourToDesiredColour.put('Y', 'G'); 
 
-    openSolenoidDeploy = new Solenoid(Constants.openSolenoidDeployPort);
-    closeSolenoidDeploy = new Solenoid(Constants.closeSolenoidDeployPort);
+    // openSolenoidDeploy = new Solenoid(Constants.openSolenoidDeployPort);
+    // closeSolenoidDeploy = new Solenoid(Constants.closeSolenoidDeployPort);
 
-    wheelSpinner = new WPI_TalonSRX(Constants.ID_wheelRotationMotor);
+    wheelSpinner = new Spark(Constants.PWMPORT_wheelSpinner);
 
     networkTableInst = NetworkTableInstance.getDefault();
     wheelState = networkTableInst.getTable("WheelOfFortune").getEntry("wheelState");
@@ -122,10 +125,10 @@ public class ArmSubsystem extends Subsystem {
     switch (armState) {
     case Idle:
       wheelSpinner.set(0.0);
-      deployWheel(false);
+      // deployWheel(false);
       if (operate) {
         percentCompleteArm = 0.0;
-        deployWheel(true);
+        // deployWheel(true);
         armState = ArmState.DeployingArm;
         previousInput = true;
       }
@@ -145,6 +148,7 @@ public class ArmSubsystem extends Subsystem {
       break;
       
     case SpinningWheel:
+      SmartDashboard.putNumber("Color Changes Left", desiredNumberOfColorChanges);
       wheelSpinner.set(Constants.maxSpinSpeed);
       currentColour = getColourFromSensor();
       if(previousInput != operate && operate){
@@ -192,7 +196,7 @@ public class ArmSubsystem extends Subsystem {
       break;
     case RetractingArm:
       wheelSpinner.set(0.0);
-      deployWheel(false);
+      // deployWheel(false);
       armState = ArmState.Idle;
       break;
     }
@@ -205,6 +209,11 @@ public class ArmSubsystem extends Subsystem {
 
   public void sendState(){
     wheelState.setString(armState.toString());
+  }
+
+
+  public void stopWheel(){
+    wheelSpinner.set(0.0);
   }
 
 
@@ -268,10 +277,10 @@ public class ArmSubsystem extends Subsystem {
 
 
  
-  private void deployWheel(boolean deploy){
-    openSolenoidDeploy.set(deploy);
-    closeSolenoidDeploy.set(!deploy);
-  }
+  // private void deployWheel(boolean deploy){
+  //   openSolenoidDeploy.set(deploy);
+  //   closeSolenoidDeploy.set(!deploy);
+  // }
  
  
 }
