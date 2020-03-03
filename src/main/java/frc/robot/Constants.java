@@ -7,13 +7,15 @@ public class Constants{
         public static final int ID_leftFrontMotor = 2;
         public static final int ID_rightFrontMotor = 3;
         public static final int ID_rightBackMotor = 4;
-        public static final int ID_wheelRotationMotor = 5;
         public static final int ID_shooterMotor = 6;
         public static final int ID_shooterFeedMotor = 7;
         public static final int ID_climbMotor = 8;
 
-        public static final int PWMPORT_intakeMotorPort = 0;
-        public static final int PWMPORT_agitatorMotor = 1;
+        public static final int PWMPORT_agitatorMotor = 3;
+        public static final int PWMPORT_intakeMotorPort = 1;
+        public static final int PWMPORT_wheelSpinner = 2;
+
+
 
     //Sensors
         //Indexing ball count sensors
@@ -40,6 +42,7 @@ public class Constants{
         public static final double unitsPerRotation = 8192;
         public static final double RPMsToUnitsPerHundredMilliseconds = 1.0/600.0;
         public static final double desiredRPMsForDrive = 500.0;
+        public static final double maxDriveVelocity = 6000.0;
         public static final double VelocityInputConversionFactor = desiredRPMsForDrive * unitsPerRotation * RPMsToUnitsPerHundredMilliseconds;
 
 
@@ -61,9 +64,13 @@ public class Constants{
         public static final int boxControlPort = 1;
 
     //Index
-        public static final double feedingSpeed = 0.6;
-        public static final double agitatingSpeed = -0.45;
-        public static final double feedingVelocity = 33500;
+        public static final double desiredFeedingPercent = 0.75;
+        public static final double agitatingSpeed = -0.55;
+        public static final double maxFeedingVelocity = -34712;
+
+        public static final double indexingkF = 0.028;
+        public static final double indexingkP = 0.015;
+        public static final double indexingkD = 0.003;
 
     //Intake
         public static final int intakeDeployPort = 2;
@@ -91,10 +98,14 @@ public class Constants{
         public static final char NullColorConstant = 'N';
 
     //Shooter
-	    public static final double maxShooterSpeed = 46000; //Units per 100 milliseconds
-	    public static final double maxShooterPercent = 0.85;
+	    public static final double maxShooterSpeed = 47816; //Units per 100 milliseconds
+	    public static final double desiredShooterPercent = 0.75;
         public static final double minShooterSpeed = 0.05;        
-        public static final double desiredSensorUnitsPerHundredMilliseconds = 46000;
+        public static final double desiredSensorUnitsPerHundredMilliseconds = 47618;
+
+        public static final double shooterkF = 0.021;
+        public static final double shooterkP = 0.1;
+        public static final double shooterkD = 0.003;
 
         public static final int leftServoPort = 0;
         public static final int rightServoPort = 1;
