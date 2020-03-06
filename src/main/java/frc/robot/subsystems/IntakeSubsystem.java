@@ -10,6 +10,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.robot.Constants;
+import edu.wpi.first.wpilibj.Solenoid;
 
 /**
  * Add your docs here.
@@ -24,14 +25,20 @@ public class IntakeSubsystem extends Subsystem {
     RetractedIdle,
     Deploying,
     Intaking,
-    Retracting
+    Retracting,
+    DeployedNotSpinning
   }
   
   IntakeState intakeState;
+  Solenoid extendIntake, retractIntake;
+  boolean prevDeploy;
 
   public IntakeSubsystem(){
     intakeMotor = new Spark(Constants.PWMPORT_intakeMotorPort);
-    intakeState = IntakeState.RetractedIdle ;
+    intakeState = IntakeState.RetractedIdle;
+    extendIntake = new Solenoid(Constants.SOLENOID_extendIntake);
+    retractIntake = new Solenoid(Constants.SOLENOID_retractIntake);
+    prevDeploy = false;
   }
 
 
@@ -44,16 +51,22 @@ public class IntakeSubsystem extends Subsystem {
 
 
 
-  public void operateIntake(boolean intake){
+  public void operateIntake(boolean intake, boolean deploy){
 
     switch(intakeState){
       case RetractedIdle:
+        setIntakeDeploy(false);
         if(intake){
           intakeState = IntakeState.Deploying;
+        }
+        else if(deploy && prevDeploy != deploy){
+          intakeState = IntakeState.DeployedNotSpinning;
+          prevDeploy = deploy;
         }
         break;
       case Deploying:
           intakeMotor.set(Constants.intakeSpeed);
+          setIntakeDeploy(true);
           intakeState = IntakeState.Intaking;
         break;
       case Intaking:
@@ -66,9 +79,26 @@ public class IntakeSubsystem extends Subsystem {
         break;
       case Retracting:
         intakeMotor.set(0);
+        setIntakeDeploy(false);
         intakeState = IntakeState.RetractedIdle;
         break;
+      case DeployedNotSpinning:
+        if(deploy && prevDeploy != deploy){
+          setIntakeDeploy(false);
+          intakeState = IntakeState.RetractedIdle;
+        }
+        else
+          setIntakeDeploy(true);
+      break;
     }
+    prevDeploy = deploy;
+  }
+
+
+
+  public void setIntakeDeploy(boolean deploy){
+    extendIntake.set(deploy);
+    retractIntake.set(!deploy);
   }
 
 
