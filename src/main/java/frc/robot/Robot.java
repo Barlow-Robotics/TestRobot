@@ -115,7 +115,7 @@ public class Robot extends TimedRobot {
 
     armSubsystem = new ArmSubsystem(networkTable);
     // climbSubsystem = new ClimbSubsystem();
-    indexingSubsystem = new IndexingSubsystem(networkTable);
+    indexingSubsystem = new IndexingSubsystem(networkTable, 0);
     intakeSubsystem = new IntakeSubsystem();
 
     autoState = AutoState.Aligning;
@@ -257,8 +257,8 @@ public class Robot extends TimedRobot {
     driveSubsystem.teleopDrive(oi.getForwardSpeed(), oi.getTurnAngle(), oi.isAutoTargeting(), oi.isBallChasing(), false, null);
     shooterSubsystem.operateShooter(false, false);
     indexingSubsystem.operateIndex(oi.getIsShooting(), oi.getDeployIntakeManual(), false);
-    intakeSubsystem.operateIntake(oi.getDeployIntakeManual());
-    armSubsystem.OperateControlPanel(oi.getTriangleButton());
+    intakeSubsystem.operateIntake(oi.getDeployIntakeManual(), oi.getTriangleButton());
+    // armSubsystem.OperateControlPanel(oi.getTriangleButton());
     //============================================================
     endTime = System.currentTimeMillis();
     duration = endTime - startTime;
@@ -278,7 +278,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void testPeriodic() {
-    indexingSubsystem.operateIndex(false, oi.getIsShooting(), false);
   }
 
 }
