@@ -35,7 +35,8 @@ public class IndexingSubsystem extends Subsystem {
   private BeamSensor exitSensor;
   private BeamSensor entrySensor;
   private boolean prevIntakeValue, prevExitValue;
-  private boolean agitatingDirection;
+  private boolean agitating;
+  private double agitatingCycleStartTime;
   private double cycleStart;
   enum IndexingState{
     Idle,
@@ -60,7 +61,7 @@ public class IndexingSubsystem extends Subsystem {
   private NetworkTableEntry kD_Index;
   private NetworkTableEntry cellCountEntry;
 
-  public IndexingSubsystem(NetworkTableInstance networkTableInst){
+  public IndexingSubsystem(NetworkTableInstance networkTableInst, int cellCount){
     indexingWheelDriver = new WPI_TalonSRX(Constants.ID_shooterFeedMotor);
     agitatorMotor = new Spark(Constants.PWMPORT_agitatorMotor);
     cellCount = 0;
@@ -77,7 +78,7 @@ public class IndexingSubsystem extends Subsystem {
     kP_Index.setNumber(Constants.indexingkP);
     kI_Index.setNumber(0.000);
     kD_Index.setNumber(Constants.indexingkD);
-    cellCountEntry.setNumber(0);
+    cellCountEntry.setNumber(cellCount);
 
     indexingWheelDriver.setNeutralMode(NeutralMode.Coast);
     indexingWheelDriver.configMotionCruiseVelocity(8192 * 10000);
@@ -89,7 +90,8 @@ public class IndexingSubsystem extends Subsystem {
     exitSensor = new BeamSensor(Constants.DIOPORT_exitSensor, Constants.DIOPORT_exitTransmitter);
     entrySensor = new BeamSensor(Constants.DIOPORT_intakeSensor, Constants.DIOPORT_intakeTransmitter);
     
-    agitatingState = AgitatingState.Off;
+    agitating = true;
+    agitatingCycleStartTime = 0;
     cycleStart = 0;
   } 
 
@@ -111,7 +113,7 @@ public class IndexingSubsystem extends Subsystem {
         if(firing){
           indexingState = IndexingState.Feeding;
           agitatingState = AgitatingState.Clockwise;
-          cycleStart = System.currentTimeMillis();
+          agitatingCycleStartTime = System.currentTimeMillis();
         }
         else if(cellChasing)
           indexingState = IndexingState.ProcessingIntake;
@@ -131,16 +133,14 @@ public class IndexingSubsystem extends Subsystem {
         }
         else{
           indexingWheelDriver.set(ControlMode.Velocity, Constants.desiredFeedingPercent * Constants.maxFeedingVelocity);
-          switch(agitatingState){
-            case Off:
-              agitatorMotor.set(0.0);
-              break;
-            case Clockwise:
-              agitatorMotor.set(-Constants.agitatingSpeed);
-              break;
-            case Counterclockwise:
-              agitatorMotor.set(Constants.agitatingSpeed);
-              break;
+          // if(agitating)
+            agitatorMotor.set(Constants.agitatingSpeed);
+          // else
+            // agitatorMotor.set(0.0);
+
+          if(System.currentTimeMillis() - agitatingCycleStartTime >= Constants.agitatorCyclePeriod){
+            agitating = !agitating;
+            agitatingCycleStartTime = System.currentTimeMillis();
           }
           SmartDashboard.putNumber("Agitation", agitatorMotor.get());
           if(ballHasExited())
@@ -171,8 +171,6 @@ public class IndexingSubsystem extends Subsystem {
         }
       break;
     } 
-    if(ballHasEntered()) cellCount++;
-    if(ballHasExited()) cellCount--;
     SmartDashboard.putNumber("Ball Count", cellCount);
     cellCountEntry.setNumber(cellCount);
     updatePreviousValues();
