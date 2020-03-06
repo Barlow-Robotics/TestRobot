@@ -15,7 +15,8 @@ public class Constants{
         public static final int PWMPORT_intakeMotorPort = 1;
         public static final int PWMPORT_wheelSpinner = 2;
 
-
+        public static final int SOLENOID_extendIntake = 3;
+        public static final int SOLENOID_retractIntake = 2;
 
     //Sensors
         //Indexing ball count sensors
@@ -54,8 +55,10 @@ public class Constants{
         public static final double pathFollowingThreshold = 20;
 
         public static final double speedConstantForBallChase = 0.5;
-        public static final double maxAngleChangeForAlignFinish = 0.01;
+        public static final double maxAngleChangeForAlignFinish = 0.5;
         public static final double maxAngleDifferenceBetweenNavXAndVision = 0.01;
+        public static final double alignTimeoutTime = 3000;
+        public static final double alignMemorySize = 3;
 
         //Physical
             public static final double halfDistanceBetweenWheels = 10.75; //Inches
@@ -66,8 +69,9 @@ public class Constants{
 
     //Index
         public static final double desiredFeedingPercent = 0.75;
-        public static final double agitatingSpeed = -0.40;
+        public static final double agitatingSpeed = 0.35;
         public static final double maxFeedingVelocity = -34712;
+        public static final double agitatorCyclePeriod = 1000;
 
         public static final double indexingkF = 0.028;
         public static final double indexingkP = 0.015;
@@ -100,7 +104,7 @@ public class Constants{
 
     //Shooter
 	    public static final double maxShooterSpeed = 47816; //Units per 100 milliseconds
-	    public static final double desiredShooterPercent = 0.25;
+	    public static final double desiredShooterPercent = 0.25; //CHANGE THIS
         public static final double minShooterSpeed = 0.05;        
         public static final double desiredSensorUnitsPerHundredMilliseconds = 47618;
 
