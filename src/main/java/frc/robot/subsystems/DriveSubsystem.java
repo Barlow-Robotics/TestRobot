@@ -10,6 +10,8 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 
+import java.util.ArrayList;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
@@ -38,9 +40,9 @@ public class DriveSubsystem extends Subsystem {
   
   AHRS navX;
 
-  final double targetControllerKp = 2.8; 
+  final double targetControllerKp = 3.75; 
   final double targetControllerKi = 0.0;
-  final double targetControllerKd = 0.0;
+  final double targetControllerKd = 0.0625;
   final double targetControllerPeriod = 1.0/50.0;
   PIDController targetController;
   
@@ -72,8 +74,15 @@ public class DriveSubsystem extends Subsystem {
   NetworkTableEntry powercellAngleEntry ;
   NetworkTableEntry powercellDistanceEntry ;
 
+  NetworkTableEntry autoAlignKpEntry;
+  NetworkTableEntry autoAlignKiEntry;
+  NetworkTableEntry autoAlignKdEntry;
+
   private boolean finishedAligning;
   private boolean finishedPath;
+  private ArrayList<Double> lastThreeAngleErrors;
+  private double alignStartTime;
+  private int alignCycleCount;
 
   // Put methods for controlling this subsystem
   // here. Call these from Commands.
@@ -115,11 +124,18 @@ public class DriveSubsystem extends Subsystem {
     powercellAngleEntry = networkTableInst.getTable("vision").getEntry("powercellAngle") ;
     powercellDistanceEntry = networkTableInst.getTable("vision").getEntry("powercellDistance") ;
 
+    autoAlignKpEntry = networkTableInst.getTable("shooter").getEntry("autoAlignKp");
+    autoAlignKiEntry = networkTableInst.getTable("shooter").getEntry("autoAlignKi");
+    autoAlignKdEntry = networkTableInst.getTable("shooter").getEntry("autoAlignKd");
+
     currentAngleToTarget = 0;
     lastCycleAngleToTarget = 0;
 
     finishedAligning = false;
     finishedPath = false;
+    lastThreeAngleErrors = new ArrayList<Double>();
+    alignStartTime = 0.0;
+    alignCycleCount = 0;
   }
 
 
@@ -131,6 +147,7 @@ public class DriveSubsystem extends Subsystem {
 
 
   public void teleopDrive(double leftJoy, double rightJoy, boolean targetAligning, boolean chaseCell, boolean driveOnPath, PathParams pathParams){
+    SmartDashboard.putNumber("NavX", navX.getAngle());
     switch (teleopDriveState) {
       case Manual:
         if (targetAligning && canSeeTarget()) {
@@ -139,6 +156,7 @@ public class DriveSubsystem extends Subsystem {
             originalAngleToTarget = angleToTargetFromVision();
             teleopDriveState = TeleopDriveState.AutoTargetAlign;
             finishedAligning = false;
+            alignStartTime = System.currentTimeMillis();
         } 
         else if (chaseCell && canSeePowercell()) {
           teleopDriveState = TeleopDriveState.Powercell ;
@@ -152,8 +170,11 @@ public class DriveSubsystem extends Subsystem {
         break;
 
       case AutoTargetAlign:
-        if (!targetAligning){
+        if (!targetAligning || (lastThreeAngleErrors.size() >= Constants.alignMemorySize && angleRelativelyStatic()) || System.currentTimeMillis() - alignStartTime >= Constants.alignTimeoutTime){
+          leftBackSide.set(0.0);
+          rightBackSide.set(0.0);
           teleopDriveState = TeleopDriveState.Manual;
+          finishedAligning = true;
         } 
         // else if(finishedAligningUncorrected()){
         //   originalAngleToTarget = angleToTargetFromVision();
@@ -171,6 +192,11 @@ public class DriveSubsystem extends Subsystem {
             leftBackSide.set(ControlMode.Velocity, output * Constants.VelocityInputConversionFactor);
             rightBackSide.set(ControlMode.Velocity, -output * Constants.VelocityInputConversionFactor);
             lastCycleAngleToTarget = currentAngleToTarget;
+            if(alignCycleCount >= 10){
+              lastThreeAngleErrors.add(currentAngleToTarget);
+            }
+            alignCycleCount++;
+            alignCycleCount %= 10;
         }
         break;
 
@@ -193,9 +219,25 @@ public class DriveSubsystem extends Subsystem {
           finishedPath = true;
         }
       }
+      autoAlignKpEntry = networkTableInst.getTable("").getEntry("autoAlignKp");
+      autoAlignKiEntry = networkTableInst.getTable("").getEntry("autoAlignKi");
+      autoAlignKdEntry = networkTableInst.getTable("").getEntry("autoAlignKd");
   }
 
   
+
+  private boolean angleRelativelyStatic(){
+    if(lastThreeAngleErrors.size() >= 3){
+      return Math.abs(lastThreeAngleErrors.get(0) - lastThreeAngleErrors.get(2)) < Constants.maxAngleChangeForAlignFinish
+          && Math.abs(lastThreeAngleErrors.get(1) - lastThreeAngleErrors.get(2)) < Constants.maxAngleChangeForAlignFinish
+          && Math.abs(lastThreeAngleErrors.get(0) - lastThreeAngleErrors.get(1)) < Constants.maxAngleChangeForAlignFinish
+          && Math.abs(lastThreeAngleErrors.get(2)) < 1.0;
+    }
+    else
+      return false;
+  }
+
+
 
   private boolean canSeeTarget(){
     return canSeeTargetEntry.getBoolean(false) ;
