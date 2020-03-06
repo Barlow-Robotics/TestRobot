@@ -149,6 +149,7 @@ public class ArmSubsystem extends Subsystem {
       
     case SpinningWheel:
       SmartDashboard.putNumber("Color Changes Left", desiredNumberOfColorChanges);
+      SmartDashboard.putString("Current Color: ", getColourFromSensor() + " ");
       wheelSpinner.set(Constants.maxSpinSpeed);
       currentColour = getColourFromSensor();
       if(previousInput != operate && operate){
@@ -169,7 +170,7 @@ public class ArmSubsystem extends Subsystem {
         }
       }
       lastColour = currentColour;
-      percentCompleteArm = 0.6 * (colourChangeCountGoal - desiredNumberOfColorChanges ) ;
+      percentCompleteArm = 0.6 * (colourChangeCountGoal - desiredNumberOfColorChanges );
       break;
     case SpinningDown:
       if(operate != previousInput && operate){
@@ -223,14 +224,18 @@ public class ArmSubsystem extends Subsystem {
   }
 
 
+  boolean previousCalibrationInput = false;
+
 
   public void calibrationMode(boolean buttonPressed){
     SmartDashboard.putString("Calibrate", "Put color "+ colorSensor.getColorAtIndex(colorForCalibration) + " under sensor, then press the pink button");
-    if(buttonPressed){
+    if(buttonPressed != previousCalibrationInput && previousCalibrationInput){
       colorSensor.calibrateColor(colorForCalibration);
       colorForCalibration++;
       colorForCalibration %= 4;
+      SmartDashboard.putString("Calibrated Color!", " " + colorSensor.getCurrentColor());
     }
+    previousCalibrationInput = buttonPressed;
   }
 
 
