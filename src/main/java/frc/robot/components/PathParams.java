@@ -10,7 +10,11 @@ public class PathParams {
     public PathParams(double degreeChangeInRadians, double radius){
         this.degreeChangeInRadians = degreeChangeInRadians;
         this.radius = radius;
-        leftRotations = (radius + Constants.halfDistanceBetweenWheels) * degreeChangeInRadians/(2 * Math.PI);
+        //New formula for testing
+        leftRotations = ((degreeChangeInRadians/(Math.PI * 2) + 1) * 2 * Math.PI //Accounts for ratio of degrees to full circumference of arclength circle
+                          * (radius + Constants.halfDistanceBetweenWheels))      //+ or - depending on which side; allows for differential rotation
+                          /(7.65 * Math.PI);                                     //Conversion for inches to rotations
+        //Old nonfunctional formula
         rightRotations = (radius - Constants.halfDistanceBetweenWheels) * degreeChangeInRadians/(2 * Math.PI);
     }
 
