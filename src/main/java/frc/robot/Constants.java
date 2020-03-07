@@ -15,8 +15,8 @@ public class Constants{
         public static final int PWMPORT_intakeMotorPort = 1;
         public static final int PWMPORT_wheelSpinner = 2;
 
-        public static final int SOLENOID_extendIntake = 3;
-        public static final int SOLENOID_retractIntake = 2;
+        public static final int SOLENOID_extendIntake = 2;
+        public static final int SOLENOID_retractIntake = 3;
 
     //Sensors
         //Indexing ball count sensors
@@ -54,7 +54,7 @@ public class Constants{
         public static final double autoBackingDistance = 3.5; //3.5 rotations of the wheel ~ 65"
         public static final double pathFollowingThreshold = 20;
 
-        public static final double speedConstantForBallChase = 0.5;
+        public static final double speedConstantForBallChase = 0.1;
         public static final double maxAngleChangeForAlignFinish = 0.5;
         public static final double maxAngleDifferenceBetweenNavXAndVision = 0.01;
         public static final double alignTimeoutTime = 3000;
@@ -80,7 +80,7 @@ public class Constants{
     //Intake
         public static final int intakeDeployPort = 2;
         public static final int intakeRetractPort = 3;
-        public static final double intakeSpeed = 0.75;
+        public static final double intakeSpeed = 0.50;
 
     //Wheel
         public static final int openSolenoidDeployPort = 1;
