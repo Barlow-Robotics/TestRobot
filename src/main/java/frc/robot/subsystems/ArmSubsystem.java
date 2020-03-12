@@ -44,8 +44,8 @@ public class ArmSubsystem extends Subsystem {
   private Color kRedTarget = ColorMatch.makeColor(0.561, 0.232, 0.114);
   private Color kYellowTarget = ColorMatch.makeColor(0.361, 0.524, 0.113);
   
-  // private Solenoid openSolenoidDeploy;
-  // private Solenoid closeSolenoidDeploy;
+  private Solenoid openSolenoidDeploy;
+  private Solenoid closeSolenoidDeploy;
   private Spark wheelSpinner;
   
   NetworkTableInstance networkTableInst;
@@ -101,13 +101,14 @@ public class ArmSubsystem extends Subsystem {
     FMSColourToDesiredColour.put('G', 'Y'); 
     FMSColourToDesiredColour.put('Y', 'G'); 
 
-    // openSolenoidDeploy = new Solenoid(Constants.openSolenoidDeployPort);
-    // closeSolenoidDeploy = new Solenoid(Constants.closeSolenoidDeployPort);
+    openSolenoidDeploy = new Solenoid(Constants.openSolenoidDeployPort);
+    closeSolenoidDeploy = new Solenoid(Constants.closeSolenoidDeployPort);
 
     wheelSpinner = new Spark(Constants.PWMPORT_wheelSpinner);
 
     networkTableInst = NetworkTableInstance.getDefault();
     wheelState = networkTableInst.getTable("WheelOfFortune").getEntry("wheelState");
+    timeOut = networkTableInst.getTable("WheelOfFortune").getEntry("timeOut");
   }
 
 
@@ -125,10 +126,10 @@ public class ArmSubsystem extends Subsystem {
     switch (armState) {
     case Idle:
       wheelSpinner.set(0.0);
-      // deployWheel(false);
+      deployWheel(false);
       if (operate) {
         percentCompleteArm = 0.0;
-        // deployWheel(true);
+        deployWheel(true);
         armState = ArmState.DeployingArm;
         previousInput = true;
       }
@@ -282,10 +283,10 @@ public class ArmSubsystem extends Subsystem {
 
 
  
-  // private void deployWheel(boolean deploy){
-  //   openSolenoidDeploy.set(deploy);
-  //   closeSolenoidDeploy.set(!deploy);
-  // }
+  private void deployWheel(boolean deploy){
+    openSolenoidDeploy.set(deploy);
+    closeSolenoidDeploy.set(!deploy);
+  }
  
  
 }
