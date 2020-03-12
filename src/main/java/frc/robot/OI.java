@@ -20,7 +20,7 @@ public class OI{
         public double getForwardSpeed(){return controller.getRawAxis(1);} //Left-side Y axis
         public double getTurnAngle(){return controller.getRawAxis(2);}   //Right-side X axis
 
-    // public boolean getSquareButton(){return controller.getRawButton(1);}
+         public boolean getSquareButton(){return controller.getRawButton(1);}
         public boolean getCircleButton(){return controller.getRawButton(3);}
         public boolean getXButton(){return controller.getRawButton(2);}
         public boolean getTriangleButton(){return controller.getRawButton(4);}
