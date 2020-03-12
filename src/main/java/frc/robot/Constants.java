@@ -15,15 +15,15 @@ public class Constants{
         public static final int PWMPORT_intakeMotorPort = 1;
         public static final int PWMPORT_wheelSpinner = 2;
 
-        public static final int SOLENOID_extendIntake = 2;
-        public static final int SOLENOID_retractIntake = 3;
+        public static final int SOLENOID_extendIntake = 3;
+        public static final int SOLENOID_retractIntake = 2;
 
     //Sensors
         //Indexing ball count sensors
         public static final int DIOPORT_intakeSensor = 1;
         public static final int DIOPORT_intakeTransmitter = 0;
-        public static final int DIOPORT_exitSensor = 2;
-        public static final int DIOPORT_exitTransmitter = 3;
+        public static final int DIOPORT_exitSensor = 3;
+        public static final int DIOPORT_exitTransmitter = 2;
 
 
     //General
@@ -34,7 +34,7 @@ public class Constants{
         public static final double drivetrainMinPower = 0.05;
         public static final double drivetrainMaxPower = 1.0;
         public static final double manualVoltageRampingConstant = 1.0;
-        public static final double closedVoltageRampingConstant = 0.6;
+        public static final double closedVoltageRampingConstant = 1.0;
 
         public static final int PID_id = 0;
         public static final double PID_Period = 1.0/20.0;
@@ -53,11 +53,14 @@ public class Constants{
 
         public static final double autoBackingDistance = 3.5; //3.5 rotations of the wheel ~ 65"
         public static final double pathFollowingThreshold = 20;
+        public static final int autonomousDriveTime = 2500;
+        public static final double autonomousDriveSpeed = 0.7;
+        public static final double autonomousTurnRate = 0.7;
 
-        public static final double speedConstantForBallChase = 0.1;
+        public static final double speedConstantForBallChase = 0.3;
         public static final double maxAngleChangeForAlignFinish = 0.5;
         public static final double maxAngleDifferenceBetweenNavXAndVision = 0.01;
-        public static final double alignTimeoutTime = 3000;
+        public static final double alignTimeoutTime = 1000;
         public static final double alignMemorySize = 3;
 
         //Physical
@@ -107,6 +110,8 @@ public class Constants{
 	    public static final double desiredShooterPercent = 0.25; //CHANGE THIS
         public static final double minShooterSpeed = 0.05;        
         public static final double desiredSensorUnitsPerHundredMilliseconds = 47618;
+        public static final double minShooterPercentForFiring = 0.9;
+        public static final double shooterSpinupTimeout = 1000;
 
         public static final double shooterkF = 0.021;
         public static final double shooterkP = 0.1;
