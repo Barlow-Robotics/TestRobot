@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.kauailabs.navx.frc.AHRS;
@@ -68,7 +67,6 @@ public class DriveSubsystem extends Subsystem {
   NetworkTableInstance networkTableInst ;
   NetworkTableEntry canSeeTargetEntry ;
   NetworkTableEntry targetAngleEntry ;
-  NetworkTableEntry targetDistanceEntry ;
 
   NetworkTableEntry canSeePowercellEntry ;
   NetworkTableEntry powercellAngleEntry ;
@@ -87,13 +85,11 @@ public class DriveSubsystem extends Subsystem {
   // Put methods for controlling this subsystem
   // here. Call these from Commands.
 
-  public DriveSubsystem(){
+  public DriveSubsystem(AHRS navX){
     leftFrontSide = new WPI_TalonSRX(Constants.ID_leftFrontMotor);
     leftBackSide = new WPI_TalonSRX(Constants.ID_leftBackMotor);
     rightFrontSide = new WPI_TalonSRX(Constants.ID_rightFrontMotor);
     rightBackSide = new WPI_TalonSRX(Constants.ID_rightBackMotor);
-
-    navX = new AHRS(SerialPort.Port.kUSB);
 
     leftBackSide.setInverted(false);
     leftBackSide.setInverted(false);
@@ -107,7 +103,7 @@ public class DriveSubsystem extends Subsystem {
 
     targetController = new PIDController(targetControllerKp, targetControllerKi, targetControllerKd, targetControllerPeriod);
     targetController.setTolerance(Constants.angleThreshold);
-    targetController.setSetpoint(0.0);
+    targetController.setSetpoint(1.0*3.1415927/180.0);
 
     powerCellController = new PIDController(powerCellKp, powerCellKi, powerCellKd, powerCellPeriod);
     powerCellController.setSetpoint(0.0);
@@ -118,7 +114,7 @@ public class DriveSubsystem extends Subsystem {
 
     canSeeTargetEntry = networkTableInst.getTable("vision").getEntry("canSeeTarget") ;
     targetAngleEntry = networkTableInst.getTable("vision").getEntry("targetAngle") ;
-    targetDistanceEntry = networkTableInst.getTable("vision").getEntry("targetDistance") ;
+    //targetDistanceEntry = networkTableInst.getTable("vision").getEntry("targetDistance") ;
 
     canSeePowercellEntry = networkTableInst.getTable("vision").getEntry("canSeePowercell") ;
     powercellAngleEntry = networkTableInst.getTable("vision").getEntry("powercellAngle") ;
@@ -136,6 +132,8 @@ public class DriveSubsystem extends Subsystem {
     lastThreeAngleErrors = new ArrayList<Double>();
     alignStartTime = 0.0;
     alignCycleCount = 0;
+
+    this.navX = navX;
   }
 
 
@@ -144,6 +142,7 @@ public class DriveSubsystem extends Subsystem {
   public void initDefaultCommand() {
     //setDefaultCommand(new DriveCommand());
   }
+
 
 
   public void teleopDrive(double leftJoy, double rightJoy, boolean targetAligning, boolean chaseCell, boolean driveOnPath, PathParams pathParams){
@@ -158,7 +157,8 @@ public class DriveSubsystem extends Subsystem {
             finishedAligning = false;
             alignStartTime = System.currentTimeMillis();
         } 
-        else if (chaseCell && canSeePowercell()) {
+        // wpk magic number alert
+        else if (chaseCell && canSeePowercell() && Math.abs(angleToPowercell()) < (8.0*180.0/Math.PI)) {
           teleopDriveState = TeleopDriveState.Powercell ;
         }
         else if (driveOnPath){
@@ -170,7 +170,9 @@ public class DriveSubsystem extends Subsystem {
         break;
 
       case AutoTargetAlign:
-        if (!targetAligning || (lastThreeAngleErrors.size() >= Constants.alignMemorySize && angleRelativelyStatic()) || System.currentTimeMillis() - alignStartTime >= Constants.alignTimeoutTime){
+        if (!targetAligning 
+          //  || (lastThreeAngleErrors.size() >= Constants.alignMemorySize && angleRelativelyStatic()) 
+           || System.currentTimeMillis() - alignStartTime >= Constants.alignTimeoutTime){
           leftBackSide.set(0.0);
           rightBackSide.set(0.0);
           teleopDriveState = TeleopDriveState.Manual;
@@ -201,14 +203,14 @@ public class DriveSubsystem extends Subsystem {
         break;
 
       case Powercell:
-        if (!chaseCell || !canSeePowercell()){
+        if (!chaseCell){
           teleopDriveState = TeleopDriveState.Manual;
         } 
         else {
           double anglePowerCell = angleToPowercell() ;
           double output = powerCellController.calculate(anglePowerCell) ; 
-          leftBackSide.set(ControlMode.Velocity, (output - Constants.speedConstantForBallChase) * Constants.VelocityInputConversionFactor);
-          rightBackSide.set(ControlMode.Velocity, (output + Constants.speedConstantForBallChase) * Constants.VelocityInputConversionFactor);
+          leftBackSide.set(ControlMode.Velocity, (output + Constants.speedConstantForBallChase) * Constants.VelocityInputConversionFactor);
+          rightBackSide.set(ControlMode.Velocity, -(output - Constants.speedConstantForBallChase) * Constants.VelocityInputConversionFactor);
         }
         break;
       case PathFollowing:
@@ -290,6 +292,21 @@ public class DriveSubsystem extends Subsystem {
 
 
 
+  double flattenSpeed( double inSpeed) {
+
+    // wpk magic number alert
+    double outSpeed = inSpeed ;
+    if ( Math.abs(inSpeed) < 0.5) {
+      outSpeed = inSpeed * 0.5 ;
+    } else if ( Math.abs(inSpeed) < 0.8) {
+      outSpeed = 0.75 * inSpeed ;
+    }
+    return outSpeed;
+  }
+
+
+
+
   private void arcadeDrive(double speed, double angle){
 
     speed = -speed;
@@ -297,14 +314,31 @@ public class DriveSubsystem extends Subsystem {
     double leftPower = 0;
     double rightPower = 0;
 
-    angle *= 0.5;
-    speed *= 0.5;
+    speed = flattenSpeed( speed ) ;
 
+    angle *= 0.60;
+    speed *= 0.75;
+
+    // leftPower = speed + angle;
+    // rightPower = speed - angle;
+
+    if(Math.abs(speed) <= 0.1){
     leftPower = speed + angle;
     rightPower = speed - angle;
+    } else {
+      if ( angle < 0.0 ) {
+        leftPower = speed ;
+        rightPower = speed - angle;
+      } else {
+        rightPower = speed;
+        leftPower = speed + angle;
+      }
+    }
 
+    // System.out.println("Right Power: " + rightPower);
     SmartDashboard.putNumber("Left Power", leftPower);
-    
+    SmartDashboard.putNumber("Right Power", rightPower);
+    SmartDashboard.putNumber("Angle", angle);
     leftBackSide.set(ControlMode.Velocity, leftPower * Constants.maxDriveVelocity);
     rightBackSide.set(ControlMode.Velocity, rightPower * Constants.maxDriveVelocity);
   }
