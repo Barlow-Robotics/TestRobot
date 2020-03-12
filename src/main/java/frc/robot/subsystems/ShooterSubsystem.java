@@ -38,6 +38,9 @@ public class ShooterSubsystem extends Subsystem {
   private NetworkTableEntry kI_Shooter;
   private NetworkTableEntry kD_Shooter;
 
+  Servo leftHoodServo ;
+  Servo rightHoodServo ;
+
 
   public enum ShooterState{
     IdleSpin,
@@ -75,6 +78,11 @@ public class ShooterSubsystem extends Subsystem {
     shooterController.config_kP(0, (double)kP_Shooter.getNumber(Constants.shooterkP));
     shooterController.config_kI(0, (double)kI_Shooter.getNumber(0.000));
     shooterController.config_kD(0, (double)kD_Shooter.getNumber(Constants.shooterkD));
+
+    // wpk put in constants
+    // leftHoodServo = new Servo(4);
+    // rightHoodServo = new Servo(5);
+
     
   }
 
