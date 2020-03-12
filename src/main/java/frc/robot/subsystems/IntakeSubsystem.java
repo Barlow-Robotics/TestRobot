@@ -39,6 +39,8 @@ public class IntakeSubsystem extends Subsystem {
     extendIntake = new Solenoid(Constants.SOLENOID_extendIntake);
     retractIntake = new Solenoid(Constants.SOLENOID_retractIntake);
     prevDeploy = false;
+    extendIntake.set(false);
+    retractIntake.set(true);
   }
 
 
@@ -51,11 +53,14 @@ public class IntakeSubsystem extends Subsystem {
 
 
 
-  public void operateIntake(boolean intake, boolean deploy){
+  public void operateIntake(boolean intake, boolean deploy, boolean reverse){
 
+    double direction = 1.0 ;
+    if ( reverse) {
+      direction = -direction ;
+    }
     switch(intakeState){
       case RetractedIdle:
-        setIntakeDeploy(false);
         if(intake){
           intakeState = IntakeState.Deploying;
         }
@@ -65,7 +70,7 @@ public class IntakeSubsystem extends Subsystem {
         }
         break;
       case Deploying:
-          intakeMotor.set(Constants.intakeSpeed);
+          intakeMotor.set(-Constants.intakeSpeed * direction);
           setIntakeDeploy(true);
           intakeState = IntakeState.Intaking;
         break;
@@ -74,7 +79,8 @@ public class IntakeSubsystem extends Subsystem {
           intakeState = IntakeState.Retracting;
         }
         else if(intake){
-          intakeMotor.set(-Constants.intakeSpeed);
+          setIntakeDeploy(true);
+          intakeMotor.set(-Constants.intakeSpeed * direction);
         }
         break;
       case Retracting:
@@ -97,8 +103,11 @@ public class IntakeSubsystem extends Subsystem {
 
 
   public void setIntakeDeploy(boolean deploy){
+    // wpk FIX ME! Hard code to keep it deployed
+    if ( !deploy) {
     extendIntake.set(deploy);
     retractIntake.set(!deploy);
+    }
   }
 
 
