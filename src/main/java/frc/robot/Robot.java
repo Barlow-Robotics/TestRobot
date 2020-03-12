@@ -36,6 +36,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 
+import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.wpilibj.SerialPort;
+
+
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the TimedRobot
@@ -57,6 +61,7 @@ public class Robot extends TimedRobot {
   // Constants.leftEncoderPorts[1]);
 
   DriveSubsystem driveSubsystem;
+  AHRS navX;
   ShooterSubsystem shooterSubsystem;
 
   ArmSubsystem armSubsystem;
@@ -80,12 +85,16 @@ public class Robot extends TimedRobot {
   byte[] ethernetByteList;
   Enumeration<NetworkInterface> allNetworkInterfaces;
 
+  private double driveStartTime;
+  private double autonomousStartTime ;
+
+
 
   // Compressor compressor;
   PowerDistributionPanel PDP;
 
   public enum AutoState {
-    Idle, DrivingPath, Searching, Aligning, Firing
+    Idle, DrivingPath, DrivingFromLine, Searching, Aligning, Firing, Turn180
   };
 
   public enum StartingPosition {
@@ -106,16 +115,18 @@ public class Robot extends TimedRobot {
     
     networkTable = NetworkTableInstance.getDefault();
 
+    navX = new AHRS(SerialPort.Port.kUSB);
+
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
 
-    driveSubsystem = new DriveSubsystem();
+    driveSubsystem = new DriveSubsystem(navX);
     shooterSubsystem = new ShooterSubsystem(networkTable);
 
     armSubsystem = new ArmSubsystem(networkTable);
     // climbSubsystem = new ClimbSubsystem();
-    indexingSubsystem = new IndexingSubsystem(networkTable, 0);
+    indexingSubsystem = new IndexingSubsystem(networkTable, 3);
     intakeSubsystem = new IntakeSubsystem();
 
     autoState = AutoState.Aligning;
@@ -189,7 +200,8 @@ public class Robot extends TimedRobot {
       autoDriveParams = new PathParams(0.0, 0.0);
     }
 
-    autoState = AutoState.DrivingPath;
+    autonomousStartTime = System.currentTimeMillis() ;
+    autoState = AutoState.Aligning;
   }
 
   /**
@@ -199,26 +211,46 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {
     switch(autoState){
       case Idle:
-        shooterSubsystem.operateShooter(true, false);
-        indexingSubsystem.operateIndex(false, false, false);
+        //shooterSubsystem.operateShooter(true, false);
+        indexingSubsystem.operateIndex(false, false, false, false);
         driveSubsystem.teleopDrive(0, 0, false, false, false, null);
       break;
       case Aligning:
-        shooterSubsystem.operateShooter(true, false);
+        //shooterSubsystem.operateShooter(true, false);
         driveSubsystem.teleopDrive(0, 0, true, false, false, null);
         if(driveSubsystem.finishedAligning())
           autoState = AutoState.Firing;
       break;
       case Firing:
-        shooterSubsystem.operateShooter(true, false);
-        indexingSubsystem.operateIndex(true, false, false);
-        if(indexingSubsystem.getCellCount() == 0)
-          autoState = AutoState.Idle;
+        //shooterSubsystem.operateShooter(true, false);
+        indexingSubsystem.operateIndex(true, false, false, false);
+        //wpk magic number alert!
+        if(indexingSubsystem.getCellCount() == 0
+           || System.currentTimeMillis() - autonomousStartTime > 10000) {
+          // autoState = AutoState.Idle;
+          autoState = AutoState.DrivingPath;
+        }
       break;
       case DrivingPath:
-        shooterSubsystem.operateShooter(true, false);
-        driveSubsystem.teleopDrive(0, 0, false, false, true, autoDriveParams);
-        if(driveSubsystem.pathIsFinished())
+        indexingSubsystem.operateIndex(false, false, false, false);
+        this.driveStartTime = System.currentTimeMillis() ;
+        //shooterSubsystem.operateShooter(true, false);
+        driveSubsystem.teleopDrive(Constants.autonomousDriveSpeed, 0.0, false, false, false, null);
+        autoState = AutoState.DrivingFromLine ;
+        // if(driveSubsystem.pathIsFinished())
+        //   autoState = AutoState.Idle;
+      case DrivingFromLine:
+          if (System.currentTimeMillis() - driveStartTime > Constants.autonomousDriveTime) {
+             navX.reset();
+             driveSubsystem.teleopDrive(0.0, Constants.autonomousTurnRate, false, false, false, null);
+             autoState = AutoState.Turn180 ;
+          }
+      break;
+      case Turn180:
+        double currentAngle = navX.getAngle();
+        if(Math.abs(currentAngle) < 180)
+          driveSubsystem.teleopDrive(0.0, Constants.autonomousTurnRate, false, false, false, null);
+        else
           autoState = AutoState.Idle;
       break;
       default:
@@ -255,10 +287,10 @@ public class Robot extends TimedRobot {
     previousStartTime = System.currentTimeMillis();
     //============================================================
     driveSubsystem.teleopDrive(oi.getForwardSpeed(), oi.getTurnAngle(), oi.isAutoTargeting(), oi.isBallChasing(), false, null);
-    shooterSubsystem.operateShooter(false, false);
-    indexingSubsystem.operateIndex(oi.getIsShooting(), oi.getDeployIntakeManual(), false);
-    intakeSubsystem.operateIntake(oi.getDeployIntakeManual(), oi.getTriangleButton());
-    // armSubsystem.OperateControlPanel(oi.getTriangleButton());
+    indexingSubsystem.operateIndex(oi.getIsShooting(), oi.getDeployIntakeManual(), false, oi.getRedButton());
+    //wpk add button check to folloinwg line
+    intakeSubsystem.operateIntake(oi.getDeployIntakeManual() || oi.isBallChasing(), oi.getTriangleButton(), oi.getSquareButton()); 
+    armSubsystem.OperateControlPanel(oi.getPinkButton());
     //============================================================
     endTime = System.currentTimeMillis();
     duration = endTime - startTime;
