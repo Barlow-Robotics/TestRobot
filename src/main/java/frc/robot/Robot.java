@@ -113,6 +113,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     
+    // Initialize our overall NetworkTable to connect with the Jetson
     networkTable = NetworkTableInstance.getDefault();
 
     navX = new AHRS(SerialPort.Port.kUSB);
