@@ -272,9 +272,9 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     super.teleopInit();
-    System.out.println("Period: " + this.m_period);
-    previousStartTime = System.currentTimeMillis();
-    System.out.println(ethernetByteList);
+    // System.out.println("Period: " + this.m_period);
+    // previousStartTime = System.currentTimeMillis();
+    // System.out.println(ethernetByteList);
   }
 
   /**
